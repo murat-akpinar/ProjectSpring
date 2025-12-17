@@ -113,11 +113,11 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
   const getTaskTypeColor = (type?: TaskType): string => {
     switch (type) {
       case TaskType.FEATURE:
-        return '#94e2d5'; // Teal (yeşil)
+        return '#94e2d5'; // Teal (daha açık yeşil)
       case TaskType.BUG:
-        return '#ff5e6c'; // Coral Pink
+        return '#eba0ac'; // Maroon (daha açık kırmızı)
       default:
-        return '#ffaaab'; // Pink Leaf
+        return '#89dceb'; // Sky (daha açık mavi)
     }
   };
   
@@ -135,11 +135,11 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
   const getPriorityColor = (priority?: string): string => {
     switch (priority) {
       case 'URGENT':
-        return '#ff5e6c'; // Coral Pink
+        return '#eba0ac'; // Maroon (daha açık kırmızı)
       case 'HIGH':
-        return '#feb300'; // Sleuthe Yellow
+        return '#f2cdcd'; // Flamingo (daha açık turuncu)
       default:
-        return '#7f849c'; // Gri
+        return '#7f849c'; // Overlay1 (daha açık gri)
     }
   };
   
@@ -177,8 +177,10 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
     if (startIndex === -1) startIndex = 0;
     if (endIndex === -1) endIndex = days.length - 1;
     
-    const left = (startIndex / days.length) * 100;
-    const width = ((endIndex - startIndex + 1) / days.length) * 100;
+    // Her günün genişliği eşit olduğu için, index bazlı hesaplama
+    const cellWidth = 100 / days.length;
+    const left = startIndex * cellWidth;
+    const width = (endIndex - startIndex + 1) * cellWidth;
     
     return { left, width, startIndex, endIndex };
   };
@@ -306,7 +308,7 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
           
           <div className="gantt-timeline-body">
             {organizedTasks.map(({ task, level, isSubtask }) => {
-              const { width, startIndex, endIndex } = getTaskBarPosition(task);
+              const { left, width, startIndex } = getTaskBarPosition(task);
               const typeColor = getTaskTypeColor(task.taskType);
               const isMilestone = width < 2; // Çok kısa task'lar milestone olarak göster
               
@@ -321,19 +323,18 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
                       const isCurrentMonth = isSameMonth(day, monthStart);
                       const isTodayDay = isToday(day);
                       const isWeekendDay = isWeekend(day);
-                      const isInRange = index >= startIndex && index <= endIndex;
                       
                       return (
                         <div
                           key={index}
                           className={`timeline-cell ${!isCurrentMonth ? 'other-month' : ''} ${isTodayDay ? 'today' : ''} ${isWeekendDay ? 'weekend' : ''}`}
                         >
-                          {isInRange && index === startIndex && (
+                          {index === startIndex && (
                             <div
                               className={isMilestone ? 'gantt-milestone' : 'gantt-bar'}
                               style={{
-                                left: '0',
-                                width: isMilestone ? 'auto' : `calc(${width}% - 2px)`,
+                                left: `${left}%`,
+                                width: isMilestone ? 'auto' : `${width}%`,
                                 backgroundColor: typeColor,
                                 borderLeft: `3px solid ${getPriorityColor(task.priority)}`,
                                 borderTop: `2px solid ${getStatusColor(task.status)}`,

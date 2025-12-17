@@ -4,13 +4,14 @@ import Sidebar from '../components/layout/Sidebar';
 import MonthView from '../components/calendar/MonthView';
 import CalendarView from '../components/calendar/CalendarView';
 import GanttChartView from '../components/calendar/GanttChartView';
+import KanbanBoardView from '../components/calendar/KanbanBoardView';
 import TaskModal from '../components/task/TaskModal';
 import { Task } from '../types/Task';
 import { taskService } from '../services/taskService';
 import { getMonthName, getWeeksInMonth } from '../utils/dateUtils';
 import '../App.css';
 
-type ViewMode = 'calendar' | 'gantt';
+type ViewMode = 'calendar' | 'gantt' | 'kanban';
 
 const CalendarPage: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -44,6 +45,7 @@ const CalendarPage: React.FC = () => {
   useEffect(() => {
     setSelectedMonth(null);
     setSelectedWeek(0);
+    setViewMode('calendar');
   }, [selectedTeamId]);
   
   // Calculate weeks in selected month
@@ -141,6 +143,7 @@ const CalendarPage: React.FC = () => {
                   >
                     <option value="calendar">Takvim Görünümü</option>
                     <option value="gantt">Gantt Chart</option>
+                    <option value="kanban">Kanban Board</option>
                   </select>
                 </div>
                 <button className="back-button" onClick={handleBackToMonths}>
@@ -176,13 +179,20 @@ const CalendarPage: React.FC = () => {
                       year={selectedYear}
                       onTaskClick={handleTaskClick} 
                     />
-                  ) : (
+                  ) : viewMode === 'gantt' ? (
                     <GanttChartView
                       tasks={filteredTasks}
                       month={selectedMonth}
                       year={selectedYear}
                       selectedWeek={selectedWeek}
                       weeksInMonth={weeksInMonth}
+                      onTaskClick={handleTaskClick}
+                    />
+                  ) : (
+                    <KanbanBoardView
+                      tasks={filteredTasks}
+                      month={selectedMonth}
+                      year={selectedYear}
                       onTaskClick={handleTaskClick}
                     />
                   )}

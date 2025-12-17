@@ -1,7 +1,7 @@
 .gantt-chart-view {
   padding: 20px;
   overflow: auto;
-  background-color: #fff5d7; /* Ragin Beige */
+  background-color: var(--ctp-base);
   border-radius: 8px;
 }
 
@@ -231,6 +231,7 @@
   width: 100%;
   height: 100%;
   position: relative;
+  overflow: visible;
 }
 
 .timeline-cell {
@@ -238,6 +239,7 @@
   border-right: 1px solid var(--ctp-surface0);
   position: relative;
   background-color: var(--ctp-base);
+  overflow: visible;
 }
 
 .timeline-cell.other-month {
