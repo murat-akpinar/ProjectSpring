@@ -28,11 +28,11 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClick }) => {
   const getPriorityColor = (priority?: string): string => {
     switch (priority) {
       case 'URGENT':
-        return '#eba0ac'; // Maroon (daha açık kırmızı)
+        return '#ff5e6c'; // Coral Pink
       case 'HIGH':
-        return '#f2cdcd'; // Flamingo (daha açık turuncu)
+        return '#feb300'; // Sleuthe Yellow
       default:
-        return '#7f849c'; // Overlay1 (daha açık gri)
+        return '#7f849c'; // Gri
     }
   };
   

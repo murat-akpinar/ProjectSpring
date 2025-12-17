@@ -1,10 +1,10 @@
 .task-card {
-  background: var(--ctp-surface1);
+  background: #fff5d7; /* Ragin Beige */
   border-radius: 6px;
   padding: 12px;
   margin-bottom: 10px;
   border-left: 4px solid;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: transform 0.2s, background-color 0.2s;
 }
@@ -35,7 +35,7 @@
 
 .task-title {
   font-weight: 600;
-  color: var(--ctp-text);
+  color: #1e1e2e; /* Koyu metin - açık bej arka plan için */
   font-size: 14px;
   flex: 1;
 }
@@ -46,20 +46,20 @@
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
-  color: var(--ctp-base);
+  color: #fff; /* Beyaz metin - renkli arka planlar için */
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   letter-spacing: 0.3px;
 }
 
 .task-content {
   font-size: 12px;
-  color: var(--ctp-subtext1);
+  color: #45475a; /* Koyu gri metin */
   margin-bottom: 8px;
 }
 
 .task-meta {
   font-size: 12px;
-  color: var(--ctp-subtext0);
+  color: #585b70; /* Orta koyu gri */
   margin-top: 5px;
 }
 
@@ -82,14 +82,14 @@
 
 .task-assignees {
   font-size: 11px;
-  color: var(--ctp-subtext0);
+  color: #585b70; /* Orta koyu gri */
   margin-top: 5px;
 }
 
 .task-subtasks {
   font-size: 11px;
-  color: var(--ctp-subtext0);
+  color: #585b70; /* Orta koyu gri */
   margin-top: 5px;
   padding-top: 5px;
-  border-top: 1px solid var(--ctp-surface1);
+  border-top: 1px solid rgba(255, 94, 108, 0.3); /* Coral Pink border */
 }

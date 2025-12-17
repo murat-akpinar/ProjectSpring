@@ -3,19 +3,19 @@ import { TaskStatus } from '../types/Task';
 export const getStatusColor = (status: TaskStatus): string => {
   switch (status) {
     case TaskStatus.OPEN:
-      return '#f5e0dc'; // Rosewater (daha açık sarı)
+      return '#feb300'; // Sleuthe Yellow
     case TaskStatus.IN_PROGRESS:
-      return '#89dceb'; // Sky (daha açık mavi)
+      return '#ff5e6c'; // Coral Pink
     case TaskStatus.COMPLETED:
-      return '#94e2d5'; // Teal (daha açık yeşil)
+      return '#94e2d5'; // Teal (yeşil - tamamlandı için uygun)
     case TaskStatus.POSTPONED:
-      return '#f2cdcd'; // Flamingo (daha açık turuncu)
+      return '#ffaaab'; // Pink Leaf
     case TaskStatus.CANCELLED:
-      return '#7f849c'; // Overlay1 (daha açık gri)
+      return '#7f849c'; // Gri
     case TaskStatus.OVERDUE:
-      return '#eba0ac'; // Maroon (daha açık kırmızı)
+      return '#ff5e6c'; // Coral Pink (acil durum)
     default:
-      return '#9399b2'; // Catppuccin Overlay2
+      return '#9399b2';
   }
 };
 

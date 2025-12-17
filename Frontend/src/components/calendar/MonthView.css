@@ -6,12 +6,12 @@
 }
 
 .month-card {
-  background: var(--ctp-surface0);
+  background: #fff5d7; /* Ragin Beige */
   border-radius: 8px;
   padding: 20px;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-  border: 2px solid var(--ctp-surface1);
+  border: 2px solid rgba(255, 94, 108, 0.3); /* Coral Pink with opacity */
 }
 
 .month-card.current-month {
@@ -26,7 +26,7 @@
 .month-name {
   font-size: 18px;
   font-weight: bold;
-  color: var(--ctp-text);
+  color: #1e1e2e; /* Koyu metin */
   margin-bottom: 10px;
 }
 
@@ -35,7 +35,7 @@
   flex-wrap: wrap;
   gap: 15px;
   font-size: 14px;
-  color: var(--ctp-subtext1);
+  color: #45475a; /* Koyu gri */
 }
 
 .stat-item {
@@ -45,6 +45,6 @@
 }
 
 .stat-item strong {
-  color: var(--ctp-text);
+  color: #1e1e2e; /* Koyu metin */
   font-weight: 600;
 }

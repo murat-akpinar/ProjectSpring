@@ -1,7 +1,7 @@
 .gantt-chart-view {
   padding: 20px;
   overflow: auto;
-  background-color: var(--ctp-base);
+  background-color: #fff5d7; /* Ragin Beige */
   border-radius: 8px;
 }
 

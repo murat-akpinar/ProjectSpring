@@ -13,22 +13,22 @@
 }
 
 .calendar-day-header {
-  background-color: var(--ctp-mantle);
+  background-color: rgba(255, 94, 108, 0.1); /* Coral Pink with opacity */
   padding: 12px;
   text-align: center;
   font-weight: 600;
-  color: var(--ctp-text);
+  color: #1e1e2e; /* Koyu metin */
   font-size: 14px;
-  border-bottom: 2px solid var(--ctp-surface0);
+  border-bottom: 2px solid rgba(255, 94, 108, 0.2);
 }
 
 .calendar-day {
-  background-color: var(--ctp-surface0);
+  background-color: #fff5d7; /* Ragin Beige */
   min-height: 120px;
   padding: 8px;
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--ctp-surface1);
+  border: 1px solid rgba(255, 94, 108, 0.2); /* Coral Pink with opacity */
 }
 
 .calendar-day.other-month {
@@ -37,8 +37,8 @@
 }
 
 .calendar-day.today {
-  background-color: var(--ctp-surface0);
-  border: 2px solid var(--ctp-blue);
+  background-color: rgba(254, 179, 0, 0.2); /* Sleuthe Yellow with opacity */
+  border: 2px solid #feb300; /* Sleuthe Yellow */
 }
 
 .calendar-day.weekend {
@@ -52,7 +52,7 @@
 
 .calendar-day-number {
   font-weight: 600;
-  color: var(--ctp-text);
+  color: #1e1e2e; /* Koyu metin */
   font-size: 14px;
   margin-bottom: 4px;
 }
