@@ -41,6 +41,15 @@
   border: 2px solid var(--ctp-blue);
 }
 
+.calendar-day.weekend {
+  background-color: var(--ctp-surface0);
+  opacity: 0.6;
+}
+
+.calendar-day.weekend .calendar-day-number {
+  color: var(--ctp-overlay0);
+}
+
 .calendar-day-number {
   font-weight: 600;
   color: var(--ctp-text);

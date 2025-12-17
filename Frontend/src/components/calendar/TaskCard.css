@@ -21,6 +21,18 @@
   margin-bottom: 8px;
 }
 
+.task-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.priority-icon {
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
 .task-title {
   font-weight: 600;
   color: var(--ctp-text);

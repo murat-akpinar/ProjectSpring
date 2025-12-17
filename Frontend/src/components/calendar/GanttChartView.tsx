@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Task, TaskType, TaskStatus } from '../../types/Task';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, parseISO, isSameMonth } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, parseISO, isSameMonth, addWeeks, getDay } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { getStatusColor, getStatusLabel } from '../../utils/statusColors';
 import './GanttChartView.css';
@@ -9,6 +9,8 @@ interface GanttChartViewProps {
   tasks: Task[];
   month: number;
   year: number;
+  selectedWeek?: number;
+  weeksInMonth?: number;
   onTaskClick?: (task: Task) => void;
 }
 
@@ -16,14 +18,28 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
   tasks, 
   month, 
   year, 
+  selectedWeek,
+  weeksInMonth,
   onTaskClick 
 }) => {
   const [expandedTasks, setExpandedTasks] = useState<Set<number>>(new Set());
   
   const monthStart = startOfMonth(new Date(year, month - 1, 1));
   const monthEnd = endOfMonth(monthStart);
-  const calendarStart = startOfWeek(monthStart, { locale: tr, weekStartsOn: 1 });
-  const calendarEnd = endOfWeek(monthEnd, { locale: tr, weekStartsOn: 1 });
+  
+  // Hafta seçimi varsa sadece o haftayı göster
+  let calendarStart: Date;
+  let calendarEnd: Date;
+  
+  if (selectedWeek && selectedWeek > 0 && weeksInMonth) {
+    const firstWeekStart = startOfWeek(monthStart, { locale: tr, weekStartsOn: 1 });
+    const weekStart = addWeeks(firstWeekStart, selectedWeek - 1);
+    calendarStart = weekStart;
+    calendarEnd = endOfWeek(weekStart, { locale: tr, weekStartsOn: 1 });
+  } else {
+    calendarStart = startOfWeek(monthStart, { locale: tr, weekStartsOn: 1 });
+    calendarEnd = endOfWeek(monthEnd, { locale: tr, weekStartsOn: 1 });
+  }
   
   const days = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
   
@@ -172,6 +188,22 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
     return format(day, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd');
   };
   
+  const isWeekend = (day: Date): boolean => {
+    const dayOfWeek = getDay(day);
+    return dayOfWeek === 0 || dayOfWeek === 6; // 0 = Pazar, 6 = Cumartesi
+  };
+  
+  const getPriorityIcon = (priority?: string): string => {
+    switch (priority) {
+      case 'URGENT':
+        return '🔴'; // Kırmızı daire
+      case 'HIGH':
+        return '🟠'; // Turuncu daire
+      default:
+        return '⚪'; // Beyaz daire (Normal)
+    }
+  };
+  
   const daysCount = days.length;
   
   return (
@@ -258,11 +290,12 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
             {days.map((day, index) => {
               const isCurrentMonth = isSameMonth(day, monthStart);
               const isTodayDay = isToday(day);
+              const isWeekendDay = isWeekend(day);
               
               return (
                 <div
                   key={index}
-                  className={`timeline-day-header ${!isCurrentMonth ? 'other-month' : ''} ${isTodayDay ? 'today' : ''}`}
+                  className={`timeline-day-header ${!isCurrentMonth ? 'other-month' : ''} ${isTodayDay ? 'today' : ''} ${isWeekendDay ? 'weekend' : ''}`}
                 >
                   <div className="day-number">{format(day, 'd')}</div>
                   <div className="day-name">{format(day, 'EEE', { locale: tr })}</div>
@@ -287,12 +320,13 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
                     {days.map((day, index) => {
                       const isCurrentMonth = isSameMonth(day, monthStart);
                       const isTodayDay = isToday(day);
+                      const isWeekendDay = isWeekend(day);
                       const isInRange = index >= startIndex && index <= endIndex;
                       
                       return (
                         <div
                           key={index}
-                          className={`timeline-cell ${!isCurrentMonth ? 'other-month' : ''} ${isTodayDay ? 'today' : ''}`}
+                          className={`timeline-cell ${!isCurrentMonth ? 'other-month' : ''} ${isTodayDay ? 'today' : ''} ${isWeekendDay ? 'weekend' : ''}`}
                         >
                           {isInRange && index === startIndex && (
                             <div
@@ -303,12 +337,14 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
                                 backgroundColor: typeColor,
                                 borderLeft: `3px solid ${getPriorityColor(task.priority)}`,
                                 borderTop: `2px solid ${getStatusColor(task.status)}`,
+                                opacity: isWeekendDay ? 0.5 : 1,
                               }}
                               onClick={() => onTaskClick?.(task)}
                               title={`${task.title} - ${format(parseISO(task.startDate), 'dd.MM.yyyy')} - ${format(parseISO(task.endDate), 'dd.MM.yyyy')}`}
                             >
                               {!isMilestone && (
                                 <div className="gantt-bar-content">
+                                  <span className="priority-icon-small">{getPriorityIcon(task.priority)}</span>
                                   <div className="gantt-bar-title">{task.title}</div>
                                 </div>
                               )}
