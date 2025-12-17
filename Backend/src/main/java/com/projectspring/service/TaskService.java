@@ -3,6 +3,8 @@ package com.projectspring.service;
 import com.projectspring.dto.*;
 import com.projectspring.model.*;
 import com.projectspring.model.enums.TaskStatus;
+import com.projectspring.model.enums.TaskType;
+import com.projectspring.model.enums.Priority;
 import com.projectspring.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -101,6 +103,8 @@ public class TaskService {
         task.setStartDate(request.getStartDate());
         task.setEndDate(request.getEndDate());
         task.setStatus(request.getStatus());
+        task.setTaskType(request.getTaskType() != null ? request.getTaskType() : TaskType.TASK);
+        task.setPriority(request.getPriority() != null ? request.getPriority() : Priority.NORMAL);
         task.setTeam(team);
         task.setCreatedBy(currentUser);
         
@@ -154,6 +158,8 @@ public class TaskService {
         task.setStartDate(request.getStartDate());
         task.setEndDate(request.getEndDate());
         task.setStatus(request.getStatus());
+        task.setTaskType(request.getTaskType() != null ? request.getTaskType() : TaskType.TASK);
+        task.setPriority(request.getPriority() != null ? request.getPriority() : Priority.NORMAL);
         
         if (request.getAssigneeIds() != null) {
             Set<User> assignees = request.getAssigneeIds().stream()
@@ -265,6 +271,8 @@ public class TaskService {
         dto.setStartDate(task.getStartDate());
         dto.setEndDate(task.getEndDate());
         dto.setStatus(task.getStatus());
+        dto.setTaskType(task.getTaskType());
+        dto.setPriority(task.getPriority());
         dto.setTeamId(task.getTeam().getId());
         dto.setTeamName(task.getTeam().getName());
         dto.setCreatedById(task.getCreatedBy().getId());

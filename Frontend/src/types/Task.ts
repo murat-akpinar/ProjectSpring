@@ -7,6 +7,18 @@ export enum TaskStatus {
   OVERDUE = 'OVERDUE',
 }
 
+export enum TaskType {
+  TASK = 'TASK',      // Görev
+  FEATURE = 'FEATURE', // Özellik
+  BUG = 'BUG',        // Hata
+}
+
+export enum Priority {
+  NORMAL = 'NORMAL',  // Normal
+  HIGH = 'HIGH',      // Yüksek
+  URGENT = 'URGENT',  // Acil
+}
+
 export interface Subtask {
   id: number;
   title: string;
@@ -25,6 +37,8 @@ export interface Task {
   startDate: string;
   endDate: string;
   status: TaskStatus;
+  taskType?: TaskType;
+  priority?: Priority;
   teamId: number;
   teamName: string;
   createdById: number;
@@ -43,6 +57,8 @@ export interface CreateTaskRequest {
   startDate: string;
   endDate: string;
   status?: TaskStatus;
+  taskType?: TaskType;
+  priority?: Priority;
   teamId: number;
   assigneeIds?: number[];
   subtasks?: CreateSubtaskRequest[];

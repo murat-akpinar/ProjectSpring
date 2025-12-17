@@ -3,42 +3,60 @@ import Header from '../components/layout/Header';
 import Sidebar from '../components/layout/Sidebar';
 import MonthView from '../components/calendar/MonthView';
 import CalendarView from '../components/calendar/CalendarView';
+import TeamPlannerView from '../components/calendar/TeamPlannerView';
 import TaskModal from '../components/task/TaskModal';
 import { Task } from '../types/Task';
+import { User } from '../types/User';
 import { taskService } from '../services/taskService';
-import { getMonthName } from '../utils/dateUtils';
+import { userService } from '../services/userService';
+import { getMonthName, getWeeksInMonth } from '../utils/dateUtils';
 import '../App.css';
+
+type ViewMode = 'calendar' | 'planner';
 
 const CalendarPage: React.FC = () => {
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
+  const [selectedWeek, setSelectedWeek] = useState(1);
+  const [viewMode, setViewMode] = useState<ViewMode>('calendar');
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   useEffect(() => {
-    const fetchTasks = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const data = await taskService.getTasks(selectedTeamId || undefined, selectedYear);
-        setTasks(data);
+        const [tasksData, usersData] = await Promise.all([
+          taskService.getTasks(selectedTeamId || undefined, selectedYear),
+          userService.getAllUsers(),
+        ]);
+        setTasks(tasksData);
+        setUsers(usersData);
       } catch (error) {
-        console.error('Failed to fetch tasks:', error);
+        console.error('Failed to fetch data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTasks();
+    fetchData();
   }, [selectedYear, selectedTeamId]);
 
   // Reset month view when team changes
   useEffect(() => {
     setSelectedMonth(null);
+    setSelectedWeek(1);
   }, [selectedTeamId]);
+  
+  // Calculate weeks in selected month
+  const weeksInMonth = selectedMonth 
+    ? getWeeksInMonth(selectedMonth, selectedYear)
+    : 0;
 
   const handleMonthClick = (month: number) => {
     setSelectedMonth(month);
@@ -87,9 +105,48 @@ const CalendarPage: React.FC = () => {
           {selectedMonth ? (
             <div className="week-container">
               <div className="week-header">
-                <h2 className="week-title">
-                  {getMonthName(selectedMonth)} {selectedYear}
-                </h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                  <h2 className="week-title">
+                    {getMonthName(selectedMonth)} {selectedYear}
+                  </h2>
+                  <select
+                    value={selectedWeek}
+                    onChange={(e) => setSelectedWeek(parseInt(e.target.value))}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '4px',
+                      border: '1px solid var(--ctp-surface0)',
+                      backgroundColor: 'var(--ctp-surface0)',
+                      color: 'var(--ctp-text)',
+                      fontFamily: "'Cascadia Mono', monospace",
+                      fontSize: '14px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {Array.from({ length: weeksInMonth }, (_, i) => i + 1).map((week) => (
+                      <option key={week} value={week}>
+                        {week}. Hafta
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={viewMode}
+                    onChange={(e) => setViewMode(e.target.value as ViewMode)}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '4px',
+                      border: '1px solid var(--ctp-surface0)',
+                      backgroundColor: 'var(--ctp-surface0)',
+                      color: 'var(--ctp-text)',
+                      fontFamily: "'Cascadia Mono', monospace",
+                      fontSize: '14px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value="calendar">Takvim Görünümü</option>
+                    <option value="planner">Ekip Planlayıcı</option>
+                  </select>
+                </div>
                 <button className="back-button" onClick={handleBackToMonths}>
                   Aylara Dön
                 </button>
@@ -103,24 +160,36 @@ const CalendarPage: React.FC = () => {
                       onClick={handleCreateTask}
                       style={{
                         padding: '10px 20px',
-                        backgroundColor: '#2196F3',
-                        color: 'white',
+                        backgroundColor: 'var(--ctp-blue)',
+                        color: 'var(--ctp-base)',
                         border: 'none',
                         borderRadius: '4px',
                         cursor: 'pointer',
                         fontSize: '14px',
-                        fontWeight: '500'
+                        fontWeight: '500',
+                        fontFamily: "'Cascadia Mono', monospace"
                       }}
                     >
                       + Yeni İş
                     </button>
                   </div>
-                  <CalendarView 
-                    tasks={filteredTasks} 
-                    month={selectedMonth} 
-                    year={selectedYear}
-                    onTaskClick={handleTaskClick} 
-                  />
+                  {viewMode === 'calendar' ? (
+                    <CalendarView 
+                      tasks={filteredTasks} 
+                      month={selectedMonth} 
+                      year={selectedYear}
+                      onTaskClick={handleTaskClick} 
+                    />
+                  ) : (
+                    <TeamPlannerView
+                      tasks={filteredTasks}
+                      users={users}
+                      month={selectedMonth}
+                      year={selectedYear}
+                      selectedWeek={selectedWeek}
+                      onTaskClick={handleTaskClick}
+                    />
+                  )}
                 </>
               )}
             </div>

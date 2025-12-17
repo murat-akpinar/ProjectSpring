@@ -1,4 +1,4 @@
-import { format, startOfWeek, endOfWeek, getWeek, parseISO } from 'date-fns';
+import { format, startOfWeek, endOfWeek, getWeek, parseISO, startOfMonth, endOfMonth, eachWeekOfInterval } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
 export const formatDate = (date: string | Date): string => {
@@ -55,5 +55,15 @@ export const getSeasonColor = (season: 'winter' | 'spring' | 'summer' | 'autumn'
     autumn: isBright ? '#fab387' : '#6c7086', // Peach (parlak) / Overlay0 (soluk)
   };
   return colors[season];
+};
+
+export const getWeeksInMonth = (month: number, year: number): number => {
+  const monthStart = startOfMonth(new Date(year, month - 1, 1));
+  const monthEnd = endOfMonth(monthStart);
+  const weeks = eachWeekOfInterval(
+    { start: monthStart, end: monthEnd },
+    { weekStartsOn: 1, locale: tr }
+  );
+  return weeks.length;
 };
 

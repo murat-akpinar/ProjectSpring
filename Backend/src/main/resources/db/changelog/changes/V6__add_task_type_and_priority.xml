@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+    
+    <!-- Add task_type and priority to tasks table -->
+    <changeSet id="add_task_type_and_priority" author="projectspring">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="tasks"/>
+        </preConditions>
+        
+        <comment>Add task_type and priority columns to tasks table</comment>
+        
+        <addColumn tableName="tasks">
+            <column name="task_type" type="VARCHAR(20)" defaultValue="TASK">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        
+        <addColumn tableName="tasks">
+            <column name="priority" type="VARCHAR(20)" defaultValue="NORMAL">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        
+        <createIndex indexName="idx_tasks_type" tableName="tasks">
+            <column name="task_type"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_tasks_priority" tableName="tasks">
+            <column name="priority"/>
+        </createIndex>
+        
+        <rollback>
+            <dropIndex indexName="idx_tasks_priority" tableName="tasks"/>
+            <dropIndex indexName="idx_tasks_type" tableName="tasks"/>
+            <dropColumn tableName="tasks" columnName="priority"/>
+            <dropColumn tableName="tasks" columnName="task_type"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
+

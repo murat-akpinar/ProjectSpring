@@ -1,6 +1,8 @@
 package com.projectspring.dto;
 
 import com.projectspring.model.enums.TaskStatus;
+import com.projectspring.model.enums.TaskType;
+import com.projectspring.model.enums.Priority;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,6 +21,8 @@ public class TaskDTO {
     private LocalDate startDate;
     private LocalDate endDate;
     private TaskStatus status;
+    private TaskType taskType;
+    private Priority priority;
     private Long teamId;
     private String teamName;
     private Long createdById;

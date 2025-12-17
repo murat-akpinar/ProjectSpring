@@ -10,6 +10,7 @@
     <include file="db/changelog/changes/V3__add_password_to_users.xml"/>
     <include file="db/changelog/changes/V4__create_admin_user.xml"/>
     <include file="db/changelog/changes/V5__add_subtask_fields.xml"/>
+    <include file="db/changelog/changes/V6__add_task_type_and_priority.xml"/>
     
 </databaseChangeLog>
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Task, CreateTaskRequest, CreateSubtaskRequest, TaskStatus } from '../../types/Task';
+import { Task, CreateTaskRequest, CreateSubtaskRequest, TaskStatus, TaskType, Priority } from '../../types/Task';
 import { Team } from '../../types/Team';
 import { User } from '../../types/User';
 import { taskService } from '../../services/taskService';
@@ -37,6 +37,8 @@ const TaskModal: React.FC<TaskModalProps> = ({
     startDate: defaultStartDate || new Date().toISOString().split('T')[0],
     endDate: defaultEndDate || new Date().toISOString().split('T')[0],
     status: TaskStatus.OPEN,
+    taskType: TaskType.TASK,
+    priority: Priority.NORMAL,
     teamId: defaultTeamId || 0,
     assigneeIds: [],
     subtasks: [],
@@ -52,6 +54,8 @@ const TaskModal: React.FC<TaskModalProps> = ({
           startDate: task.startDate,
           endDate: task.endDate,
           status: task.status,
+          taskType: task.taskType || TaskType.TASK,
+          priority: task.priority || Priority.NORMAL,
           teamId: task.teamId,
           assigneeIds: task.assigneeIds || [],
           subtasks: task.subtasks?.map(s => ({
@@ -69,6 +73,8 @@ const TaskModal: React.FC<TaskModalProps> = ({
           startDate: defaultStartDate || new Date().toISOString().split('T')[0],
           endDate: defaultEndDate || new Date().toISOString().split('T')[0],
           status: TaskStatus.OPEN,
+          taskType: TaskType.TASK,
+          priority: Priority.NORMAL,
           teamId: defaultTeamId || 0,
           assigneeIds: [],
           subtasks: [],
@@ -218,6 +224,32 @@ const TaskModal: React.FC<TaskModalProps> = ({
                     {getStatusLabel(status)}
                   </option>
                 ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label>İş Türü</label>
+              <select
+                value={formData.taskType}
+                onChange={(e) => setFormData({ ...formData, taskType: e.target.value as TaskType })}
+              >
+                <option value={TaskType.TASK}>Görev</option>
+                <option value={TaskType.FEATURE}>Özellik</option>
+                <option value={TaskType.BUG}>Hata</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Önem</label>
+              <select
+                value={formData.priority}
+                onChange={(e) => setFormData({ ...formData, priority: e.target.value as Priority })}
+              >
+                <option value={Priority.NORMAL}>Normal</option>
+                <option value={Priority.HIGH}>Yüksek</option>
+                <option value={Priority.URGENT}>Acil</option>
               </select>
             </div>
           </div>

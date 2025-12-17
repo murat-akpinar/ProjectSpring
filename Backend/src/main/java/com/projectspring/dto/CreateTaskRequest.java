@@ -1,6 +1,8 @@
 package com.projectspring.dto;
 
 import com.projectspring.model.enums.TaskStatus;
+import com.projectspring.model.enums.TaskType;
+import com.projectspring.model.enums.Priority;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -27,6 +29,10 @@ public class CreateTaskRequest {
     private LocalDate endDate;
     
     private TaskStatus status = TaskStatus.OPEN;
+    
+    private TaskType taskType = TaskType.TASK;
+    
+    private Priority priority = Priority.NORMAL;
     
     @NotNull(message = "Team ID is required")
     private Long teamId;
