@@ -255,7 +255,8 @@ const TaskModal: React.FC<TaskModalProps> = ({
                 + Alt İş Ekle
               </button>
             </div>
-            {formData.subtasks?.map((subtask, index) => (
+            <div className="subtasks-container">
+              {formData.subtasks?.map((subtask, index) => (
               <div key={index} className="subtask-item">
                 <input
                   type="text"
@@ -310,7 +311,8 @@ const TaskModal: React.FC<TaskModalProps> = ({
                   Sil
                 </button>
               </div>
-            ))}
+              ))}
+            </div>
           </div>
 
           <div className="modal-actions">
