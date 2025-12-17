@@ -155,7 +155,21 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
   // Task'ın timeline'da nerede başlayıp nerede bittiğini hesapla
   const getTaskBarPosition = (task: Task) => {
     const taskStart = parseISO(task.startDate);
+    taskStart.setHours(0, 0, 0, 0);
     const taskEnd = parseISO(task.endDate);
+    taskEnd.setHours(23, 59, 59, 999);
+    
+    // Timeline'ın başlangıç ve bitiş tarihleri
+    const timelineStart = new Date(days[0]);
+    timelineStart.setHours(0, 0, 0, 0);
+    const timelineEnd = new Date(days[days.length - 1]);
+    timelineEnd.setHours(23, 59, 59, 999);
+    
+    // Task timeline ile kesişiyor mu kontrol et
+    if (taskEnd < timelineStart || taskStart > timelineEnd) {
+      // Task timeline ile kesişmiyor, görünmez
+      return { left: 0, width: 0, startIndex: -1, endIndex: -1, isVisible: false };
+    }
     
     let startIndex = -1;
     let endIndex = -1;
@@ -166,23 +180,36 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
       const dayEnd = new Date(day);
       dayEnd.setHours(23, 59, 59, 999);
       
+      // Task bu günde başlıyor mu?
       if (startIndex === -1 && taskStart <= dayEnd && taskStart >= dayStart) {
         startIndex = index;
       }
+      // Task bu günde bitiyor mu?
       if (taskEnd >= dayStart && taskEnd <= dayEnd) {
         endIndex = index;
       }
     });
     
-    if (startIndex === -1) startIndex = 0;
-    if (endIndex === -1) endIndex = days.length - 1;
+    // Eğer task timeline'dan önce başlıyorsa, timeline'ın başından başlat
+    if (startIndex === -1 && taskStart < timelineStart) {
+      startIndex = 0;
+    }
+    // Eğer task timeline'dan sonra bitiyorsa, timeline'ın sonuna kadar göster
+    if (endIndex === -1 && taskEnd > timelineEnd) {
+      endIndex = days.length - 1;
+    }
+    
+    // Eğer hala bulunamadıysa, task timeline ile kesişmiyor demektir
+    if (startIndex === -1 || endIndex === -1) {
+      return { left: 0, width: 0, startIndex: -1, endIndex: -1, isVisible: false };
+    }
     
     // Her günün genişliği eşit olduğu için, index bazlı hesaplama
     const cellWidth = 100 / days.length;
     const left = startIndex * cellWidth;
     const width = (endIndex - startIndex + 1) * cellWidth;
     
-    return { left, width, startIndex, endIndex };
+    return { left, width, startIndex, endIndex, isVisible: true };
   };
   
   const isToday = (day: Date): boolean => {
@@ -308,9 +335,14 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
           
           <div className="gantt-timeline-body">
             {organizedTasks.map(({ task, level, isSubtask }) => {
-              const { left, width } = getTaskBarPosition(task);
+              const { left, width, isVisible } = getTaskBarPosition(task);
               const typeColor = getTaskTypeColor(task.taskType);
               const isMilestone = width < 2; // Çok kısa task'lar milestone olarak göster
+              
+              // Task görünür değilse render etme
+              if (!isVisible) {
+                return null;
+              }
               
               return (
                 <div

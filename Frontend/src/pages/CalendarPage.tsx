@@ -87,8 +87,16 @@ const CalendarPage: React.FC = () => {
     fetchTasks();
   };
 
+  // Task'ları filtrele: startDate veya endDate seçilen ay içinde olmalı
   const filteredTasks = selectedMonth
-    ? tasks.filter((task) => new Date(task.startDate).getMonth() + 1 === selectedMonth)
+    ? tasks.filter((task) => {
+        const taskStart = new Date(task.startDate);
+        const taskEnd = new Date(task.endDate);
+        const taskStartMonth = taskStart.getMonth() + 1;
+        const taskEndMonth = taskEnd.getMonth() + 1;
+        // Task'ın startDate'i veya endDate'i seçilen ay içinde olmalı
+        return taskStartMonth === selectedMonth || taskEndMonth === selectedMonth;
+      })
     : tasks;
 
   return (
