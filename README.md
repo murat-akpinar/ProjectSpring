@@ -13,6 +13,7 @@ ProjectSpring — Takımlar için takvim odaklı proje ve görev yönetim platfo
   - Gantt Chart: Timeline bazlı Gantt chart, hafta seçimi, hiyerarşik subtask desteği
   - Kanban Board: Status bazlı Kanban board, her takım için ayrı
 - **Aylık Görünüm**: 12 ay grid görünümü, mevsim renkleri ile
+- **Ekip Renkleri ve İkonları**: Her ekibin kendine özel belirleyici rengi ve ikonu var, toplu görünümde ekipleri ayırmak kolay
 - **Ekip Dashboard**: Gerçek zamanlı istatistikler
 - **İş Kartları**: Detaylı iş takibi, alt işler, durum yönetimi, önem seviyesi icon'ları
 - **İş Türleri ve Öncelikler**: Görev (TASK), Özellik (FEATURE), Hata (BUG) / Normal, Yüksek, Acil
@@ -108,7 +109,7 @@ npm run dev
 
 - `users` - Kullanıcılar
 - `roles` - Roller (DAIRE_BASKANI, TAKIM_LIDERI, YAZILIMCI, DEVOPS, IS_ANALISTI, TESTCI)
-- `teams` - Ekipler
+- `teams` - Ekipler (her ekibin kendine özel rengi ve ikonu var)
 - `tasks` - İş kartları
 - `subtasks` - Alt işler
 - `task_status_history` - İş durum geçmişi
@@ -201,6 +202,10 @@ POST /api/auth/register
 - `V1__initial_schema.xml` - Tüm tablolar oluşturulur
 - `V2__seed_data.xml` - İlk roller ve ekipler eklenir
 - `V3__add_password_to_users.xml` - Password kolonu eklenir
+- `V4__create_admin_user.xml` - Admin kullanıcı oluşturulur
+- `V5__add_subtask_fields.xml` - Alt işlere tarih ve atanan kişi alanları eklenir
+- `V6__add_task_type_and_priority.xml` - İşlere tür ve öncelik alanları eklenir
+- `V7__add_team_color_and_icon.xml` - Ekiplere renk ve ikon kolonları eklenir (planlanan)
 
 Manuel bir şey yapmanıza gerek yok, uygulama ilk çalıştığında tüm tablolar otomatik oluşturulur.
 
@@ -227,12 +232,21 @@ Manuel bir şey yapmanıza gerek yok, uygulama ilk çalıştığında tüm tablo
 
 ## Renk Paleti
 
-Proje özel bir renk paleti kullanmaktadır:
+Uygulama, Catppuccin Mocha renk paletini kullanmaktadır.
 
-- **Ragin Beige (#fff5d7):** Arka plan rengi
-- **Coral Pink (#ff5e6c):** Vurgu rengi (Yapılıyor, Acil, Hata)
-- **Sleuthe Yellow (#feb300):** Vurgu rengi (Açık, Yüksek)
-- **Pink Leaf (#ffaaab):** Vurgu rengi (Ertelendi, Görev)
+- **Arka Plan**: `--ctp-base` (koyu morumsu gri)
+- **Yüzeyler**: `--ctp-surface0`, `--ctp-surface1`, `--ctp-crust` (daha açık gri tonları)
+- **Metin**: `--ctp-text`, `--ctp-subtext0`, `--ctp-subtext1` (açık beyaz tonları)
+- **Vurgu Renkleri**: `--ctp-blue`, `--ctp-green`, `--ctp-yellow`, `--ctp-peach`, `--ctp-red` vb.
+
+## Ekip Renkleri ve İkonları
+
+Her ekibin kendine özel belirleyici rengi ve ikonu vardır. Bu özellik sayesinde:
+- Toplu görünümlerde (Gantt Chart, Kanban Board, Takvim) ekipleri hızlıca ayırt edebilirsiniz
+- Ekip seçim menüsünde görsel olarak ekipleri tanımlayabilirsiniz
+- İş kartlarında hangi ekibe ait olduğunu renk ve ikon ile görebilirsiniz
+
+**Planlanan Özellik:** `teams` tablosuna `color` (VARCHAR) ve `icon` (VARCHAR) kolonları eklenecek. Her ekip için özel renk kodu (hex) ve ikon (emoji veya icon identifier) tanımlanabilecek.
 
 ## Lisans
 
