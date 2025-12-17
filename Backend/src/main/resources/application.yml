@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: projectspring
+  
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:projectspring}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: ${SHOW_SQL:false}
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+  
+  ldap:
+    urls: ${LDAP_URLS:ldap://localhost:389}
+    base: ${LDAP_BASE:dc=example,dc=com}
+    username: ${LDAP_USERNAME:}
+    password: ${LDAP_PASSWORD:}
+    user-search-base: ${LDAP_USER_SEARCH_BASE:ou=users}
+    user-search-filter: ${LDAP_USER_SEARCH_FILTER:(uid={0})}
+
+auth:
+  ldap:
+    enabled: ${LDAP_ENABLED:true} # Set to false to disable LDAP and use only local users
+
+server:
+  port: ${SERVER_PORT:8080}
+
+jwt:
+  secret: ${JWT_SECRET:your-secret-key-change-this-in-production-min-256-bits}
+  expiration: ${JWT_EXPIRATION:86400000} # 24 hours in milliseconds
+
+logging:
+  level:
+    com.projectspring: ${LOG_LEVEL:INFO}
+    org.springframework.security: ${SECURITY_LOG_LEVEL:DEBUG}
+

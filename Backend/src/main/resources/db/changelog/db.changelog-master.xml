@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+    
+    <include file="db/changelog/changes/V1__initial_schema.xml"/>
+    <include file="db/changelog/changes/V2__seed_data.xml"/>
+    <include file="db/changelog/changes/V3__add_password_to_users.xml"/>
+    <include file="db/changelog/changes/V4__create_admin_user.xml"/>
+    <include file="db/changelog/changes/V5__add_subtask_fields.xml"/>
+    
+</databaseChangeLog>
+

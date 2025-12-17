@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+    
+    <!-- Roles Table -->
+    <changeSet id="create_roles_table" author="projectspring">
+        <createTable tableName="roles">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    
+    <!-- Users Table -->
+    <changeSet id="create_users_table" author="projectspring">
+        <createTable tableName="users">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="full_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ldap_dn" type="VARCHAR(500)"/>
+            <column name="is_active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="idx_users_username" tableName="users">
+            <column name="username"/>
+        </createIndex>
+        <createIndex indexName="idx_users_email" tableName="users">
+            <column name="email"/>
+        </createIndex>
+    </changeSet>
+    
+    <!-- Teams Table -->
+    <changeSet id="create_teams_table" author="projectspring">
+        <createTable tableName="teams">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="description" type="VARCHAR(500)"/>
+            <column name="leader_id" type="BIGINT">
+                <constraints nullable="true" foreignKeyName="fk_teams_leader" references="users(id)"/>
+            </column>
+            <column name="is_active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="idx_teams_name" tableName="teams">
+            <column name="name"/>
+        </createIndex>
+    </changeSet>
+    
+    <!-- User Roles Table (Many-to-Many) -->
+    <changeSet id="create_user_roles_table" author="projectspring">
+        <createTable tableName="user_roles">
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_user_roles_user" references="users(id)" deleteCascade="true"/>
+            </column>
+            <column name="role_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_user_roles_role" references="roles(id)" deleteCascade="true"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="user_roles" columnNames="user_id,role_id"/>
+    </changeSet>
+    
+    <!-- User Teams Table (Many-to-Many) -->
+    <changeSet id="create_user_teams_table" author="projectspring">
+        <createTable tableName="user_teams">
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_user_teams_user" references="users(id)" deleteCascade="true"/>
+            </column>
+            <column name="team_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_user_teams_team" references="teams(id)" deleteCascade="true"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="user_teams" columnNames="user_id,team_id"/>
+    </changeSet>
+    
+    <!-- Tasks Table -->
+    <changeSet id="create_tasks_table" author="projectspring">
+        <createTable tableName="tasks">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="title" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="TEXT"/>
+            <column name="start_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="team_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_tasks_team" references="teams(id)"/>
+            </column>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_tasks_created_by" references="users(id)"/>
+            </column>
+            <column name="postponed_to_date" type="DATE"/>
+            <column name="postponed_from_date" type="DATE"/>
+            <column name="is_postponed" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="idx_tasks_team" tableName="tasks">
+            <column name="team_id"/>
+        </createIndex>
+        <createIndex indexName="idx_tasks_status" tableName="tasks">
+            <column name="status"/>
+        </createIndex>
+        <createIndex indexName="idx_tasks_dates" tableName="tasks">
+            <column name="start_date"/>
+            <column name="end_date"/>
+        </createIndex>
+    </changeSet>
+    
+    <!-- Task Assignees Table (Many-to-Many) -->
+    <changeSet id="create_task_assignees_table" author="projectspring">
+        <createTable tableName="task_assignees">
+            <column name="task_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_task_assignees_task" references="tasks(id)" deleteCascade="true"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_task_assignees_user" references="users(id)" deleteCascade="true"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="task_assignees" columnNames="task_id,user_id"/>
+    </changeSet>
+    
+    <!-- Subtasks Table -->
+    <changeSet id="create_subtasks_table" author="projectspring">
+        <createTable tableName="subtasks">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="task_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_subtasks_task" references="tasks(id)" deleteCascade="true"/>
+            </column>
+            <column name="title" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="TEXT"/>
+            <column name="is_completed" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="idx_subtasks_task" tableName="subtasks">
+            <column name="task_id"/>
+        </createIndex>
+    </changeSet>
+    
+    <!-- Task Status History Table -->
+    <changeSet id="create_task_status_history_table" author="projectspring">
+        <createTable tableName="task_status_history">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="task_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_task_status_history_task" references="tasks(id)" deleteCascade="true"/>
+            </column>
+            <column name="old_status" type="VARCHAR(20)"/>
+            <column name="new_status" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_task_status_history_user" references="users(id)"/>
+            </column>
+            <column name="change_reason" type="VARCHAR(500)"/>
+            <column name="postponed_to_date" type="DATE"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="idx_task_status_history_task" tableName="task_status_history">
+            <column name="task_id"/>
+        </createIndex>
+        <createIndex indexName="idx_task_status_history_created" tableName="task_status_history">
+            <column name="created_at"/>
+        </createIndex>
+    </changeSet>
+    
+    <!-- Update trigger for updated_at columns -->
+    <changeSet id="create_updated_at_trigger" author="projectspring">
+        <sql splitStatements="false" stripComments="false">
+            <![CDATA[
+            CREATE OR REPLACE FUNCTION update_updated_at_column()
+            RETURNS TRIGGER AS $$
+            BEGIN
+                NEW.updated_at = CURRENT_TIMESTAMP;
+                RETURN NEW;
+            END;
+            $$ LANGUAGE plpgsql;
+            ]]>
+        </sql>
+        <rollback>
+            DROP FUNCTION IF EXISTS update_updated_at_column();
+        </rollback>
+    </changeSet>
+    
+    <changeSet id="add_updated_at_trigger_users" author="projectspring">
+        <sql>
+            CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+        </sql>
+    </changeSet>
+    
+    <changeSet id="add_updated_at_trigger_teams" author="projectspring">
+        <sql>
+            CREATE TRIGGER update_teams_updated_at BEFORE UPDATE ON teams
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+        </sql>
+    </changeSet>
+    
+    <changeSet id="add_updated_at_trigger_tasks" author="projectspring">
+        <sql>
+            CREATE TRIGGER update_tasks_updated_at BEFORE UPDATE ON tasks
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+        </sql>
+    </changeSet>
+    
+    <changeSet id="add_updated_at_trigger_subtasks" author="projectspring">
+        <sql>
+            CREATE TRIGGER update_subtasks_updated_at BEFORE UPDATE ON subtasks
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+        </sql>
+    </changeSet>
+    
+</databaseChangeLog>
+

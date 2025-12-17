@@ -1,0 +1,63 @@
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid;
+}
+
+.stat-card.open {
+  border-left-color: #FFD700;
+}
+
+.stat-card.in-progress {
+  border-left-color: #4169E1;
+}
+
+.stat-card.completed {
+  border-left-color: #32CD32;
+}
+
+.stat-card.overdue {
+  border-left-color: #DC143C;
+}
+
+.stat-card.postponed {
+  border-left-color: #FF8C00;
+}
+
+.stat-card.cancelled {
+  border-left-color: #808080;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: bold;
+  color: #333;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.error {
+  text-align: center;
+  padding: 40px;
+  color: #dc3545;
+}
+

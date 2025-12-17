@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+    
+    <!-- Add fields to subtasks table -->
+    <changeSet id="add_subtask_fields" author="projectspring">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="subtasks"/>
+        </preConditions>
+        
+        <comment>Add start_date, end_date, and assignee_id to subtasks table</comment>
+        
+        <addColumn tableName="subtasks">
+            <column name="start_date" type="DATE"/>
+        </addColumn>
+        
+        <addColumn tableName="subtasks">
+            <column name="end_date" type="DATE"/>
+        </addColumn>
+        
+        <addColumn tableName="subtasks">
+            <column name="assignee_id" type="BIGINT"/>
+        </addColumn>
+        
+        <addForeignKeyConstraint
+            baseTableName="subtasks"
+            baseColumnNames="assignee_id"
+            constraintName="fk_subtasks_assignee"
+            referencedTableName="users"
+            referencedColumnNames="id"
+            onDelete="SET NULL"/>
+        
+        <createIndex indexName="idx_subtasks_assignee" tableName="subtasks">
+            <column name="assignee_id"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_subtasks_dates" tableName="subtasks">
+            <column name="start_date"/>
+            <column name="end_date"/>
+        </createIndex>
+    </changeSet>
+    
+</databaseChangeLog>
+

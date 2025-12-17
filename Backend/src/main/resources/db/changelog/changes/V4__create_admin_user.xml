@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+    
+    <!-- Create admin user -->
+    <changeSet id="create_admin_user" author="projectspring">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="users"/>
+            <tableExists tableName="roles"/>
+            <tableExists tableName="teams"/>
+        </preConditions>
+        
+        <comment>Create default admin user (username: admin, password: admin)</comment>
+        
+        <!-- Insert admin user -->
+        <sql>
+            INSERT INTO users (username, email, full_name, password, is_active, ldap_dn, created_at, updated_at)
+            VALUES ('admin', 'admin@projectspring.local', 'Administrator', 
+                    '$2a$10$Xc4mHu6jFaGEQtCnhWZdouc8EfJN5yhhY/pdIhXJZBaIaVA/yPl/G', 
+                    true, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            ON CONFLICT (username) DO NOTHING;
+        </sql>
+        
+        <!-- Assign DAIRE_BASKANI role to admin -->
+        <sql>
+            INSERT INTO user_roles (user_id, role_id)
+            SELECT u.id, r.id
+            FROM users u, roles r
+            WHERE u.username = 'admin' AND r.name = 'DAIRE_BASKANI'
+            AND NOT EXISTS (
+                SELECT 1 FROM user_roles ur 
+                WHERE ur.user_id = u.id AND ur.role_id = r.id
+            );
+        </sql>
+        
+        <!-- Assign admin to all teams -->
+        <sql>
+            INSERT INTO user_teams (user_id, team_id)
+            SELECT u.id, t.id
+            FROM users u, teams t
+            WHERE u.username = 'admin'
+            AND NOT EXISTS (
+                SELECT 1 FROM user_teams ut 
+                WHERE ut.user_id = u.id AND ut.team_id = t.id
+            );
+        </sql>
+    </changeSet>
+    
+</databaseChangeLog>
+

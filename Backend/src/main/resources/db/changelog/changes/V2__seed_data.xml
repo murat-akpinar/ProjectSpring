@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+    
+    <!-- Insert Roles -->
+    <changeSet id="insert_roles" author="projectspring">
+        <insert tableName="roles">
+            <column name="name" value="DAIRE_BASKANI"/>
+            <column name="description" value="Daire Başkanı - Tüm ekipleri görüntüleyebilir"/>
+        </insert>
+        <insert tableName="roles">
+            <column name="name" value="TAKIM_LIDERI"/>
+            <column name="description" value="Takım Lideri - Kendi ekibini yönetebilir"/>
+        </insert>
+        <insert tableName="roles">
+            <column name="name" value="YAZILIMCI"/>
+            <column name="description" value="Yazılımcı"/>
+        </insert>
+        <insert tableName="roles">
+            <column name="name" value="DEVOPS"/>
+            <column name="description" value="DevOps Mühendisi"/>
+        </insert>
+        <insert tableName="roles">
+            <column name="name" value="IS_ANALISTI"/>
+            <column name="description" value="İş Analisti"/>
+        </insert>
+        <insert tableName="roles">
+            <column name="name" value="TESTCI"/>
+            <column name="description" value="Test Uzmanı"/>
+        </insert>
+    </changeSet>
+    
+    <!-- Insert Teams -->
+    <changeSet id="insert_teams" author="projectspring">
+        <insert tableName="teams">
+            <column name="name" value="Sistem Ekibi"/>
+            <column name="description" value="Sistem yönetimi ve altyapı ekibi"/>
+        </insert>
+        <insert tableName="teams">
+            <column name="name" value="Yazılım Ekibi"/>
+            <column name="description" value="Yazılım geliştirme ekibi"/>
+        </insert>
+        <insert tableName="teams">
+            <column name="name" value="Test Ekibi"/>
+            <column name="description" value="Test ve kalite güvence ekibi"/>
+        </insert>
+        <insert tableName="teams">
+            <column name="name" value="Network Ekibi"/>
+            <column name="description" value="Ağ yönetimi ekibi"/>
+        </insert>
+        <insert tableName="teams">
+            <column name="name" value="Some Ekibi"/>
+            <column name="description" value="Some ekibi"/>
+        </insert>
+    </changeSet>
+    
+</databaseChangeLog>
+

@@ -1,0 +1,32 @@
+# Maven
+Backend/target/
+Backend/.mvn/
+Backend/*.iml
+Backend/.idea/
+
+# Node
+Frontend/node_modules/
+Frontend/dist/
+Frontend/.vite/
+Frontend/*.log
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
+
+# Plan file (local reference only)
+plan.md
