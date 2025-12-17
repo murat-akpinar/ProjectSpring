@@ -9,7 +9,7 @@
     <changeSet id="insert_roles" author="projectspring">
         <insert tableName="roles">
             <column name="name" value="DAIRE_BASKANI"/>
-            <column name="description" value="Daire Başkanı - Tüm ekipleri görüntüleyebilir"/>
+            <column name="description" value="Yönetici - Tüm ekipleri görüntüleyebilir"/>
         </insert>
         <insert tableName="roles">
             <column name="name" value="TAKIM_LIDERI"/>

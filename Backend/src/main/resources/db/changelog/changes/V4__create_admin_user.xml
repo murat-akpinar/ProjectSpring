@@ -24,7 +24,7 @@
             ON CONFLICT (username) DO NOTHING;
         </sql>
         
-        <!-- Assign DAIRE_BASKANI role to admin -->
+        <!-- Assign Yönetici (DAIRE_BASKANI) role to admin -->
         <sql>
             INSERT INTO user_roles (user_id, role_id)
             SELECT u.id, r.id

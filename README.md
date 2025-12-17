@@ -4,7 +4,7 @@ ProjectSpring — Takımlar için takvim odaklı proje ve görev yönetim platfo
 
 ## Özellikler
 
-- **Çok Seviyeli Yetkilendirme**: Daire Başkanı, Takım Lideri ve Personel rolleri
+- **Çok Seviyeli Yetkilendirme**: Yönetici, Takım Lideri ve Personel rolleri
 - **Hibrit Authentication**: Hem LDAP hem de Local User desteği (LDAP önce denenir, başarısız olursa local user kontrol edilir)
 - **JWT Authentication**: Stateless authentication (session problemi yok, yatay ölçeklendirme için uygun)
 - **Otomatik Database Migration**: Liquibase ile veritabanı şeması otomatik oluşturulur
@@ -134,7 +134,7 @@ npm run dev
 
 ## Yetkilendirme
 
-### Daire Başkanı
+### Yönetici
 - Tüm ekipleri görüntüleyebilir
 - Tüm işleri görebilir/düzenleyebilir
 - Tüm dashboard'ları görebilir
@@ -156,7 +156,7 @@ npm run dev
 Uygulama ilk başlatıldığında otomatik olarak bir admin kullanıcı oluşturulur:
 - **Kullanıcı Adı:** `admin`
 - **Şifre:** `admin`
-- **Rol:** Daire Başkanı (DAIRE_BASKANI)
+- **Rol:** Yönetici (DAIRE_BASKANI)
 - **Erişim:** Tüm ekiplere ve işlere erişim
 
 **Önemli:** İlk girişten sonra şifrenizi değiştirmeniz önerilir.

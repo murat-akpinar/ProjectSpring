@@ -28,7 +28,7 @@ public class TeamService {
     public List<TeamDTO> getAllTeams() {
         User currentUser = getCurrentUser();
         
-        // Daire Başkanı tüm ekipleri görebilir
+        // Yönetici tüm ekipleri görebilir
         if (hasRole(currentUser, Role.DAIRE_BASKANI)) {
             return teamRepository.findByIsActiveTrue().stream()
                 .map(this::convertToDTO)
