@@ -3,19 +3,19 @@ import { TaskStatus } from '../types/Task';
 export const getStatusColor = (status: TaskStatus): string => {
   switch (status) {
     case TaskStatus.OPEN:
-      return '#FFD700'; // Sarı
+      return '#f9e2af'; // Catppuccin Yellow
     case TaskStatus.IN_PROGRESS:
-      return '#4169E1'; // Mavi
+      return '#89b4fa'; // Catppuccin Blue
     case TaskStatus.COMPLETED:
-      return '#32CD32'; // Yeşil
+      return '#a6e3a1'; // Catppuccin Green
     case TaskStatus.POSTPONED:
-      return '#FF8C00'; // Turuncu
+      return '#fab387'; // Catppuccin Peach
     case TaskStatus.CANCELLED:
-      return '#808080'; // Gri
+      return '#6c7086'; // Catppuccin Overlay0
     case TaskStatus.OVERDUE:
-      return '#DC143C'; // Kırmızı
+      return '#f38ba8'; // Catppuccin Red
     default:
-      return '#CCCCCC';
+      return '#9399b2'; // Catppuccin Overlay2
   }
 };
 

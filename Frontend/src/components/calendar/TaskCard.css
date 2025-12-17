@@ -1,16 +1,17 @@
 .task-card {
-  background: white;
+  background: var(--ctp-mantle);
   border-radius: 6px;
   padding: 12px;
   margin-bottom: 10px;
   border-left: 4px solid;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   cursor: pointer;
   transition: transform 0.2s;
 }
 
 .task-card:hover {
   transform: translateX(4px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
 }
 
 .task-header {
@@ -22,7 +23,7 @@
 
 .task-title {
   font-weight: 600;
-  color: #333;
+  color: var(--ctp-text);
   font-size: 14px;
   flex: 1;
 }
@@ -33,17 +34,18 @@
   font-size: 11px;
   font-weight: 500;
   white-space: nowrap;
+  color: var(--ctp-base);
 }
 
 .task-content {
   font-size: 12px;
-  color: #666;
+  color: var(--ctp-subtext1);
   margin-bottom: 8px;
 }
 
 .task-meta {
   font-size: 12px;
-  color: #666;
+  color: var(--ctp-subtext0);
   margin-top: 5px;
 }
 
@@ -56,8 +58,8 @@
 
 .postponed-badge {
   display: inline-block;
-  background-color: #ff8c00;
-  color: white;
+  background-color: var(--ctp-peach);
+  color: var(--ctp-base);
   padding: 2px 6px;
   border-radius: 3px;
   font-size: 10px;
@@ -66,13 +68,12 @@
 
 .task-assignees {
   font-size: 11px;
-  color: #999;
+  color: var(--ctp-subtext0);
   margin-top: 5px;
 }
 
 .task-subtasks {
   font-size: 11px;
-  color: #999;
+  color: var(--ctp-subtext0);
   margin-top: 5px;
 }
-

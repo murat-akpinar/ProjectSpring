@@ -6,58 +6,58 @@
 }
 
 .stat-card {
-  background: white;
+  background: var(--ctp-mantle);
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   border-left: 4px solid;
+  border: 1px solid var(--ctp-surface0);
 }
 
 .stat-card.open {
-  border-left-color: #FFD700;
+  border-left-color: var(--ctp-yellow);
 }
 
 .stat-card.in-progress {
-  border-left-color: #4169E1;
+  border-left-color: var(--ctp-blue);
 }
 
 .stat-card.completed {
-  border-left-color: #32CD32;
+  border-left-color: var(--ctp-green);
 }
 
 .stat-card.overdue {
-  border-left-color: #DC143C;
+  border-left-color: var(--ctp-red);
 }
 
 .stat-card.postponed {
-  border-left-color: #FF8C00;
+  border-left-color: var(--ctp-peach);
 }
 
 .stat-card.cancelled {
-  border-left-color: #808080;
+  border-left-color: var(--ctp-overlay0);
 }
 
 .stat-label {
   font-size: 14px;
-  color: #666;
+  color: var(--ctp-subtext1);
   margin-bottom: 8px;
 }
 
 .stat-value {
   font-size: 32px;
   font-weight: bold;
-  color: #333;
+  color: var(--ctp-text);
 }
 
 .loading {
   text-align: center;
   padding: 40px;
-  color: #666;
+  color: var(--ctp-subtext0);
 }
 
 .error {
   text-align: center;
   padding: 40px;
-  color: #dc3545;
+  color: var(--ctp-red);
 }
-
