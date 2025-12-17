@@ -23,12 +23,12 @@
 }
 
 .calendar-day {
-  background-color: var(--ctp-base);
+  background-color: var(--ctp-surface0);
   min-height: 120px;
   padding: 8px;
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--ctp-surface0);
+  border: 1px solid var(--ctp-surface1);
 }
 
 .calendar-day.other-month {

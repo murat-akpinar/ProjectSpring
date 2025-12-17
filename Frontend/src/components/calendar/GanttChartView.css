@@ -272,10 +272,11 @@
   padding: 6px 8px;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
   overflow: hidden;
   z-index: 2;
   min-width: 60px;
+  opacity: 0.85;
 }
 
 .gantt-bar:hover {

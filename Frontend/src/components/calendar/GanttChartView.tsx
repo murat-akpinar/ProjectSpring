@@ -113,11 +113,11 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
   const getTaskTypeColor = (type?: TaskType): string => {
     switch (type) {
       case TaskType.FEATURE:
-        return '#a6e3a1'; // Green
+        return '#94e2d5'; // Teal (daha açık yeşil)
       case TaskType.BUG:
-        return '#f38ba8'; // Red
+        return '#eba0ac'; // Maroon (daha açık kırmızı)
       default:
-        return '#89b4fa'; // Blue
+        return '#89dceb'; // Sky (daha açık mavi)
     }
   };
   
@@ -135,11 +135,11 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
   const getPriorityColor = (priority?: string): string => {
     switch (priority) {
       case 'URGENT':
-        return '#f38ba8'; // Red
+        return '#eba0ac'; // Maroon (daha açık kırmızı)
       case 'HIGH':
-        return '#fab387'; // Peach
+        return '#f2cdcd'; // Flamingo (daha açık turuncu)
       default:
-        return '#6c7086'; // Overlay0
+        return '#7f849c'; // Overlay1 (daha açık gri)
     }
   };
   
