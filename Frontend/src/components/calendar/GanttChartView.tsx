@@ -308,7 +308,7 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
           
           <div className="gantt-timeline-body">
             {organizedTasks.map(({ task, level, isSubtask }) => {
-              const { left, width, startIndex } = getTaskBarPosition(task);
+              const { left, width } = getTaskBarPosition(task);
               const typeColor = getTaskTypeColor(task.taskType);
               const isMilestone = width < 2; // Çok kısa task'lar milestone olarak göster
               
@@ -329,34 +329,32 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
                           key={index}
                           className={`timeline-cell ${!isCurrentMonth ? 'other-month' : ''} ${isTodayDay ? 'today' : ''} ${isWeekendDay ? 'weekend' : ''}`}
                         >
-                          {index === startIndex && (
-                            <div
-                              className={isMilestone ? 'gantt-milestone' : 'gantt-bar'}
-                              style={{
-                                left: `${left}%`,
-                                width: isMilestone ? 'auto' : `${width}%`,
-                                backgroundColor: typeColor,
-                                borderLeft: `3px solid ${getPriorityColor(task.priority)}`,
-                                borderTop: `2px solid ${getStatusColor(task.status)}`,
-                                opacity: isWeekendDay ? 0.5 : 1,
-                              }}
-                              onClick={() => onTaskClick?.(task)}
-                              title={`${task.title} - ${format(parseISO(task.startDate), 'dd.MM.yyyy')} - ${format(parseISO(task.endDate), 'dd.MM.yyyy')}`}
-                            >
-                              {!isMilestone && (
-                                <div className="gantt-bar-content">
-                                  <span className="priority-icon-small">{getPriorityIcon(task.priority)}</span>
-                                  <div className="gantt-bar-title">{task.title}</div>
-                                </div>
-                              )}
-                            </div>
-                          )}
                           {isTodayDay && (
                             <div className="today-indicator" />
                           )}
                         </div>
                       );
                     })}
+                    {/* Task bar'ı container içinde absolute positioning ile yerleştir */}
+                    <div
+                      className={isMilestone ? 'gantt-milestone' : 'gantt-bar'}
+                      style={{
+                        left: `${left}%`,
+                        width: isMilestone ? 'auto' : `${width}%`,
+                        backgroundColor: typeColor,
+                        borderLeft: `3px solid ${getPriorityColor(task.priority)}`,
+                        borderTop: `2px solid ${getStatusColor(task.status)}`,
+                      }}
+                      onClick={() => onTaskClick?.(task)}
+                      title={`${task.title} - ${format(parseISO(task.startDate), 'dd.MM.yyyy')} - ${format(parseISO(task.endDate), 'dd.MM.yyyy')}`}
+                    >
+                      {!isMilestone && (
+                        <div className="gantt-bar-content">
+                          <span className="priority-icon-small">{getPriorityIcon(task.priority)}</span>
+                          <div className="gantt-bar-title">{task.title}</div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
