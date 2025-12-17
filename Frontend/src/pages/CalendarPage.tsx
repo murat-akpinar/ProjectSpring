@@ -4,6 +4,7 @@ import Sidebar from '../components/layout/Sidebar';
 import MonthView from '../components/calendar/MonthView';
 import CalendarView from '../components/calendar/CalendarView';
 import TeamPlannerView from '../components/calendar/TeamPlannerView';
+import GanttChartView from '../components/calendar/GanttChartView';
 import TaskModal from '../components/task/TaskModal';
 import { Task } from '../types/Task';
 import { User } from '../types/User';
@@ -12,7 +13,7 @@ import { userService } from '../services/userService';
 import { getMonthName, getWeeksInMonth } from '../utils/dateUtils';
 import '../App.css';
 
-type ViewMode = 'calendar' | 'planner';
+type ViewMode = 'calendar' | 'planner' | 'gantt';
 
 const CalendarPage: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -145,6 +146,7 @@ const CalendarPage: React.FC = () => {
                   >
                     <option value="calendar">Takvim Görünümü</option>
                     <option value="planner">Ekip Planlayıcı</option>
+                    <option value="gantt">Gantt Chart</option>
                   </select>
                 </div>
                 <button className="back-button" onClick={handleBackToMonths}>
@@ -180,13 +182,20 @@ const CalendarPage: React.FC = () => {
                       year={selectedYear}
                       onTaskClick={handleTaskClick} 
                     />
-                  ) : (
+                  ) : viewMode === 'planner' ? (
                     <TeamPlannerView
                       tasks={filteredTasks}
                       users={users}
                       month={selectedMonth}
                       year={selectedYear}
                       selectedWeek={selectedWeek}
+                      onTaskClick={handleTaskClick}
+                    />
+                  ) : (
+                    <GanttChartView
+                      tasks={filteredTasks}
+                      month={selectedMonth}
+                      year={selectedYear}
                       onTaskClick={handleTaskClick}
                     />
                   )}
