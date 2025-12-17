@@ -1,12 +1,12 @@
 .task-card {
-  background: var(--ctp-mantle);
+  background: var(--ctp-surface0);
   border-radius: 6px;
   padding: 12px;
   margin-bottom: 10px;
   border-left: 4px solid;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: transform 0.2s, background-color 0.2s;
 }
 
 .task-card:hover {
@@ -76,4 +76,6 @@
   font-size: 11px;
   color: var(--ctp-subtext0);
   margin-top: 5px;
+  padding-top: 5px;
+  border-top: 1px solid var(--ctp-surface1);
 }

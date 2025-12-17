@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from '../components/layout/Header';
 import Sidebar from '../components/layout/Sidebar';
 import MonthView from '../components/calendar/MonthView';
-import WeekView from '../components/calendar/WeekView';
+import CalendarView from '../components/calendar/CalendarView';
 import TaskModal from '../components/task/TaskModal';
 import { Task } from '../types/Task';
 import { taskService } from '../services/taskService';
@@ -115,7 +115,12 @@ const CalendarPage: React.FC = () => {
                       + Yeni İş
                     </button>
                   </div>
-                  <WeekView tasks={filteredTasks} onTaskClick={handleTaskClick} />
+                  <CalendarView 
+                    tasks={filteredTasks} 
+                    month={selectedMonth} 
+                    year={selectedYear}
+                    onTaskClick={handleTaskClick} 
+                  />
                 </>
               )}
             </div>
@@ -147,6 +152,7 @@ const CalendarPage: React.FC = () => {
                 <MonthView
                   tasks={tasks}
                   onMonthClick={handleMonthClick}
+                  selectedYear={selectedYear}
                 />
               )}
             </div>

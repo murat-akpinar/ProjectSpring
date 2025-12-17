@@ -35,3 +35,25 @@ export const getMonthName = (month: number): string => {
   return months[month - 1] || '';
 };
 
+export const getSeasonForMonth = (month: number): 'winter' | 'spring' | 'summer' | 'autumn' => {
+  // Kış: Aralık, Ocak, Şubat (12, 1, 2)
+  // İlkbahar: Mart, Nisan, Mayıs (3, 4, 5)
+  // Yaz: Haziran, Temmuz, Ağustos (6, 7, 8)
+  // Sonbahar: Eylül, Ekim, Kasım (9, 10, 11)
+  if (month === 12 || month <= 2) return 'winter';
+  if (month >= 3 && month <= 5) return 'spring';
+  if (month >= 6 && month <= 8) return 'summer';
+  return 'autumn';
+};
+
+export const getSeasonColor = (season: 'winter' | 'spring' | 'summer' | 'autumn', isBright: boolean = false): string => {
+  // Catppuccin Mocha renkleri
+  const colors = {
+    winter: isBright ? '#89b4fa' : '#6c7086', // Blue (parlak) / Overlay0 (soluk)
+    spring: isBright ? '#a6e3a1' : '#6c7086', // Green (parlak) / Overlay0 (soluk)
+    summer: isBright ? '#f9e2af' : '#6c7086', // Yellow (parlak) / Overlay0 (soluk)
+    autumn: isBright ? '#fab387' : '#6c7086', // Peach (parlak) / Overlay0 (soluk)
+  };
+  return colors[season];
+};
+
