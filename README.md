@@ -8,9 +8,14 @@ ProjectSpring — Takımlar için takvim odaklı proje ve görev yönetim platfo
 - **Hibrit Authentication**: Hem LDAP hem de Local User desteği (LDAP önce denenir, başarısız olursa local user kontrol edilir)
 - **JWT Authentication**: Stateless authentication (session problemi yok, yatay ölçeklendirme için uygun)
 - **Otomatik Database Migration**: Liquibase ile veritabanı şeması otomatik oluşturulur
-- **Takvim Görünümü**: Yıl/Ay/Hafta bazlı iş takibi
+- **Çoklu Görünüm Modları**: 
+  - Takvim Görünümü: Günlük takvim görünümü, hafta sonu günleri soluk
+  - Gantt Chart: Timeline bazlı Gantt chart, hafta seçimi, hiyerarşik subtask desteği
+  - Kanban Board: Status bazlı Kanban board, her takım için ayrı
+- **Aylık Görünüm**: 12 ay grid görünümü, mevsim renkleri ile
 - **Ekip Dashboard**: Gerçek zamanlı istatistikler
-- **İş Kartları**: Detaylı iş takibi, alt işler, durum yönetimi
+- **İş Kartları**: Detaylı iş takibi, alt işler, durum yönetimi, önem seviyesi icon'ları
+- **İş Türleri ve Öncelikler**: Görev (TASK), Özellik (FEATURE), Hata (BUG) / Normal, Yüksek, Acil
 - **Ertelendi Takibi**: Ertelenen işlerin yeni tarih bilgisi ile takibi
 - **Yetişmedi Hesaplama**: Otomatik yetişmedi iş tespiti
 - **Docker Desteği**: Tam containerized yapı, yatay ölçeklendirme için hazır
@@ -30,6 +35,8 @@ ProjectSpring — Takımlar için takvim odaklı proje ve görev yönetim platfo
 - Vite
 - React Router
 - Axios
+- date-fns (tarih işlemleri)
+- Cascadia Mono (font)
 
 ### Infrastructure
 - Docker & Docker Compose
@@ -199,12 +206,33 @@ Manuel bir şey yapmanıza gerek yok, uygulama ilk çalıştığında tüm tablo
 
 ## İş Durumları
 
-- **OPEN** (Açık) - Sarı
-- **IN_PROGRESS** (Yapılıyor) - Mavi
-- **COMPLETED** (Tamamlandı) - Yeşil
-- **POSTPONED** (Ertelendi) - Turuncu (yeni tarih bilgisi ile)
+- **OPEN** (Açık) - Sleuthe Yellow (#feb300)
+- **IN_PROGRESS** (Yapılıyor) - Coral Pink (#ff5e6c)
+- **COMPLETED** (Tamamlandı) - Teal (#94e2d5)
+- **POSTPONED** (Ertelendi) - Pink Leaf (#ffaaab) (yeni tarih bilgisi ile)
 - **CANCELLED** (İptal Edildi) - Gri
-- **OVERDUE** (Yetişmedi) - Kırmızı
+- **OVERDUE** (Yetişmedi) - Coral Pink (#ff5e6c)
+
+## İş Türleri ve Öncelikler
+
+### İş Türleri
+- **TASK** (Görev) - Pink Leaf (#ffaaab)
+- **FEATURE** (Özellik) - Teal (#94e2d5)
+- **BUG** (Hata) - Coral Pink (#ff5e6c)
+
+### Öncelik Seviyeleri
+- **NORMAL** (Normal) - Gri, ⚪ icon
+- **HIGH** (Yüksek) - Sleuthe Yellow (#feb300), 🟠 icon
+- **URGENT** (Acil) - Coral Pink (#ff5e6c), 🔴 icon
+
+## Renk Paleti
+
+Proje özel bir renk paleti kullanmaktadır:
+
+- **Ragin Beige (#fff5d7):** Arka plan rengi
+- **Coral Pink (#ff5e6c):** Vurgu rengi (Yapılıyor, Acil, Hata)
+- **Sleuthe Yellow (#feb300):** Vurgu rengi (Açık, Yüksek)
+- **Pink Leaf (#ffaaab):** Vurgu rengi (Ertelendi, Görev)
 
 ## Lisans
 
