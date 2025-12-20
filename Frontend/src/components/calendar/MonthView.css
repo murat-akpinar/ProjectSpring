@@ -5,6 +5,35 @@
   padding: 20px;
 }
 
+/* Responsive breakpoints */
+@media (max-width: 1400px) {
+  .month-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 1000px) {
+  .month-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .month-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    padding: 15px;
+  }
+  
+  .month-name {
+    font-size: 16px;
+  }
+  
+  .month-stats {
+    font-size: 12px;
+  }
+}
+
 .month-card {
   background: var(--ctp-surface0);
   border-radius: 8px;

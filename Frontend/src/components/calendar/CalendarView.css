@@ -1,5 +1,8 @@
 .calendar-view {
   padding: 20px;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .calendar-grid {
@@ -81,5 +84,55 @@
 .calendar-day-tasks .task-card .task-status-badge {
   font-size: 9px;
   padding: 2px 4px;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 1400px) {
+  .calendar-view {
+    padding: 15px;
+  }
+  
+  .calendar-day-header {
+    font-size: 13px;
+    padding: 10px;
+  }
+  
+  .calendar-day {
+    min-height: 100px;
+    padding: 6px;
+  }
+  
+  .calendar-day-number {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 768px) {
+  .calendar-view {
+    padding: 10px;
+  }
+  
+  .calendar-day-header {
+    font-size: 11px;
+    padding: 8px;
+  }
+  
+  .calendar-day {
+    min-height: 80px;
+    padding: 4px;
+  }
+  
+  .calendar-day-number {
+    font-size: 12px;
+  }
+  
+  .calendar-day-tasks .task-card {
+    padding: 4px;
+    font-size: 10px;
+  }
+  
+  .calendar-day-tasks .task-card .task-title {
+    font-size: 10px;
+  }
 }
 
