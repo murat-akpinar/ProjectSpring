@@ -26,7 +26,7 @@ public class CreateUserRequest {
     private String fullName;
     
     @NotBlank(message = "Password is required")
-    @Size(min = 6, message = "Password must be at least 6 characters")
+    @com.projectspring.validation.ValidPassword
     private String password;
     
     private List<Long> roleIds;

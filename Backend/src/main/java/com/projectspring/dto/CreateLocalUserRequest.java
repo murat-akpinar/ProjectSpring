@@ -21,6 +21,7 @@ public class CreateLocalUserRequest {
     private String fullName;
     
     @NotBlank(message = "Password is required")
+    @com.projectspring.validation.ValidPassword
     private String password;
     
     private String role; // Optional role name

@@ -6,6 +6,7 @@ import com.projectspring.model.RoleEntity;
 import com.projectspring.model.User;
 import com.projectspring.repository.RoleRepository;
 import com.projectspring.repository.UserRepository;
+import com.projectspring.util.LdapInputSanitizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ldap.core.AttributesMapper;
@@ -45,7 +46,9 @@ public class LdapImportService {
         List<LdapUserDTO> results = new ArrayList<>();
 
         try {
-            EqualsFilter filter = new EqualsFilter("uid", username);
+            // Sanitize username input to prevent LDAP injection
+            String sanitizedUsername = LdapInputSanitizer.sanitizeUsername(username);
+            EqualsFilter filter = new EqualsFilter("uid", sanitizedUsername);
             List<LdapUserDTO> users = ldapTemplate.search(
                     LdapUtils.emptyLdapName(),
                     filter.encode(),
