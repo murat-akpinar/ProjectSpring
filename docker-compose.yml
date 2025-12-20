@@ -29,7 +29,7 @@ services:
       DB_NAME: projectspring
       DB_USER: postgres
       DB_PASSWORD: postgres
-      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-this-in-production-min-256-bits}
+      JWT_SECRET: ${JWT_SECRET}
       LDAP_ENABLED: ${LDAP_ENABLED:-false}
       LDAP_URLS: ${LDAP_URLS:-ldap://ldap:389}
       LDAP_BASE: ${LDAP_BASE:-dc=example,dc=com}
