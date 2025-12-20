@@ -5,6 +5,7 @@ import com.projectspring.model.User;
 import com.projectspring.model.enums.Role;
 import com.projectspring.repository.RoleRepository;
 import com.projectspring.repository.UserRepository;
+import com.projectspring.util.LdapInputSanitizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ldap.core.AttributesMapper;
@@ -56,11 +57,14 @@ public class LdapAuthService {
     private boolean ldapEnabled;
     
     public String authenticate(String username, String password) {
+        // Sanitize username input to prevent LDAP injection
+        String sanitizedUsername = LdapInputSanitizer.sanitizeUsername(username);
+        
         // Try LDAP first if enabled
         if (ldapEnabled) {
             try {
                 // LDAP authentication
-                EqualsFilter filter = new EqualsFilter("uid", username);
+                EqualsFilter filter = new EqualsFilter("uid", sanitizedUsername);
                 boolean authenticated = ldapTemplate.authenticate(
                     LdapUtils.emptyLdapName(),
                     filter.encode(),
@@ -69,10 +73,10 @@ public class LdapAuthService {
                 
                 if (authenticated) {
                     // Get user details from LDAP
-                    String userDn = findUserDn(username);
+                    String userDn = findUserDn(sanitizedUsername);
                     
                     // Sync user to database
-                    User user = syncUserFromLdap(username, userDn);
+                    User user = syncUserFromLdap(sanitizedUsername, userDn);
                     
                     // Generate JWT token
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
@@ -85,7 +89,7 @@ public class LdapAuthService {
         }
         
         // Try local user authentication
-        Optional<User> userOpt = userRepository.findByUsername(username);
+        Optional<User> userOpt = userRepository.findByUsername(sanitizedUsername);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             
@@ -149,7 +153,9 @@ public class LdapAuthService {
     
     public boolean validateCredentials(String username, String password) {
         try {
-            EqualsFilter filter = new EqualsFilter("uid", username);
+            // Sanitize username input to prevent LDAP injection
+            String sanitizedUsername = LdapInputSanitizer.sanitizeUsername(username);
+            EqualsFilter filter = new EqualsFilter("uid", sanitizedUsername);
             return ldapTemplate.authenticate(
                 LdapUtils.emptyLdapName(),
                 filter.encode(),

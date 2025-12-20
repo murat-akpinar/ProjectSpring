@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+    
+    <!-- Create login_attempts table for rate limiting and account lockout -->
+    <changeSet id="create_login_attempts_table" author="projectspring">
+        <comment>Create login_attempts table to track login attempts for rate limiting and account lockout</comment>
+        
+        <createTable tableName="login_attempts">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="ip_address" type="VARCHAR(45)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="attempt_time" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="success" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        <!-- Indexes for performance -->
+        <createIndex indexName="idx_login_attempts_username" tableName="login_attempts">
+            <column name="username"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_login_attempts_ip_address" tableName="login_attempts">
+            <column name="ip_address"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_login_attempts_attempt_time" tableName="login_attempts">
+            <column name="attempt_time"/>
+        </createIndex>
+        
+        <!-- Composite index for common queries -->
+        <createIndex indexName="idx_login_attempts_username_time" tableName="login_attempts">
+            <column name="username"/>
+            <column name="attempt_time"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_login_attempts_ip_time" tableName="login_attempts">
+            <column name="ip_address"/>
+            <column name="attempt_time"/>
+        </createIndex>
+    </changeSet>
+    
+</databaseChangeLog>
+

@@ -3,6 +3,7 @@ package com.projectspring.config;
 import com.projectspring.security.JwtAuthenticationEntryPoint;
 import com.projectspring.security.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -74,11 +75,26 @@ public class SecurityConfig {
         return http.build();
     }
     
+    @Value("${app.cors.allowed-origins:*}")
+    private String allowedOrigins;
+    
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Use allowedOriginPatterns instead of allowedOrigins when allowCredentials is true
-        configuration.setAllowedOriginPatterns(List.of("*")); // Production'da spesifik origin'ler belirtilmeli
+        
+        // Parse allowed origins from configuration
+        if ("*".equals(allowedOrigins)) {
+            // Development mode: allow all origins
+            configuration.setAllowedOriginPatterns(List.of("*"));
+        } else {
+            // Production mode: specific origins
+            List<String> origins = Arrays.asList(allowedOrigins.split(","));
+            configuration.setAllowedOrigins(origins.stream()
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .toList());
+        }
+        
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setExposedHeaders(Arrays.asList("Authorization"));
