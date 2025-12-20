@@ -1,0 +1,192 @@
+.system-logs {
+  background-color: var(--ctp-mantle);
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.system-logs-header {
+  margin-bottom: 20px;
+}
+
+.system-logs-header h2 {
+  color: var(--ctp-text);
+  margin: 0;
+}
+
+.system-logs-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--ctp-surface0);
+}
+
+.system-logs-tabs button {
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--ctp-subtext1);
+  cursor: pointer;
+  font-family: 'Cascadia Mono', monospace;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.system-logs-tabs button:hover {
+  color: var(--ctp-text);
+}
+
+.system-logs-tabs button.active {
+  color: var(--ctp-blue);
+  border-bottom-color: var(--ctp-blue);
+}
+
+.system-logs-filters {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.filter-group label {
+  color: var(--ctp-text);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.filter-group select,
+.filter-group input[type="datetime-local"] {
+  padding: 8px;
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 4px;
+  background-color: var(--ctp-base);
+  color: var(--ctp-text);
+  font-family: 'Cascadia Mono', monospace;
+  font-size: 14px;
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+  outline: none;
+  border-color: var(--ctp-blue);
+}
+
+.btn-refresh {
+  padding: 8px 16px;
+  background-color: var(--ctp-blue);
+  color: var(--ctp-base);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Cascadia Mono', monospace;
+  font-size: 14px;
+  transition: background-color 0.2s;
+  height: fit-content;
+}
+
+.btn-refresh:hover {
+  background-color: var(--ctp-sapphire);
+}
+
+.logs-table-container {
+  overflow-x: auto;
+}
+
+.logs-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--ctp-base);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.logs-table thead {
+  background-color: var(--ctp-surface0);
+}
+
+.logs-table th {
+  padding: 12px;
+  text-align: left;
+  color: var(--ctp-text);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.logs-table td {
+  padding: 12px;
+  color: var(--ctp-text);
+  font-size: 14px;
+  border-top: 1px solid var(--ctp-surface0);
+}
+
+.logs-table tbody tr:hover {
+  background-color: var(--ctp-surface0);
+}
+
+.level-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: var(--ctp-base);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.message-cell {
+  max-width: 300px;
+  word-break: break-word;
+}
+
+.endpoint-cell {
+  max-width: 200px;
+  word-break: break-word;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.pagination button {
+  padding: 8px 16px;
+  background-color: var(--ctp-surface0);
+  color: var(--ctp-text);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Cascadia Mono', monospace;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.pagination button:hover:not(:disabled) {
+  background-color: var(--ctp-surface1);
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  color: var(--ctp-text);
+  font-size: 14px;
+}
+
+.loading,
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: var(--ctp-subtext1);
+}
+

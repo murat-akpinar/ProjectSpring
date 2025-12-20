@@ -16,6 +16,8 @@
     <include file="db/changelog/changes/V10__rename_daire_baskani_to_admin.xml"/>
     <include file="db/changelog/changes/V11__create_ldap_settings.xml"/>
     <include file="db/changelog/changes/V12__create_login_attempts.xml"/>
+    <include file="db/changelog/changes/V13__create_system_logs.xml"/>
+    <include file="db/changelog/changes/V14__create_task_logs.xml"/>
     
 </databaseChangeLog>
 

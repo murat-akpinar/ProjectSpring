@@ -4,10 +4,35 @@
   margin: 0 auto;
 }
 
+.admin-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
 .admin-panel-page h1 {
   color: var(--ctp-text);
-  margin-bottom: 20px;
+  margin: 0;
   font-size: 28px;
+}
+
+.btn-back-to-home {
+  padding: 10px 20px;
+  background-color: var(--ctp-surface1);
+  border: 1px solid var(--ctp-surface2);
+  border-radius: 6px;
+  color: var(--ctp-text);
+  cursor: pointer;
+  font-size: 14px;
+  font-family: 'Cascadia Mono', monospace;
+  transition: all 0.2s;
+}
+
+.btn-back-to-home:hover {
+  background-color: var(--ctp-surface2);
+  border-color: var(--ctp-blue);
+  color: var(--ctp-blue);
 }
 
 .admin-tabs {
@@ -42,5 +67,37 @@
 
 .admin-tab-content {
   margin-top: 20px;
+}
+
+.logs-tab-content {
+  margin-top: 0;
+}
+
+.logs-sub-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--ctp-surface0);
+}
+
+.logs-sub-tabs button {
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--ctp-subtext1);
+  cursor: pointer;
+  font-family: 'Cascadia Mono', monospace;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.logs-sub-tabs button:hover {
+  color: var(--ctp-text);
+}
+
+.logs-sub-tabs button.active {
+  color: var(--ctp-blue);
+  border-bottom-color: var(--ctp-blue);
 }
 

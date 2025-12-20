@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Task, CreateTaskRequest, CreateSubtaskRequest, TaskStatus, TaskType, Priority } from '../../types/Task';
+import { Task, CreateTaskRequest, CreateSubtaskRequest, TaskStatus, TaskType, Priority, UpdateTaskStatusRequest } from '../../types/Task';
 import { Team } from '../../types/Team';
 import { User } from '../../types/User';
 import { taskService } from '../../services/taskService';
@@ -116,15 +116,47 @@ const TaskModal: React.FC<TaskModalProps> = ({
     try {
       setLoading(true);
       if (task) {
-        await taskService.updateTask(task.id, formData);
+        // Check if arrays are equal (assigneeIds)
+        const assigneeIdsEqual = JSON.stringify((task.assigneeIds || []).sort()) === JSON.stringify((formData.assigneeIds || []).sort());
+        
+        // Check if subtasks are equal (simplified - just count and titles)
+        const subtasksEqual = (task.subtasks || []).length === (formData.subtasks || []).length &&
+          (task.subtasks || []).every((st, idx) => {
+            const newSt = (formData.subtasks || [])[idx];
+            return st.title === newSt?.title && st.content === newSt?.content;
+          });
+        
+        // If only status is changing, use updateTaskStatus
+        const onlyStatusChanged = task.status !== formData.status &&
+          task.title === formData.title &&
+          (task.content || '') === (formData.content || '') &&
+          task.startDate === formData.startDate &&
+          task.endDate === formData.endDate &&
+          (task.taskType || TaskType.TASK) === (formData.taskType || TaskType.TASK) &&
+          (task.priority || Priority.NORMAL) === (formData.priority || Priority.NORMAL) &&
+          task.teamId === formData.teamId &&
+          task.projectId === formData.projectId &&
+          assigneeIdsEqual &&
+          subtasksEqual;
+        
+        if (onlyStatusChanged) {
+          const statusUpdate: UpdateTaskStatusRequest = {
+            status: formData.status!,
+            changeReason: 'Status updated from task modal'
+          };
+          await taskService.updateTaskStatus(task.id, statusUpdate);
+        } else {
+          await taskService.updateTask(task.id, formData);
+        }
       } else {
         await taskService.createTask(formData);
       }
       onSave();
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to save task:', error);
-      alert('İş kaydedilemedi');
+      const errorMessage = error.response?.data?.error || error.message || 'İş kaydedilemedi';
+      alert(`İş kaydedilemedi: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
