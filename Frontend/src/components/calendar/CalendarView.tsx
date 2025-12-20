@@ -1,7 +1,7 @@
 import React from 'react';
 import { Task } from '../../types/Task';
 import TaskCard from './TaskCard';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, isSameMonth, isSameDay } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, isSameMonth, isToday, getDay } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import './CalendarView.css';
 
@@ -44,12 +44,14 @@ const CalendarView: React.FC<CalendarViewProps> = ({ tasks, month, year, onTaskC
         {days.map((day, index) => {
           const dayTasks = getTasksForDay(day);
           const isCurrentMonthDay = isSameMonth(day, monthStart);
-          const isToday = isSameDay(day, new Date());
+          const isTodayDay = isToday(day);
+          const dayOfWeek = getDay(day);
+          const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; // 0 = Pazar, 6 = Cumartesi
           
           return (
             <div
               key={index}
-              className={`calendar-day ${!isCurrentMonthDay ? 'other-month' : ''} ${isToday ? 'today' : ''}`}
+              className={`calendar-day ${!isCurrentMonthDay ? 'other-month' : ''} ${isTodayDay ? 'today' : ''} ${isWeekend ? 'weekend' : ''}`}
             >
               <div className="calendar-day-number">{format(day, 'd')}</div>
               <div className="calendar-day-tasks">

@@ -41,6 +41,10 @@ export interface Task {
   priority?: Priority;
   teamId: number;
   teamName: string;
+  teamColor?: string;
+  teamIcon?: string;
+  projectId?: number;
+  projectName?: string;
   createdById: number;
   createdByName: string;
   assigneeIds: number[];
@@ -60,6 +64,7 @@ export interface CreateTaskRequest {
   taskType?: TaskType;
   priority?: Priority;
   teamId: number;
+  projectId?: number;
   assigneeIds?: number[];
   subtasks?: CreateSubtaskRequest[];
 }

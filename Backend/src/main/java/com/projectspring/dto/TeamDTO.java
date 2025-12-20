@@ -13,5 +13,7 @@ public class TeamDTO {
     private String description;
     private Long leaderId;
     private String leaderName;
+    private String color;
+    private String icon;
 }
 

@@ -4,6 +4,8 @@ import { useAuth } from './hooks/useAuth';
 import LoginPage from './pages/LoginPage';
 import CalendarPage from './pages/CalendarPage';
 import DashboardPage from './pages/DashboardPage';
+import ProjectsPage from './pages/ProjectsPage';
+import ProjectDetailPage from './pages/ProjectDetailPage';
 import './App.css';
 
 const App: React.FC = () => {
@@ -34,6 +36,26 @@ const App: React.FC = () => {
         element={
           isAuthenticated ? (
             <DashboardPage />
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      />
+      <Route
+        path="/projects"
+        element={
+          isAuthenticated ? (
+            <ProjectsPage />
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      />
+      <Route
+        path="/projects/:id"
+        element={
+          isAuthenticated ? (
+            <ProjectDetailPage />
           ) : (
             <Navigate to="/login" />
           )

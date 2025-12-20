@@ -2,11 +2,12 @@ import api from './api';
 import { Task, CreateTaskRequest, UpdateTaskStatusRequest } from '../types/Task';
 
 export const taskService = {
-  getTasks: async (teamId?: number, year?: number, month?: number): Promise<Task[]> => {
+  getTasks: async (teamId?: number, year?: number, month?: number, projectId?: number): Promise<Task[]> => {
     const params = new URLSearchParams();
     if (teamId) params.append('teamId', teamId.toString());
     if (year) params.append('year', year.toString());
     if (month) params.append('month', month.toString());
+    if (projectId) params.append('projectId', projectId.toString());
     
     const response = await api.get<Task[]>(`/tasks?${params.toString()}`);
     return response.data;

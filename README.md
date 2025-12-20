@@ -8,11 +8,21 @@ ProjectSpring — Takımlar için takvim odaklı proje ve görev yönetim platfo
 - **Hibrit Authentication**: Hem LDAP hem de Local User desteği (LDAP önce denenir, başarısız olursa local user kontrol edilir)
 - **JWT Authentication**: Stateless authentication (session problemi yok, yatay ölçeklendirme için uygun)
 - **Otomatik Database Migration**: Liquibase ile veritabanı şeması otomatik oluşturulur
-- **Takvim Görünümü**: Yıl/Ay/Hafta bazlı iş takibi
+- **Çoklu Görünüm Modları**: 
+  - Takvim Görünümü: Günlük takvim görünümü, hafta sonu günleri soluk
+  - Gantt Chart: Timeline bazlı Gantt chart, hafta seçimi, hiyerarşik subtask desteği
+  - Kanban Board: Status bazlı Kanban board, her takım için ayrı
+- **Aylık Görünüm**: 12 ay grid görünümü, mevsim renkleri ile
+- **Proje Yönetimi**: Proje oluşturma, düzenleme, silme. Projelere ekip atama ve iş ekleme
+- **Proje Detay Görünümü**: Durum dağılımı grafiği, görev listesi ve Gantt chart ile detaylı proje takibi
+- **Proje Uyarı Sistemi**: Bitim tarihine 1 gün kalan projeler otomatik yanıp söner
+- **Ekip Renkleri ve İkonları**: Her ekibin kendine özel belirleyici rengi ve ikonu var, toplu görünümde ekipleri ayırmak kolay
 - **Ekip Dashboard**: Gerçek zamanlı istatistikler
-- **İş Kartları**: Detaylı iş takibi, alt işler, durum yönetimi
+- **İş Kartları**: Detaylı iş takibi, alt işler, durum yönetimi, önem seviyesi icon'ları
+- **İş Türleri ve Öncelikler**: Görev (TASK), Özellik (FEATURE), Hata (BUG) / Normal, Yüksek, Acil
 - **Ertelendi Takibi**: Ertelenen işlerin yeni tarih bilgisi ile takibi
 - **Yetişmedi Hesaplama**: Otomatik yetişmedi iş tespiti
+- **Örnek Veri Ekleme**: `.env` dosyasında `SEED_SAMPLE_DATA=1` yaparak otomatik örnek veri ekleme (her ekibe 5 kullanıcı, 2025 yılı için işler ve projeler)
 - **Docker Desteği**: Tam containerized yapı, yatay ölçeklendirme için hazır
 
 ## Teknoloji Stack
@@ -30,6 +40,8 @@ ProjectSpring — Takımlar için takvim odaklı proje ve görev yönetim platfo
 - Vite
 - React Router
 - Axios
+- date-fns (tarih işlemleri)
+- Cascadia Mono (font)
 
 ### Infrastructure
 - Docker & Docker Compose
@@ -101,8 +113,10 @@ npm run dev
 
 - `users` - Kullanıcılar
 - `roles` - Roller (DAIRE_BASKANI, TAKIM_LIDERI, YAZILIMCI, DEVOPS, IS_ANALISTI, TESTCI)
-- `teams` - Ekipler
-- `tasks` - İş kartları
+- `teams` - Ekipler (her ekibin kendine özel rengi ve ikonu var)
+- `projects` - Projeler (başlangıç/bitiş tarihi, durum, ekip atamaları)
+- `project_teams` - Proje-Ekip ilişkisi (many-to-many)
+- `tasks` - İş kartları (projeye bağlı olabilir)
 - `subtasks` - Alt işler
 - `task_status_history` - İş durum geçmişi
 - `user_teams` - Kullanıcı-Ekip ilişkisi
@@ -127,6 +141,13 @@ npm run dev
 - `PUT /api/tasks/{id}` - İş güncelle
 - `DELETE /api/tasks/{id}` - İş sil
 - `PUT /api/tasks/{id}/status` - İş durumu güncelle
+
+### Projects
+- `GET /api/projects` - Projeler listesi
+- `GET /api/projects/{id}` - Proje detayı
+- `POST /api/projects` - Yeni proje oluştur
+- `PUT /api/projects/{id}` - Proje güncelle
+- `DELETE /api/projects/{id}` - Proje sil
 
 ### Calendar
 - `GET /api/calendar/{year}` - Yıl bazlı takvim verisi
@@ -194,17 +215,67 @@ POST /api/auth/register
 - `V1__initial_schema.xml` - Tüm tablolar oluşturulur
 - `V2__seed_data.xml` - İlk roller ve ekipler eklenir
 - `V3__add_password_to_users.xml` - Password kolonu eklenir
+- `V4__create_admin_user.xml` - Admin kullanıcı oluşturulur
+- `V5__add_subtask_fields.xml` - Alt işlere tarih ve atanan kişi alanları eklenir
+- `V6__add_task_type_and_priority.xml` - İşlere tür ve öncelik alanları eklenir
+- `V7__add_team_color_and_icon.xml` - Ekiplere renk ve ikon kolonları eklenir
+- `V8__add_projects.xml` - Projeler tablosu ve ilişkileri oluşturulur
 
 Manuel bir şey yapmanıza gerek yok, uygulama ilk çalıştığında tüm tablolar otomatik oluşturulur.
 
 ## İş Durumları
 
-- **OPEN** (Açık) - Sarı
-- **IN_PROGRESS** (Yapılıyor) - Mavi
-- **COMPLETED** (Tamamlandı) - Yeşil
-- **POSTPONED** (Ertelendi) - Turuncu (yeni tarih bilgisi ile)
+- **OPEN** (Açık) - Sleuthe Yellow (#feb300)
+- **IN_PROGRESS** (Yapılıyor) - Coral Pink (#ff5e6c)
+- **COMPLETED** (Tamamlandı) - Teal (#94e2d5)
+- **POSTPONED** (Ertelendi) - Pink Leaf (#ffaaab) (yeni tarih bilgisi ile)
 - **CANCELLED** (İptal Edildi) - Gri
-- **OVERDUE** (Yetişmedi) - Kırmızı
+- **OVERDUE** (Yetişmedi) - Coral Pink (#ff5e6c)
+
+## İş Türleri ve Öncelikler
+
+### İş Türleri
+- **TASK** (Görev) - Pink Leaf (#ffaaab)
+- **FEATURE** (Özellik) - Teal (#94e2d5)
+- **BUG** (Hata) - Coral Pink (#ff5e6c)
+
+### Öncelik Seviyeleri
+- **NORMAL** (Normal) - Gri, ⚪ icon
+- **HIGH** (Yüksek) - Sleuthe Yellow (#feb300), 🟠 icon
+- **URGENT** (Acil) - Coral Pink (#ff5e6c), 🔴 icon
+
+## Renk Paleti
+
+Uygulama, Catppuccin Mocha renk paletini kullanmaktadır.
+
+- **Arka Plan**: `--ctp-base` (koyu morumsu gri)
+- **Yüzeyler**: `--ctp-surface0`, `--ctp-surface1`, `--ctp-crust` (daha açık gri tonları)
+- **Metin**: `--ctp-text`, `--ctp-subtext0`, `--ctp-subtext1` (açık beyaz tonları)
+- **Vurgu Renkleri**: `--ctp-blue`, `--ctp-green`, `--ctp-yellow`, `--ctp-peach`, `--ctp-red` vb.
+
+## Ekip Renkleri ve İkonları
+
+Her ekibin kendine özel belirleyici rengi ve ikonu vardır. Bu özellik sayesinde:
+- Toplu görünümlerde (Gantt Chart, Kanban Board, Takvim) ekipleri hızlıca ayırt edebilirsiniz
+- Ekip seçim menüsünde görsel olarak ekipleri tanımlayabilirsiniz
+- İş kartlarında hangi ekibe ait olduğunu renk ve ikon ile görebilirsiniz
+
+`teams` tablosunda `color` (VARCHAR(7)) ve `icon` (VARCHAR(50)) kolonları bulunur. Her ekip için özel renk kodu (hex, örn: #89b4fa) ve ikon (emoji veya icon identifier) tanımlanabilir.
+
+## Örnek Veri Ekleme
+
+Uygulamayı test etmek için otomatik örnek veri ekleme özelliği bulunmaktadır:
+
+1. `.env` dosyasında `SEED_SAMPLE_DATA=1` yapın
+2. Backend'i yeniden başlatın: `docker-compose restart backend`
+
+Bu özellik şunları ekler:
+- Her ekibe 5 kullanıcı (1 takım lideri + 4 üye)
+- 2025 yılı için her ay 15-35 arası iş
+- 5 örnek proje
+- İşlerin %30'unda alt görevler
+
+**Not:** Örnek veriler sadece ilk çalıştırmada eklenir. Mevcut kullanıcılar/işler varsa tekrar eklenmez.
 
 ## Lisans
 

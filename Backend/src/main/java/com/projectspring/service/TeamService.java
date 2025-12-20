@@ -101,6 +101,8 @@ public class TeamService {
             dto.setLeaderId(team.getLeader().getId());
             dto.setLeaderName(team.getLeader().getFullName());
         }
+        dto.setColor(team.getColor());
+        dto.setIcon(team.getIcon());
         return dto;
     }
     

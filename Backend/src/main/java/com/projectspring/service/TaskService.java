@@ -3,6 +3,7 @@ package com.projectspring.service;
 import com.projectspring.dto.*;
 import com.projectspring.model.*;
 import com.projectspring.model.enums.TaskStatus;
+import com.projectspring.repository.ProjectRepository;
 import com.projectspring.model.enums.TaskType;
 import com.projectspring.model.enums.Priority;
 import com.projectspring.repository.*;
@@ -40,7 +41,10 @@ public class TaskService {
     @Autowired
     private TeamService teamService;
     
-    public List<TaskDTO> getTasks(Long teamId, Integer year, Integer month) {
+    @Autowired
+    private ProjectRepository projectRepository;
+    
+    public List<TaskDTO> getTasks(Long teamId, Integer year, Integer month, Long projectId) {
         List<Long> accessibleTeamIds = teamService.getAccessibleTeamIds();
         
         if (teamId != null && !accessibleTeamIds.contains(teamId)) {
@@ -67,6 +71,13 @@ public class TaskService {
                     .flatMap(id -> taskRepository.findByTeamId(id).stream())
                     .collect(Collectors.toList());
             }
+        }
+        
+        // Project filter
+        if (projectId != null) {
+            tasks = tasks.stream()
+                .filter(task -> task.getProject() != null && task.getProject().getId().equals(projectId))
+                .collect(Collectors.toList());
         }
         
         return tasks.stream()
@@ -107,6 +118,19 @@ public class TaskService {
         task.setPriority(request.getPriority() != null ? request.getPriority() : Priority.NORMAL);
         task.setTeam(team);
         task.setCreatedBy(currentUser);
+        
+        // Project assignment
+        if (request.getProjectId() != null) {
+            Project project = projectRepository.findById(request.getProjectId())
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+            // Projenin ekibine erişim kontrolü
+            boolean hasAccess = project.getTeams().stream()
+                .anyMatch(t -> accessibleTeamIds.contains(t.getId()));
+            if (!hasAccess) {
+                throw new RuntimeException("Access denied to this project");
+            }
+            task.setProject(project);
+        }
         
         // Assignees
         if (request.getAssigneeIds() != null && !request.getAssigneeIds().isEmpty()) {
@@ -160,6 +184,21 @@ public class TaskService {
         task.setStatus(request.getStatus());
         task.setTaskType(request.getTaskType() != null ? request.getTaskType() : TaskType.TASK);
         task.setPriority(request.getPriority() != null ? request.getPriority() : Priority.NORMAL);
+        
+        // Project assignment
+        if (request.getProjectId() != null) {
+            Project project = projectRepository.findById(request.getProjectId())
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+            // Projenin ekibine erişim kontrolü
+            boolean hasAccess = project.getTeams().stream()
+                .anyMatch(t -> accessibleTeamIds.contains(t.getId()));
+            if (!hasAccess) {
+                throw new RuntimeException("Access denied to this project");
+            }
+            task.setProject(project);
+        } else {
+            task.setProject(null);
+        }
         
         if (request.getAssigneeIds() != null) {
             Set<User> assignees = request.getAssigneeIds().stream()
@@ -275,6 +314,12 @@ public class TaskService {
         dto.setPriority(task.getPriority());
         dto.setTeamId(task.getTeam().getId());
         dto.setTeamName(task.getTeam().getName());
+        dto.setTeamColor(task.getTeam().getColor());
+        dto.setTeamIcon(task.getTeam().getIcon());
+        if (task.getProject() != null) {
+            dto.setProjectId(task.getProject().getId());
+            dto.setProjectName(task.getProject().getName());
+        }
         dto.setCreatedById(task.getCreatedBy().getId());
         dto.setCreatedByName(task.getCreatedBy().getFullName());
         dto.setAssigneeIds(task.getAssignees().stream()

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+    
+    <!-- Add color and icon to teams table -->
+    <changeSet id="add_team_color_and_icon" author="projectspring">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="teams"/>
+        </preConditions>
+        
+        <comment>Add color and icon columns to teams table</comment>
+        
+        <addColumn tableName="teams">
+            <column name="color" type="VARCHAR(7)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        
+        <addColumn tableName="teams">
+            <column name="icon" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        
+        <rollback>
+            <dropColumn tableName="teams" columnName="icon"/>
+            <dropColumn tableName="teams" columnName="color"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
+

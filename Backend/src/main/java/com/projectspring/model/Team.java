@@ -39,6 +39,12 @@ public class Team {
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
     
+    @Column(name = "color", length = 7)
+    private String color;
+    
+    @Column(name = "icon", length = 50)
+    private String icon;
+    
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
     

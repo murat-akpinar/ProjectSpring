@@ -11,6 +11,8 @@
     <include file="db/changelog/changes/V4__create_admin_user.xml"/>
     <include file="db/changelog/changes/V5__add_subtask_fields.xml"/>
     <include file="db/changelog/changes/V6__add_task_type_and_priority.xml"/>
+    <include file="db/changelog/changes/V7__add_team_color_and_icon.xml"/>
+    <include file="db/changelog/changes/V8__add_projects.xml"/>
     
 </databaseChangeLog>
 

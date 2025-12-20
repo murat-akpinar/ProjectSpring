@@ -3,54 +3,66 @@ import Header from '../components/layout/Header';
 import Sidebar from '../components/layout/Sidebar';
 import MonthView from '../components/calendar/MonthView';
 import CalendarView from '../components/calendar/CalendarView';
-import TeamPlannerView from '../components/calendar/TeamPlannerView';
+import GanttChartView from '../components/calendar/GanttChartView';
+import KanbanBoardView from '../components/calendar/KanbanBoardView';
 import TaskModal from '../components/task/TaskModal';
 import { Task } from '../types/Task';
-import { User } from '../types/User';
+import { Project } from '../types/Project';
 import { taskService } from '../services/taskService';
-import { userService } from '../services/userService';
+import { projectService } from '../services/projectService';
 import { getMonthName, getWeeksInMonth } from '../utils/dateUtils';
 import '../App.css';
 
-type ViewMode = 'calendar' | 'planner';
+type ViewMode = 'calendar' | 'gantt' | 'kanban';
 
 const CalendarPage: React.FC = () => {
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
-  const [selectedWeek, setSelectedWeek] = useState(1);
+  const [selectedWeek, setSelectedWeek] = useState(0);
   const [viewMode, setViewMode] = useState<ViewMode>('calendar');
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchTasks = async () => {
       try {
         setLoading(true);
-        const [tasksData, usersData] = await Promise.all([
-          taskService.getTasks(selectedTeamId || undefined, selectedYear),
-          userService.getAllUsers(),
-        ]);
-        setTasks(tasksData);
-        setUsers(usersData);
+        const data = await taskService.getTasks(selectedTeamId || undefined, selectedYear, undefined, selectedProjectId || undefined);
+        setTasks(data);
       } catch (error) {
-        console.error('Failed to fetch data:', error);
+        console.error('Failed to fetch tasks:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
-  }, [selectedYear, selectedTeamId]);
+    fetchTasks();
+  }, [selectedYear, selectedTeamId, selectedProjectId]);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const data = await projectService.getAllProjects();
+        setProjects(data);
+      } catch (error) {
+        console.error('Failed to fetch projects:', error);
+      }
+    };
+    fetchProjects();
+  }, []);
 
   // Reset month view when team changes
   useEffect(() => {
     setSelectedMonth(null);
-    setSelectedWeek(1);
+    setSelectedWeek(0);
+    setViewMode('calendar');
+    setSelectedProjectId(null);
   }, [selectedTeamId]);
   
   // Calculate weeks in selected month
@@ -92,8 +104,16 @@ const CalendarPage: React.FC = () => {
     fetchTasks();
   };
 
+  // Task'ları filtrele: startDate veya endDate seçilen ay içinde olmalı
   const filteredTasks = selectedMonth
-    ? tasks.filter((task) => new Date(task.startDate).getMonth() + 1 === selectedMonth)
+    ? tasks.filter((task) => {
+        const taskStart = new Date(task.startDate);
+        const taskEnd = new Date(task.endDate);
+        const taskStartMonth = taskStart.getMonth() + 1;
+        const taskEndMonth = taskEnd.getMonth() + 1;
+        // Task'ın startDate'i veya endDate'i seçilen ay içinde olmalı
+        return taskStartMonth === selectedMonth || taskEndMonth === selectedMonth;
+      })
     : tasks;
 
   return (
@@ -105,13 +125,13 @@ const CalendarPage: React.FC = () => {
           {selectedMonth ? (
             <div className="week-container">
               <div className="week-header">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
                   <h2 className="week-title">
                     {getMonthName(selectedMonth)} {selectedYear}
                   </h2>
                   <select
-                    value={selectedWeek}
-                    onChange={(e) => setSelectedWeek(parseInt(e.target.value))}
+                    value={selectedProjectId || ''}
+                    onChange={(e) => setSelectedProjectId(e.target.value ? parseInt(e.target.value) : null)}
                     style={{
                       padding: '6px 12px',
                       borderRadius: '4px',
@@ -123,29 +143,58 @@ const CalendarPage: React.FC = () => {
                       cursor: 'pointer'
                     }}
                   >
-                    {Array.from({ length: weeksInMonth }, (_, i) => i + 1).map((week) => (
-                      <option key={week} value={week}>
-                        {week}. Hafta
-                      </option>
-                    ))}
+                    <option value="">Tüm Projeler</option>
+                    {projects
+                      .filter(project => !selectedTeamId || project.teamIds.includes(selectedTeamId))
+                      .map((project) => (
+                        <option key={project.id} value={project.id}>
+                          {project.name}
+                        </option>
+                      ))}
                   </select>
-                  <select
-                    value={viewMode}
-                    onChange={(e) => setViewMode(e.target.value as ViewMode)}
-                    style={{
-                      padding: '6px 12px',
-                      borderRadius: '4px',
-                      border: '1px solid var(--ctp-surface0)',
-                      backgroundColor: 'var(--ctp-surface0)',
-                      color: 'var(--ctp-text)',
-                      fontFamily: "'Cascadia Mono', monospace",
-                      fontSize: '14px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <option value="calendar">Takvim Görünümü</option>
-                    <option value="planner">Ekip Planlayıcı</option>
-                  </select>
+                  {viewMode === 'gantt' && (
+                    <select
+                      value={selectedWeek}
+                      onChange={(e) => setSelectedWeek(parseInt(e.target.value))}
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: '4px',
+                        border: '1px solid var(--ctp-surface0)',
+                        backgroundColor: 'var(--ctp-surface0)',
+                        color: 'var(--ctp-text)',
+                        fontFamily: "'Cascadia Mono', monospace",
+                        fontSize: '14px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <option value={0}>Tüm Ay</option>
+                      {Array.from({ length: weeksInMonth }, (_, i) => i + 1).map((week) => (
+                        <option key={week} value={week}>
+                          {week}. Hafta
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  <div className="view-mode-buttons">
+                    <button
+                      className={`view-mode-button ${viewMode === 'calendar' ? 'active' : ''}`}
+                      onClick={() => setViewMode('calendar')}
+                    >
+                      Takvim Görünümü
+                    </button>
+                    <button
+                      className={`view-mode-button ${viewMode === 'gantt' ? 'active' : ''}`}
+                      onClick={() => setViewMode('gantt')}
+                    >
+                      Gantt Chart
+                    </button>
+                    <button
+                      className={`view-mode-button ${viewMode === 'kanban' ? 'active' : ''}`}
+                      onClick={() => setViewMode('kanban')}
+                    >
+                      Kanban Board
+                    </button>
+                  </div>
                 </div>
                 <button className="back-button" onClick={handleBackToMonths}>
                   Aylara Dön
@@ -180,13 +229,20 @@ const CalendarPage: React.FC = () => {
                       year={selectedYear}
                       onTaskClick={handleTaskClick} 
                     />
-                  ) : (
-                    <TeamPlannerView
+                  ) : viewMode === 'gantt' ? (
+                    <GanttChartView
                       tasks={filteredTasks}
-                      users={users}
                       month={selectedMonth}
                       year={selectedYear}
                       selectedWeek={selectedWeek}
+                      weeksInMonth={weeksInMonth}
+                      onTaskClick={handleTaskClick}
+                    />
+                  ) : (
+                    <KanbanBoardView
+                      tasks={filteredTasks}
+                      month={selectedMonth}
+                      year={selectedYear}
                       onTaskClick={handleTaskClick}
                     />
                   )}
