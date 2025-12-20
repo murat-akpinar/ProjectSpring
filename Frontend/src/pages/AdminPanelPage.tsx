@@ -35,8 +35,8 @@ const AdminPanelPage: React.FC = () => {
       return;
     }
 
-    if (user && !hasRole('DAIRE_BASKANI')) {
-      alert('Bu sayfaya erişim yetkiniz yok. Sadece yöneticiler (DAIRE_BASKANI rolü) erişebilir.');
+    if (user && !hasRole('ADMIN')) {
+      alert('Bu sayfaya erişim yetkiniz yok. Sadece yöneticiler (ADMIN rolü) erişebilir.');
       navigate('/');
       return;
     }

@@ -59,3 +59,40 @@ export interface LdapUser {
   givenName?: string;
 }
 
+export interface LdapSettings {
+  id?: number;
+  urls: string;
+  base: string;
+  username?: string;
+  userSearchBase?: string;
+  userSearchFilter?: string;
+  isEnabled?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface UpdateLdapSettingsRequest {
+  urls: string;
+  base: string;
+  username?: string;
+  password?: string;
+  userSearchBase?: string;
+  userSearchFilter?: string;
+  isEnabled?: boolean;
+}
+
+export interface LdapTestRequest {
+  urls: string;
+  base: string;
+  username?: string;
+  password?: string;
+  userSearchBase?: string;
+  userSearchFilter?: string;
+}
+
+export interface LdapTestResponse {
+  success: boolean;
+  message: string;
+  errorDetails?: string;
+}
+

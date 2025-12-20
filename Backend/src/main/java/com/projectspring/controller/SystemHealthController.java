@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/admin/health")
 @CrossOrigin(origins = "*")
-@PreAuthorize("hasAnyRole('DAIRE_BASKANI', 'TAKIM_LIDERI')")
+@PreAuthorize("hasAnyRole('ADMIN', 'TAKIM_LIDERI')")
 public class SystemHealthController {
 
     @Autowired

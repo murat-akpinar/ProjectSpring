@@ -147,3 +147,177 @@
   background-color: #a6d189;
 }
 
+/* LDAP Settings Section */
+.ldap-settings-section {
+  background-color: var(--ctp-base);
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 4px;
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+.ldap-settings-section h3 {
+  color: var(--ctp-text);
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+
+.ldap-settings-form {
+  display: grid;
+  gap: 15px;
+}
+
+.ldap-settings-form .form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.ldap-settings-form label {
+  color: var(--ctp-text);
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.ldap-settings-form input[type="text"],
+.ldap-settings-form input[type="password"] {
+  padding: 10px;
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 4px;
+  background-color: var(--ctp-mantle);
+  color: var(--ctp-text);
+  font-family: 'Cascadia Mono', monospace;
+  font-size: 14px;
+}
+
+.ldap-settings-form input:focus {
+  outline: none;
+  border-color: var(--ctp-blue);
+}
+
+.ldap-settings-form input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.form-hint {
+  color: var(--ctp-subtext0);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.ldap-settings-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.btn-test,
+.btn-save {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Cascadia Mono', monospace;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.btn-test {
+  background-color: var(--ctp-yellow);
+  color: var(--ctp-base);
+}
+
+.btn-test:hover:not(:disabled) {
+  background-color: #e5c890;
+}
+
+.btn-save {
+  background-color: var(--ctp-blue);
+  color: var(--ctp-base);
+}
+
+.btn-save:hover:not(:disabled) {
+  background-color: var(--ctp-sapphire);
+}
+
+.btn-test:disabled,
+.btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.test-result {
+  margin-top: 15px;
+  padding: 15px;
+  border-radius: 4px;
+  border: 1px solid;
+}
+
+.test-result.success {
+  background-color: rgba(166, 209, 137, 0.1);
+  border-color: var(--ctp-green);
+  color: var(--ctp-green);
+}
+
+.test-result.error {
+  background-color: rgba(243, 139, 168, 0.1);
+  border-color: var(--ctp-red);
+  color: var(--ctp-red);
+}
+
+.test-result strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.test-result p {
+  margin: 4px 0;
+  font-size: 13px;
+}
+
+.test-result details {
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.test-result summary {
+  cursor: pointer;
+  margin-bottom: 4px;
+}
+
+.test-result pre {
+  background-color: var(--ctp-mantle);
+  padding: 8px;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin-top: 4px;
+  font-size: 11px;
+}
+
+.ldap-search-section {
+  margin-top: 30px;
+}
+
+.ldap-search-section h3 {
+  color: var(--ctp-text);
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.connection-warning {
+  background-color: rgba(230, 180, 75, 0.1);
+  border: 1px solid var(--ctp-yellow);
+  border-radius: 4px;
+  padding: 15px;
+  margin-bottom: 20px;
+  color: var(--ctp-yellow);
+}
+
+.connection-warning p {
+  margin: 0;
+  font-size: 14px;
+}
+

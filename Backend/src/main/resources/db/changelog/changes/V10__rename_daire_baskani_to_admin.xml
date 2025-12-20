@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+    
+    <!-- Rename DAIRE_BASKANI role to ADMIN -->
+    <changeSet id="rename_daire_baskani_to_admin" author="projectspring">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="roles"/>
+        </preConditions>
+        
+        <comment>Rename DAIRE_BASKANI role to ADMIN</comment>
+        
+        <update tableName="roles">
+            <column name="name" value="ADMIN"/>
+            <column name="description" value="Yönetici - Tüm ekipleri görüntüleyebilir"/>
+            <where>name = 'DAIRE_BASKANI'</where>
+        </update>
+    </changeSet>
+    
+</databaseChangeLog>
+

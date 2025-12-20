@@ -20,7 +20,7 @@ public class SystemHealthService {
     @Value("${server.port:8080}")
     private int serverPort;
 
-    @Value("${app.frontend.url:http://localhost:5173}")
+    @Value("${app.frontend.url:http://frontend:80}")
     private String frontendUrl;
 
     private static final int HEALTH_CHECK_TIMEOUT = 5000; // 5 seconds
@@ -86,6 +86,8 @@ public class SystemHealthService {
                 return SystemHealthDTO.HealthStatus.UNHEALTHY;
             }
         } catch (Exception e) {
+            // Log the exception for debugging
+            System.err.println("Frontend health check failed: " + e.getMessage());
             // If frontend URL is not configured or unreachable, return UNKNOWN
             // This is optional check, so we don't want to fail the whole health check
             return SystemHealthDTO.HealthStatus.UNKNOWN;

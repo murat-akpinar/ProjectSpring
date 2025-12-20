@@ -15,7 +15,7 @@ const Header: React.FC<HeaderProps> = ({ selectedYear, onYearChange }) => {
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i);
 
-  const isAdmin = hasRole('DAIRE_BASKANI');
+  const isAdmin = hasRole('ADMIN');
 
   const handleProfileClick = () => {
     navigate('/profile');
@@ -26,7 +26,7 @@ const Header: React.FC<HeaderProps> = ({ selectedYear, onYearChange }) => {
   };
 
   const getRoleLabel = (roles: string[]): string => {
-    if (roles.includes('DAIRE_BASKANI')) return 'Yönetici';
+    if (roles.includes('ADMIN')) return 'Yönetici';
     if (roles.includes('TAKIM_LIDERI')) return 'Takım Lideri';
     if (roles.includes('YAZILIMCI')) return 'Yazılımcı';
     if (roles.includes('DEVOPS')) return 'DevOps';

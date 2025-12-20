@@ -41,7 +41,7 @@ public class ProjectService {
         List<Long> accessibleTeamIds = teamService.getAccessibleTeamIds();
         
         // Yönetici tüm projeleri görebilir
-        if (hasRole(currentUser, Role.DAIRE_BASKANI)) {
+        if (hasRole(currentUser, Role.ADMIN)) {
             return projectRepository.findAll().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
@@ -64,7 +64,7 @@ public class ProjectService {
         boolean hasAccess = project.getTeams().stream()
             .anyMatch(team -> accessibleTeamIds.contains(team.getId()));
         
-        if (!hasAccess && !hasRole(currentUser, Role.DAIRE_BASKANI)) {
+        if (!hasAccess && !hasRole(currentUser, Role.ADMIN)) {
             throw new RuntimeException("Access denied");
         }
         
@@ -108,7 +108,7 @@ public class ProjectService {
         boolean hasAccess = project.getTeams().stream()
             .anyMatch(team -> accessibleTeamIds.contains(team.getId()));
         
-        if (!hasAccess && !hasRole(currentUser, Role.DAIRE_BASKANI)) {
+        if (!hasAccess && !hasRole(currentUser, Role.ADMIN)) {
             throw new RuntimeException("Access denied");
         }
         
@@ -139,7 +139,7 @@ public class ProjectService {
         // Proje oluşturan kişi veya Daire Başkanı silebilir
         User currentUser = getCurrentUser();
         if (!project.getCreatedBy().getId().equals(currentUser.getId()) && 
-            !hasRole(currentUser, Role.DAIRE_BASKANI)) {
+            !hasRole(currentUser, Role.ADMIN)) {
             throw new RuntimeException("Access denied: Only project creator or managers can delete projects");
         }
         

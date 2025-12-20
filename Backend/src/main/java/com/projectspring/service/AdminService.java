@@ -40,6 +40,7 @@ public class AdminService {
 
     public List<UserDTO> getAllUsers() {
         return userRepository.findAll().stream()
+                .filter(user -> user.getIsActive() != null && user.getIsActive()) // Only active users
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -80,7 +81,7 @@ public class AdminService {
 
         // Add admin role if requested
         if (Boolean.TRUE.equals(request.getIsAdmin())) {
-            roleRepository.findByName("DAIRE_BASKANI")
+            roleRepository.findByName("ADMIN")
                     .ifPresent(roles::add);
         }
 
@@ -141,7 +142,7 @@ public class AdminService {
 
             // Add admin role if requested
             if (Boolean.TRUE.equals(request.getIsAdmin())) {
-                roleRepository.findByName("DAIRE_BASKANI")
+                roleRepository.findByName("ADMIN")
                         .ifPresent(roles::add);
             }
 
@@ -209,12 +210,13 @@ public class AdminService {
 
     private boolean hasAdminRole(User user) {
         return user.getRoles().stream()
-                .anyMatch(role -> role.getName().equals("DAIRE_BASKANI"));
+                .anyMatch(role -> role.getName().equals("ADMIN"));
     }
 
     // Team Management Methods
     public List<TeamDTO> getAllTeams() {
         return teamRepository.findAll().stream()
+                .filter(team -> team.getIsActive() != null && team.getIsActive()) // Only active teams
                 .map(this::convertTeamToDTO)
                 .collect(Collectors.toList());
     }

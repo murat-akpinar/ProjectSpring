@@ -34,7 +34,7 @@ const RoleManagement: React.FC = () => {
         localStorage.removeItem('user');
         window.location.href = '/login';
       } else if (status === 403) {
-        alert('Bu işlem için yetkiniz yok. Sadece yöneticiler (DAIRE_BASKANI rolü) erişebilir.');
+        alert('Bu işlem için yetkiniz yok. Sadece yöneticiler (ADMIN rolü) erişebilir.');
       } else {
         alert('Roller yüklenemedi: ' + (error.response?.data?.error || error.message));
       }

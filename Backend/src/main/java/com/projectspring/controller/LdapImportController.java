@@ -18,7 +18,7 @@ import java.util.Set;
 @RestController
 @RequestMapping("/api/admin/ldap")
 @CrossOrigin(origins = "*")
-@PreAuthorize("hasAnyRole('DAIRE_BASKANI')")
+@PreAuthorize("hasAnyRole('ADMIN')")
 public class LdapImportController {
 
     @Autowired

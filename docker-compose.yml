@@ -36,6 +36,7 @@ services:
       LDAP_USER_SEARCH_BASE: ${LDAP_USER_SEARCH_BASE:-ou=users}
       LDAP_USER_SEARCH_FILTER: ${LDAP_USER_SEARCH_FILTER:-(uid={0})}
       SEED_SAMPLE_DATA: ${SEED_SAMPLE_DATA:-0}
+      FRONTEND_URL: ${FRONTEND_URL:-http://frontend:80}
     ports:
       - "8081:8080"
     depends_on:

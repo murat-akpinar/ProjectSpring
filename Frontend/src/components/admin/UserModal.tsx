@@ -35,7 +35,7 @@ const UserModal: React.FC<UserModalProps> = ({ user, onClose }) => {
         password: '',
         roleIds: [], // Will be populated from roles
         teamIds: Array.from(user.teamIds),
-        isAdmin: user.roles.includes('DAIRE_BASKANI'),
+        isAdmin: user.roles.includes('ADMIN'),
         isActive: user.isActive ?? true,
       });
     }
@@ -206,7 +206,7 @@ const UserModal: React.FC<UserModalProps> = ({ user, onClose }) => {
                 checked={formData.isAdmin}
                 onChange={(e) => setFormData({ ...formData, isAdmin: e.target.checked })}
               />
-              Yönetici (DAIRE_BASKANI)
+              Yönetici (ADMIN)
             </label>
           </div>
 

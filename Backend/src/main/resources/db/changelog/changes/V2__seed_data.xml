@@ -8,7 +8,7 @@
     <!-- Insert Roles -->
     <changeSet id="insert_roles" author="projectspring">
         <insert tableName="roles">
-            <column name="name" value="DAIRE_BASKANI"/>
+            <column name="name" value="ADMIN"/>
             <column name="description" value="Yönetici - Tüm ekipleri görüntüleyebilir"/>
         </insert>
         <insert tableName="roles">
