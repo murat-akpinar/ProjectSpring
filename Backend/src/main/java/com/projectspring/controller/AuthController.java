@@ -77,6 +77,7 @@ public class AuthController {
         userDTO.setTeamIds(user.getTeams().stream()
             .map(t -> t.getId())
             .collect(Collectors.toSet()));
+        userDTO.setIsActive(user.getIsActive());
         
         return ResponseEntity.ok(userDTO);
     }
@@ -102,6 +103,7 @@ public class AuthController {
         userDTO.setTeamIds(user.getTeams().stream()
             .map(t -> t.getId())
             .collect(Collectors.toSet()));
+        userDTO.setIsActive(user.getIsActive());
         
         return ResponseEntity.ok(userDTO);
     }

@@ -1,0 +1,12 @@
+.user-profile-page {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.user-profile-page h1 {
+  color: var(--ctp-text);
+  margin-bottom: 20px;
+  font-size: 28px;
+}
+

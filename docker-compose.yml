@@ -29,7 +29,7 @@ services:
       DB_NAME: projectspring
       DB_USER: postgres
       DB_PASSWORD: postgres
-      JWT_SECRET: ${JWT_SECRET}
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-this-in-production-min-256-bits}
       LDAP_ENABLED: ${LDAP_ENABLED:-false}
       LDAP_URLS: ${LDAP_URLS:-ldap://ldap:389}
       LDAP_BASE: ${LDAP_BASE:-dc=example,dc=com}
@@ -41,6 +41,12 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
     networks:
       - projectspring-network
 
@@ -52,7 +58,8 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     networks:
       - projectspring-network
 

@@ -1,0 +1,77 @@
+.role-management {
+  background-color: var(--ctp-mantle);
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.role-management-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.role-management-header h2 {
+  color: var(--ctp-text);
+  margin: 0;
+}
+
+.roles-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--ctp-base);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.roles-table thead {
+  background-color: var(--ctp-surface0);
+}
+
+.roles-table th {
+  padding: 12px;
+  text-align: left;
+  color: var(--ctp-text);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.roles-table td {
+  padding: 12px;
+  color: var(--ctp-text);
+  font-size: 14px;
+  border-top: 1px solid var(--ctp-surface0);
+}
+
+.roles-table tbody tr:hover {
+  background-color: var(--ctp-surface0);
+}
+
+.role-form {
+  padding: 20px;
+}
+
+.role-form textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 4px;
+  background-color: var(--ctp-mantle);
+  color: var(--ctp-text);
+  font-family: 'Cascadia Mono', monospace;
+  font-size: 14px;
+  resize: vertical;
+}
+
+.role-form textarea:focus {
+  outline: none;
+  border-color: var(--ctp-blue);
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--ctp-subtext1);
+}
+

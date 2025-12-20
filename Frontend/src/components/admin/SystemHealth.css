@@ -1,0 +1,66 @@
+.system-health {
+  background-color: var(--ctp-mantle);
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.system-health h2 {
+  color: var(--ctp-text);
+  margin-bottom: 15px;
+  font-size: 20px;
+}
+
+.health-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.health-card {
+  background-color: var(--ctp-base);
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 6px;
+  padding: 15px;
+  text-align: center;
+}
+
+.health-label {
+  font-size: 14px;
+  color: var(--ctp-subtext1);
+  margin-bottom: 8px;
+}
+
+.health-status {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.health-message {
+  font-size: 12px;
+  color: var(--ctp-subtext0);
+  margin-top: 5px;
+}
+
+.health-last-checked {
+  font-size: 12px;
+  color: var(--ctp-subtext1);
+  text-align: center;
+  margin-top: 10px;
+}
+
+.system-health.loading,
+.system-health.error {
+  text-align: center;
+  padding: 20px;
+  color: var(--ctp-subtext1);
+}
+
+.system-health.error {
+  color: var(--ctp-red);
+}
+

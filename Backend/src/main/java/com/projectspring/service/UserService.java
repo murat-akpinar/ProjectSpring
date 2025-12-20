@@ -83,9 +83,39 @@ public class UserService {
                 dto.setTeamIds(user.getTeams().stream()
                     .map(com.projectspring.model.Team::getId)
                     .collect(Collectors.toSet()));
+                dto.setIsActive(user.getIsActive());
                 return dto;
             })
             .collect(Collectors.toList());
+    }
+
+    public void changePassword(Long userId, String oldPassword, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Check if user has a password (local user)
+        if (user.getPassword() == null || user.getPassword().isEmpty()) {
+            throw new RuntimeException("User does not have a password set. This is an LDAP user.");
+        }
+
+        // Verify old password
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new RuntimeException("Old password is incorrect");
+        }
+
+        // Set new password
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    public void updateProfile(Long userId, String fullName) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (fullName != null && !fullName.trim().isEmpty()) {
+            user.setFullName(fullName.trim());
+            userRepository.save(user);
+        }
     }
 }
 

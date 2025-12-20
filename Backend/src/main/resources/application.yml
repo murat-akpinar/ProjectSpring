@@ -43,6 +43,7 @@ logging:
   level:
     com.projectspring: ${LOG_LEVEL:INFO}
     org.springframework.security: ${SECURITY_LOG_LEVEL:DEBUG}
+    com.projectspring.security: DEBUG
 
 app:
   seed:
