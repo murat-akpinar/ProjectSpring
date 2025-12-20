@@ -1,5 +1,5 @@
 import api from './api';
-import { DashboardStats } from '../types/Dashboard';
+import { DashboardStats, DashboardDetails } from '../types/Dashboard';
 
 export const dashboardService = {
   getTeamDashboard: async (teamId: number): Promise<DashboardStats> => {
@@ -9,6 +9,16 @@ export const dashboardService = {
 
   getAllTeamsDashboard: async (): Promise<DashboardStats> => {
     const response = await api.get<DashboardStats>('/teams/dashboard');
+    return response.data;
+  },
+
+  getTeamDashboardDetails: async (teamId: number): Promise<DashboardDetails> => {
+    const response = await api.get<DashboardDetails>(`/teams/${teamId}/dashboard/details`);
+    return response.data;
+  },
+
+  getAllTeamsDashboardDetails: async (): Promise<DashboardDetails> => {
+    const response = await api.get<DashboardDetails>('/teams/dashboard/details');
     return response.data;
   },
 };

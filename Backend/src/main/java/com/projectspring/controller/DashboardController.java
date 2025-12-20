@@ -1,5 +1,6 @@
 package com.projectspring.controller;
 
+import com.projectspring.dto.DashboardDetailsDTO;
 import com.projectspring.dto.DashboardStatsDTO;
 import com.projectspring.service.DashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,16 @@ public class DashboardController {
     @GetMapping("/dashboard")
     public ResponseEntity<DashboardStatsDTO> getAllTeamsDashboard() {
         return ResponseEntity.ok(dashboardService.getTeamDashboardStats(null));
+    }
+    
+    @GetMapping("/{id}/dashboard/details")
+    public ResponseEntity<DashboardDetailsDTO> getTeamDashboardDetails(@PathVariable Long id) {
+        return ResponseEntity.ok(dashboardService.getTeamDashboardDetails(id));
+    }
+    
+    @GetMapping("/dashboard/details")
+    public ResponseEntity<DashboardDetailsDTO> getAllTeamsDashboardDetails() {
+        return ResponseEntity.ok(dashboardService.getTeamDashboardDetails(null));
     }
 }
 
