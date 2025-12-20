@@ -7,3 +7,24 @@ export interface DashboardStats {
   totalCancelled: number;
 }
 
+export interface UserLeaderboard {
+  userId: number;
+  userName: string;
+  count: number;
+}
+
+export interface TeamMember {
+  userId: number;
+  userName: string;
+  roles: string[];
+  isLeader: boolean;
+}
+
+export interface DashboardDetails {
+  stats: DashboardStats;
+  topCompleters: UserLeaderboard[];
+  topPostponers: UserLeaderboard[];
+  topCancellers: UserLeaderboard[];
+  teamMembers: TeamMember[];
+}
+
