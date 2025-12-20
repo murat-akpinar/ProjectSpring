@@ -190,15 +190,19 @@
   font-size: 14px;
 }
 
-.ldap-settings-form input:focus {
+.ldap-settings-form input[type="text"]:focus,
+.ldap-settings-form input[type="password"]:focus {
   outline: none;
   border-color: var(--ctp-blue);
 }
 
-.ldap-settings-form input:disabled {
+.ldap-settings-form input[type="text"]:disabled,
+.ldap-settings-form input[type="password"]:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* Checkbox styles inherited from App.css */
 
 .form-hint {
   color: var(--ctp-subtext0);

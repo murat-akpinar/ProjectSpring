@@ -61,10 +61,7 @@
 }
 
 .users-table td input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-  margin: 0;
+  /* Styles inherited from App.css global checkbox styles */
 }
 
 .users-table tbody tr:hover {

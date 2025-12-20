@@ -123,7 +123,7 @@ form {
 }
 
 .team-checkbox input[type="checkbox"] {
-  cursor: pointer;
+  /* Styles inherited from App.css global checkbox styles */
 }
 
 .modal-actions {
