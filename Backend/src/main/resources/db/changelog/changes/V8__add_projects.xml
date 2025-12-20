@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+    
+    <!-- Create projects table -->
+    <changeSet id="create_projects_table" author="projectspring">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="projects"/>
+            </not>
+        </preConditions>
+        
+        <comment>Create projects table</comment>
+        
+        <createTable tableName="projects">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="start_date" type="DATE">
+                <constraints nullable="true"/>
+            </column>
+            <column name="end_date" type="DATE">
+                <constraints nullable="true"/>
+            </column>
+            <column name="status" type="VARCHAR(20)" defaultValue="ACTIVE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        <addForeignKeyConstraint
+            baseTableName="projects"
+            baseColumnNames="created_by"
+            constraintName="fk_projects_created_by"
+            referencedTableName="users"
+            referencedColumnNames="id"
+            onDelete="RESTRICT"/>
+        
+        <createIndex indexName="idx_projects_status" tableName="projects">
+            <column name="status"/>
+        </createIndex>
+        
+        <rollback>
+            <dropTable tableName="projects"/>
+        </rollback>
+    </changeSet>
+    
+    <!-- Create project_teams many-to-many table -->
+    <changeSet id="create_project_teams_table" author="projectspring">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="project_teams"/>
+            </not>
+        </preConditions>
+        
+        <comment>Create project_teams many-to-many relationship table</comment>
+        
+        <createTable tableName="project_teams">
+            <column name="project_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="team_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        <addPrimaryKey tableName="project_teams" columnNames="project_id,team_id" constraintName="pk_project_teams"/>
+        
+        <addForeignKeyConstraint
+            baseTableName="project_teams"
+            baseColumnNames="project_id"
+            constraintName="fk_project_teams_project"
+            referencedTableName="projects"
+            referencedColumnNames="id"
+            onDelete="CASCADE"/>
+        
+        <addForeignKeyConstraint
+            baseTableName="project_teams"
+            baseColumnNames="team_id"
+            constraintName="fk_project_teams_team"
+            referencedTableName="teams"
+            referencedColumnNames="id"
+            onDelete="CASCADE"/>
+        
+        <rollback>
+            <dropTable tableName="project_teams"/>
+        </rollback>
+    </changeSet>
+    
+    <!-- Add project_id to tasks table -->
+    <changeSet id="add_project_id_to_tasks" author="projectspring">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="tasks"/>
+            <not>
+                <columnExists tableName="tasks" columnName="project_id"/>
+            </not>
+        </preConditions>
+        
+        <comment>Add project_id column to tasks table</comment>
+        
+        <addColumn tableName="tasks">
+            <column name="project_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        
+        <addForeignKeyConstraint
+            baseTableName="tasks"
+            baseColumnNames="project_id"
+            constraintName="fk_tasks_project"
+            referencedTableName="projects"
+            referencedColumnNames="id"
+            onDelete="SET NULL"/>
+        
+        <createIndex indexName="idx_tasks_project_id" tableName="tasks">
+            <column name="project_id"/>
+        </createIndex>
+        
+        <rollback>
+            <dropIndex indexName="idx_tasks_project_id" tableName="tasks"/>
+            <dropForeignKeyConstraint baseTableName="tasks" constraintName="fk_tasks_project"/>
+            <dropColumn tableName="tasks" columnName="project_id"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
+

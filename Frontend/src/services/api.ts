@@ -28,9 +28,20 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      const currentPath = window.location.pathname;
+      const errorUrl = error.config?.url || '';
+      
+      // Only auto-redirect for /auth/me endpoint (token validation)
+      // This means the token is invalid/expired
+      if (errorUrl.includes('/auth/me')) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        if (currentPath !== '/login') {
+          window.location.href = '/login';
+        }
+      }
+      // For all other endpoints, don't auto-redirect
+      // Let the component handle the error (might be permission issue, not auth issue)
     }
     return Promise.reject(error);
   }

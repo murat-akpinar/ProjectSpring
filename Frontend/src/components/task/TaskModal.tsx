@@ -5,6 +5,8 @@ import { User } from '../../types/User';
 import { taskService } from '../../services/taskService';
 import { teamService } from '../../services/teamService';
 import { userService } from '../../services/userService';
+import { projectService } from '../../services/projectService';
+import { Project } from '../../types/Project';
 import { getStatusLabel } from '../../utils/statusColors';
 import './TaskModal.css';
 
@@ -14,6 +16,7 @@ interface TaskModalProps {
   onSave: () => void;
   task?: Task | null;
   defaultTeamId?: number;
+  defaultProjectId?: number;
   defaultStartDate?: string;
   defaultEndDate?: string;
 }
@@ -24,11 +27,13 @@ const TaskModal: React.FC<TaskModalProps> = ({
   onSave,
   task,
   defaultTeamId,
+  defaultProjectId,
   defaultStartDate,
   defaultEndDate,
 }) => {
   const [teams, setTeams] = useState<Team[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(false);
   
   const [formData, setFormData] = useState<CreateTaskRequest>({
@@ -40,6 +45,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
     taskType: TaskType.TASK,
     priority: Priority.NORMAL,
     teamId: defaultTeamId || 0,
+    projectId: undefined,
     assigneeIds: [],
     subtasks: [],
   });
@@ -57,6 +63,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
           taskType: task.taskType || TaskType.TASK,
           priority: task.priority || Priority.NORMAL,
           teamId: task.teamId,
+          projectId: task.projectId,
           assigneeIds: task.assigneeIds || [],
           subtasks: task.subtasks?.map(s => ({
             title: s.title,
@@ -76,6 +83,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
           taskType: TaskType.TASK,
           priority: Priority.NORMAL,
           teamId: defaultTeamId || 0,
+          projectId: defaultProjectId,
           assigneeIds: [],
           subtasks: [],
         });
@@ -85,12 +93,14 @@ const TaskModal: React.FC<TaskModalProps> = ({
 
   const loadData = async () => {
     try {
-      const [teamsData, usersData] = await Promise.all([
+      const [teamsData, usersData, projectsData] = await Promise.all([
         teamService.getAllTeams(),
         userService.getAllUsers(),
+        projectService.getAllProjects(),
       ]);
       setTeams(teamsData);
       setUsers(usersData);
+      setProjects(projectsData);
     } catch (error) {
       console.error('Failed to load data:', error);
     }
@@ -201,7 +211,10 @@ const TaskModal: React.FC<TaskModalProps> = ({
               <label>Ekip *</label>
               <select
                 value={formData.teamId}
-                onChange={(e) => setFormData({ ...formData, teamId: parseInt(e.target.value) })}
+                onChange={(e) => {
+                  const newTeamId = parseInt(e.target.value);
+                  setFormData({ ...formData, teamId: newTeamId, projectId: undefined });
+                }}
                 required
               >
                 <option value={0}>Ekip Seçin</option>
@@ -213,6 +226,25 @@ const TaskModal: React.FC<TaskModalProps> = ({
               </select>
             </div>
 
+            <div className="form-group">
+              <label>Proje</label>
+              <select
+                value={formData.projectId || ''}
+                onChange={(e) => setFormData({ ...formData, projectId: e.target.value ? parseInt(e.target.value) : undefined })}
+              >
+                <option value="">Proje Seçin (Opsiyonel)</option>
+                {projects
+                  .filter(project => formData.teamId && project.teamIds.includes(formData.teamId))
+                  .map((project) => (
+                    <option key={project.id} value={project.id}>
+                      {project.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="form-row">
             <div className="form-group">
               <label>Durum</label>
               <select

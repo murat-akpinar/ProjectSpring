@@ -25,6 +25,10 @@ public class TaskDTO {
     private Priority priority;
     private Long teamId;
     private String teamName;
+    private String teamColor;
+    private String teamIcon;
+    private Long projectId;
+    private String projectName;
     private Long createdById;
     private String createdByName;
     private Set<Long> assigneeIds;

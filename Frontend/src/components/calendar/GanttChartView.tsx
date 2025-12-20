@@ -66,6 +66,8 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
             priority: parent.priority,
             teamId: parent.teamId,
             teamName: parent.teamName,
+            teamColor: parent.teamColor,
+            teamIcon: parent.teamIcon,
             createdById: parent.createdById,
             createdByName: parent.createdByName,
             assigneeIds: subtask.assigneeId ? [subtask.assigneeId] : [],
@@ -270,6 +272,24 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
                       >
                         {isExpanded ? '▼' : '▶'}
                       </button>
+                    )}
+                    {task.teamIcon && (
+                      <span className="team-icon" style={{ color: task.teamColor || 'var(--ctp-text)', marginRight: '6px' }}>
+                        {task.teamIcon}
+                      </span>
+                    )}
+                    {task.teamColor && !task.teamIcon && (
+                      <span 
+                        className="team-color-indicator" 
+                        style={{ 
+                          backgroundColor: task.teamColor,
+                          width: '12px',
+                          height: '12px',
+                          borderRadius: '50%',
+                          display: 'inline-block',
+                          marginRight: '6px'
+                        }}
+                      />
                     )}
                     <span className="task-title">{task.title}</span>
                   </div>

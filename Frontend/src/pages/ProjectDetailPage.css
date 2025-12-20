@@ -1,0 +1,351 @@
+.project-detail-container {
+  padding: 20px;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.project-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.btn-back {
+  padding: 8px 16px;
+  background-color: var(--ctp-surface1);
+  color: var(--ctp-text);
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Cascadia Mono', monospace;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.btn-back:hover {
+  background-color: var(--ctp-surface2);
+}
+
+.project-detail-title-section {
+  flex: 1;
+  min-width: 200px;
+}
+
+.project-detail-title-section h1 {
+  margin: 0 0 10px 0;
+  color: var(--ctp-text);
+  font-size: 28px;
+}
+
+.project-detail-meta {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.project-status-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ctp-base);
+}
+
+.project-dates {
+  color: var(--ctp-subtext0);
+  font-size: 14px;
+}
+
+.project-description {
+  margin-bottom: 30px;
+  padding: 15px;
+  background-color: var(--ctp-surface0);
+  border-radius: 8px;
+  color: var(--ctp-subtext1);
+}
+
+.project-description p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.status-chart-section {
+  margin-bottom: 30px;
+}
+
+.status-chart-section h2 {
+  margin: 0 0 15px 0;
+  color: var(--ctp-text);
+  font-size: 20px;
+}
+
+.status-chart-horizontal {
+  padding: 20px;
+  background-color: var(--ctp-surface0);
+  border-radius: 8px;
+}
+
+.status-chart-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.status-bar-horizontal {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.status-bar-label-horizontal {
+  min-width: 140px;
+  color: var(--ctp-text);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.status-bar-wrapper {
+  flex: 1;
+  height: 35px;
+  background-color: var(--ctp-base);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.status-bar-fill {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 12px;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+  min-width: 30px;
+}
+
+.status-bar-value {
+  color: var(--ctp-base);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.project-plan-section {
+  margin-top: 30px;
+}
+
+.project-plan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.project-plan-header h2 {
+  margin: 0;
+  color: var(--ctp-text);
+  font-size: 20px;
+}
+
+.project-plan-content {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.tasks-table-container {
+  background-color: var(--ctp-surface0);
+  border-radius: 8px;
+  overflow: hidden;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.tasks-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.tasks-table thead {
+  background-color: var(--ctp-mantle);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.tasks-table th {
+  padding: 12px 8px;
+  text-align: left;
+  color: var(--ctp-text);
+  font-weight: 600;
+  border-bottom: 2px solid var(--ctp-surface1);
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.tasks-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--ctp-surface1);
+  color: var(--ctp-text);
+}
+
+.task-row {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.task-row:hover {
+  background-color: var(--ctp-surface1);
+}
+
+.task-subject {
+  font-weight: 500;
+  color: var(--ctp-text);
+}
+
+.task-type-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.task-type-task {
+  background-color: var(--ctp-blue);
+  color: var(--ctp-base);
+}
+
+.task-type-feature {
+  background-color: var(--ctp-green);
+  color: var(--ctp-base);
+}
+
+.task-type-bug {
+  background-color: var(--ctp-red);
+  color: var(--ctp-base);
+}
+
+.task-status-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ctp-base);
+  display: inline-block;
+}
+
+.task-assignees {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.assignee-name {
+  font-size: 12px;
+  color: var(--ctp-text);
+}
+
+.no-assignee {
+  color: var(--ctp-subtext0);
+  font-style: italic;
+}
+
+.priority-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.priority-normal {
+  background-color: var(--ctp-surface2);
+  color: var(--ctp-text);
+}
+
+.priority-high {
+  background-color: var(--ctp-yellow);
+  color: var(--ctp-base);
+}
+
+.priority-urgent {
+  background-color: var(--ctp-red);
+  color: var(--ctp-base);
+}
+
+.empty-tasks {
+  text-align: center;
+  padding: 40px;
+  color: var(--ctp-subtext0);
+  font-style: italic;
+}
+
+.gantt-chart-container {
+  background-color: var(--ctp-surface0);
+  border-radius: 8px;
+  padding: 10px;
+  overflow-x: auto;
+}
+
+.gantt-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.month-select,
+.week-select {
+  padding: 6px 12px;
+  background-color: var(--ctp-surface0);
+  color: var(--ctp-text);
+  border: 1px solid var(--ctp-surface1);
+  border-radius: 4px;
+  font-family: 'Cascadia Mono', monospace;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.month-select:hover,
+.week-select:hover {
+  background-color: var(--ctp-surface1);
+}
+
+.btn-create-task {
+  padding: 10px 20px;
+  background-color: var(--ctp-blue);
+  color: var(--ctp-base);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Cascadia Mono', monospace;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+  display: inline-block;
+  min-width: 100px;
+}
+
+.btn-create-task:hover {
+  background-color: var(--ctp-sapphire);
+}
+
+@media (max-width: 768px) {
+  .project-detail-header {
+    flex-direction: column;
+  }
+
+  .gantt-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+

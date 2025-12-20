@@ -89,12 +89,31 @@ const KanbanBoardView: React.FC<KanbanBoardViewProps> = ({
                     onClick={() => onTaskClick?.(task)}
                   >
                     <div className="kanban-card-header">
-                      <span
-                        className="kanban-card-type"
-                        style={{ color: getTaskTypeColor(task.taskType) }}
-                      >
-                        {getTaskTypeLabel(task.taskType)}
-                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {task.teamIcon && (
+                          <span className="team-icon" style={{ color: task.teamColor || 'var(--ctp-text)', fontSize: '16px' }}>
+                            {task.teamIcon}
+                          </span>
+                        )}
+                        {task.teamColor && !task.teamIcon && (
+                          <span 
+                            className="team-color-indicator" 
+                            style={{ 
+                              backgroundColor: task.teamColor,
+                              width: '12px',
+                              height: '12px',
+                              borderRadius: '50%',
+                              display: 'inline-block'
+                            }}
+                          />
+                        )}
+                        <span
+                          className="kanban-card-type"
+                          style={{ color: getTaskTypeColor(task.taskType) }}
+                        >
+                          {getTaskTypeLabel(task.taskType)}
+                        </span>
+                      </div>
                     </div>
                     <div className="kanban-card-title">{task.title}</div>
                     {task.content && (

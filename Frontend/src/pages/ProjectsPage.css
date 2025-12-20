@@ -1,0 +1,189 @@
+.projects-container {
+  padding: 20px;
+}
+
+.projects-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.projects-header h1 {
+  margin: 0;
+  color: var(--ctp-text);
+  font-size: 28px;
+}
+
+.btn-create-project {
+  padding: 10px 20px;
+  background-color: var(--ctp-blue);
+  color: var(--ctp-base);
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: 'Cascadia Mono', monospace;
+  transition: background-color 0.2s;
+}
+
+.btn-create-project:hover {
+  background-color: var(--ctp-sapphire);
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--ctp-subtext0);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--ctp-subtext0);
+}
+
+.empty-state p {
+  font-size: 16px;
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.project-card {
+  background-color: var(--ctp-mantle);
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 8px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.project-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  border-color: var(--ctp-blue);
+}
+
+.project-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+}
+
+.project-card-title {
+  margin: 0;
+  font-size: 20px;
+  color: var(--ctp-text);
+  flex: 1;
+}
+
+.project-status-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ctp-base);
+  white-space: nowrap;
+  margin-left: 10px;
+}
+
+.project-card-description {
+  color: var(--ctp-subtext0);
+  font-size: 14px;
+  margin-bottom: 15px;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.project-card-meta {
+  margin-bottom: 15px;
+  font-size: 13px;
+  color: var(--ctp-subtext1);
+}
+
+.project-card-dates {
+  margin-bottom: 8px;
+}
+
+.project-card-teams {
+  color: var(--ctp-subtext0);
+}
+
+.project-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 15px;
+  border-top: 1px solid var(--ctp-surface0);
+}
+
+.project-card-creator {
+  font-size: 12px;
+  color: var(--ctp-subtext0);
+}
+
+.project-card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-edit-project {
+  padding: 6px 12px;
+  background-color: var(--ctp-blue);
+  color: var(--ctp-base);
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: 'Cascadia Mono', monospace;
+  transition: background-color 0.2s;
+}
+
+.btn-edit-project:hover {
+  background-color: var(--ctp-sapphire);
+}
+
+.btn-delete-project {
+  padding: 6px 12px;
+  background-color: var(--ctp-red);
+  color: var(--ctp-base);
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: 'Cascadia Mono', monospace;
+  transition: background-color 0.2s;
+}
+
+.btn-delete-project:hover {
+  background-color: var(--ctp-maroon);
+}
+
+/* Proje bitim tarihine 1 gün kaldığında yanıp sönme animasyonu */
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  50% {
+    opacity: 0.6;
+    box-shadow: 0 2px 8px rgba(255, 158, 100, 0.6), 0 0 12px rgba(255, 158, 100, 0.4);
+  }
+}
+
+.project-card.ending-soon {
+  animation: blink 1.5s ease-in-out infinite;
+  border-color: var(--ctp-peach);
+  border-width: 2px;
+}
+

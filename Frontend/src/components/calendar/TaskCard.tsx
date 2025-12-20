@@ -63,12 +63,30 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClick }) => {
     >
       <div className="task-header">
         <div className="task-title-row">
+          {task.teamIcon && (
+            <span className="team-icon" style={{ color: task.teamColor || 'var(--ctp-text)' }}>
+              {task.teamIcon}
+            </span>
+          )}
+          {task.teamColor && !task.teamIcon && (
+            <span 
+              className="team-color-indicator" 
+              style={{ 
+                backgroundColor: task.teamColor,
+                width: '12px',
+                height: '12px',
+                borderRadius: '50%',
+                display: 'inline-block',
+                marginRight: '6px'
+              }}
+            />
+          )}
           <span className="priority-icon">{getPriorityIcon(task.priority)}</span>
           <div className="task-title">{task.title}</div>
         </div>
         <div
           className="task-status-badge"
-          style={{ backgroundColor: statusColor, color: 'white' }}
+          style={{ backgroundColor: statusColor, color: '#000000' }}
         >
           {statusLabel}
         </div>

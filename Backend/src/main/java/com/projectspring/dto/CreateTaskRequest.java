@@ -37,6 +37,8 @@ public class CreateTaskRequest {
     @NotNull(message = "Team ID is required")
     private Long teamId;
     
+    private Long projectId;
+    
     private Set<Long> assigneeIds;
     
     private List<CreateSubtaskRequest> subtasks;

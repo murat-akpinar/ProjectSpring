@@ -7,7 +7,9 @@ import GanttChartView from '../components/calendar/GanttChartView';
 import KanbanBoardView from '../components/calendar/KanbanBoardView';
 import TaskModal from '../components/task/TaskModal';
 import { Task } from '../types/Task';
+import { Project } from '../types/Project';
 import { taskService } from '../services/taskService';
+import { projectService } from '../services/projectService';
 import { getMonthName, getWeeksInMonth } from '../utils/dateUtils';
 import '../App.css';
 
@@ -20,6 +22,8 @@ const CalendarPage: React.FC = () => {
   const [selectedWeek, setSelectedWeek] = useState(0);
   const [viewMode, setViewMode] = useState<ViewMode>('calendar');
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
@@ -29,7 +33,7 @@ const CalendarPage: React.FC = () => {
     const fetchTasks = async () => {
       try {
         setLoading(true);
-        const data = await taskService.getTasks(selectedTeamId || undefined, selectedYear);
+        const data = await taskService.getTasks(selectedTeamId || undefined, selectedYear, undefined, selectedProjectId || undefined);
         setTasks(data);
       } catch (error) {
         console.error('Failed to fetch tasks:', error);
@@ -39,13 +43,26 @@ const CalendarPage: React.FC = () => {
     };
 
     fetchTasks();
-  }, [selectedYear, selectedTeamId]);
+  }, [selectedYear, selectedTeamId, selectedProjectId]);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const data = await projectService.getAllProjects();
+        setProjects(data);
+      } catch (error) {
+        console.error('Failed to fetch projects:', error);
+      }
+    };
+    fetchProjects();
+  }, []);
 
   // Reset month view when team changes
   useEffect(() => {
     setSelectedMonth(null);
     setSelectedWeek(0);
     setViewMode('calendar');
+    setSelectedProjectId(null);
   }, [selectedTeamId]);
   
   // Calculate weeks in selected month
@@ -108,10 +125,33 @@ const CalendarPage: React.FC = () => {
           {selectedMonth ? (
             <div className="week-container">
               <div className="week-header">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
                   <h2 className="week-title">
                     {getMonthName(selectedMonth)} {selectedYear}
                   </h2>
+                  <select
+                    value={selectedProjectId || ''}
+                    onChange={(e) => setSelectedProjectId(e.target.value ? parseInt(e.target.value) : null)}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '4px',
+                      border: '1px solid var(--ctp-surface0)',
+                      backgroundColor: 'var(--ctp-surface0)',
+                      color: 'var(--ctp-text)',
+                      fontFamily: "'Cascadia Mono', monospace",
+                      fontSize: '14px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value="">Tüm Projeler</option>
+                    {projects
+                      .filter(project => !selectedTeamId || project.teamIds.includes(selectedTeamId))
+                      .map((project) => (
+                        <option key={project.id} value={project.id}>
+                          {project.name}
+                        </option>
+                      ))}
+                  </select>
                   {viewMode === 'gantt' && (
                     <select
                       value={selectedWeek}
@@ -135,24 +175,26 @@ const CalendarPage: React.FC = () => {
                       ))}
                     </select>
                   )}
-                  <select
-                    value={viewMode}
-                    onChange={(e) => setViewMode(e.target.value as ViewMode)}
-                    style={{
-                      padding: '6px 12px',
-                      borderRadius: '4px',
-                      border: '1px solid var(--ctp-surface0)',
-                      backgroundColor: 'var(--ctp-surface0)',
-                      color: 'var(--ctp-text)',
-                      fontFamily: "'Cascadia Mono', monospace",
-                      fontSize: '14px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <option value="calendar">Takvim Görünümü</option>
-                    <option value="gantt">Gantt Chart</option>
-                    <option value="kanban">Kanban Board</option>
-                  </select>
+                  <div className="view-mode-buttons">
+                    <button
+                      className={`view-mode-button ${viewMode === 'calendar' ? 'active' : ''}`}
+                      onClick={() => setViewMode('calendar')}
+                    >
+                      Takvim Görünümü
+                    </button>
+                    <button
+                      className={`view-mode-button ${viewMode === 'gantt' ? 'active' : ''}`}
+                      onClick={() => setViewMode('gantt')}
+                    >
+                      Gantt Chart
+                    </button>
+                    <button
+                      className={`view-mode-button ${viewMode === 'kanban' ? 'active' : ''}`}
+                      onClick={() => setViewMode('kanban')}
+                    >
+                      Kanban Board
+                    </button>
+                  </div>
                 </div>
                 <button className="back-button" onClick={handleBackToMonths}>
                   Aylara Dön

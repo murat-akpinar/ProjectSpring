@@ -24,9 +24,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         try {
           const currentUser = await authService.getCurrentUser();
           setUser(currentUser);
-        } catch (error) {
-          authService.logout();
-          setUser(null);
+        } catch (error: any) {
+          // Only clear auth if it's a 401 from /auth/me (token invalid)
+          // Otherwise, keep the stored user and let the app continue
+          if (error.response?.status === 401 && error.config?.url?.includes('/auth/me')) {
+            authService.logout();
+            setUser(null);
+          } else {
+            // For other errors, keep the stored user
+            setUser(storedUser);
+          }
         }
       }
       setLoading(false);

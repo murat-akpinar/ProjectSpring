@@ -29,6 +29,31 @@
   color: var(--ctp-subtext0);
 }
 
+.sidebar-navigation {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--ctp-surface0);
+}
+
+.nav-item {
+  display: block;
+  padding: 12px 20px;
+  color: var(--ctp-text);
+  text-decoration: none;
+  transition: background-color 0.2s;
+  border-left: 3px solid transparent;
+  font-weight: 500;
+}
+
+.nav-item:hover {
+  background-color: var(--ctp-surface0);
+}
+
+.nav-item.active {
+  background-color: var(--ctp-surface0);
+  border-left-color: var(--ctp-blue);
+  color: var(--ctp-blue);
+}
+
 .team-list {
   padding: 10px 0;
 }
@@ -46,7 +71,15 @@
 
 .team-item.active {
   background-color: var(--ctp-surface0);
-  border-left-color: var(--ctp-blue);
+}
+
+.team-icon {
+  font-size: 18px;
+  display: inline-block;
+}
+
+.team-color-indicator {
+  flex-shrink: 0;
 }
 
 .team-item-name {

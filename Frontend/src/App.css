@@ -227,6 +227,40 @@
   background-color: var(--ctp-surface2);
 }
 
+.view-mode-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.view-mode-button {
+  padding: 8px 16px;
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 4px;
+  background-color: var(--ctp-surface0);
+  color: var(--ctp-text);
+  font-family: 'Cascadia Mono', monospace;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.view-mode-button:hover {
+  background-color: var(--ctp-surface1);
+  border-color: var(--ctp-surface1);
+}
+
+.view-mode-button.active {
+  background-color: var(--ctp-blue);
+  color: var(--ctp-base);
+  border-color: var(--ctp-blue);
+}
+
+.view-mode-button.active:hover {
+  background-color: var(--ctp-sapphire);
+  border-color: var(--ctp-sapphire);
+}
+
 .weeks-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));

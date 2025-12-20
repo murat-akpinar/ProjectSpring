@@ -44,3 +44,7 @@ logging:
     com.projectspring: ${LOG_LEVEL:INFO}
     org.springframework.security: ${SECURITY_LOG_LEVEL:DEBUG}
 
+app:
+  seed:
+    sample-data: ${SEED_SAMPLE_DATA:0} # Set to 1 to seed sample data (users, tasks, projects)
+

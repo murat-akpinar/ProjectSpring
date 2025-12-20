@@ -23,8 +23,9 @@ public class TaskController {
     public ResponseEntity<List<TaskDTO>> getTasks(
             @RequestParam(required = false) Long teamId,
             @RequestParam(required = false) Integer year,
-            @RequestParam(required = false) Integer month) {
-        return ResponseEntity.ok(taskService.getTasks(teamId, year, month));
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Long projectId) {
+        return ResponseEntity.ok(taskService.getTasks(teamId, year, month, projectId));
     }
     
     @GetMapping("/{id}")

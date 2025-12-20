@@ -22,9 +22,10 @@ public class CalendarController {
     @GetMapping("/{year}")
     public ResponseEntity<CalendarViewDTO> getCalendarByYear(
             @PathVariable int year,
-            @RequestParam(required = false) Long teamId) {
+            @RequestParam(required = false) Long teamId,
+            @RequestParam(required = false) Long projectId) {
         
-        List<TaskDTO> tasks = taskService.getTasks(teamId, year, null);
+        List<TaskDTO> tasks = taskService.getTasks(teamId, year, null, projectId);
         
         CalendarViewDTO dto = new CalendarViewDTO();
         dto.setYear(year);
@@ -55,9 +56,10 @@ public class CalendarController {
     public ResponseEntity<Map<String, List<TaskDTO>>> getCalendarByMonth(
             @PathVariable int year,
             @PathVariable int month,
-            @RequestParam(required = false) Long teamId) {
+            @RequestParam(required = false) Long teamId,
+            @RequestParam(required = false) Long projectId) {
         
-        List<TaskDTO> tasks = taskService.getTasks(teamId, year, month);
+        List<TaskDTO> tasks = taskService.getTasks(teamId, year, month, projectId);
         
         Map<String, List<TaskDTO>> tasksByWeek = new HashMap<>();
         for (TaskDTO task : tasks) {
