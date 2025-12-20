@@ -32,9 +32,9 @@ public interface SystemLogRepository extends JpaRepository<SystemLog, Long> {
     @Query(value = "SELECT * FROM system_logs sl WHERE " +
            "(:source = '' OR sl.source = :source) AND " +
            "(:level = '' OR sl.level = :level) AND " +
-           "(:userId IS NULL OR sl.user_id = CAST(:userId AS BIGINT)) AND " +
-           "(:startDate IS NULL OR sl.created_at >= CAST(:startDate AS TIMESTAMP)) AND " +
-           "(:endDate IS NULL OR sl.created_at <= CAST(:endDate AS TIMESTAMP)) " +
+           "(:userId IS NULL OR sl.user_id = :userId) AND " +
+           "(:startDate IS NULL OR sl.created_at >= :startDate) AND " +
+           "(:endDate IS NULL OR sl.created_at <= :endDate) " +
            "ORDER BY sl.created_at DESC",
            nativeQuery = true)
     Page<SystemLog> findWithFilters(

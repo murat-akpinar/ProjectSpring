@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { logService } from '../../services/logService';
 import { adminService } from '../../services/adminService';
+import { taskService } from '../../services/taskService';
 import { TaskLog, TaskLogFilter, PageResponse } from '../../types/Log';
 import { User } from '../../types/User';
 import './TaskLogs.css';
 
 const TaskLogs: React.FC = () => {
+  const navigate = useNavigate();
   const [logs, setLogs] = useState<TaskLog[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,6 +105,21 @@ const TaskLogs: React.FC = () => {
       case 'ASSIGNEE_ADDED': return 'var(--ctp-mauve)';
       case 'ASSIGNEE_REMOVED': return 'var(--ctp-peach)';
       default: return 'var(--ctp-text)';
+    }
+  };
+
+  const handleTaskClick = async (taskId: number) => {
+    try {
+      const task = await taskService.getTaskById(taskId);
+      if (task.projectId) {
+        navigate(`/projects/${task.projectId}`);
+      } else {
+        // Task modal aç veya alert göster
+        alert(`İş: ${task.title}\nProje bilgisi bulunamadı.`);
+      }
+    } catch (error) {
+      console.error('Failed to fetch task:', error);
+      alert('İş yüklenemedi.');
     }
   };
 
@@ -233,7 +251,11 @@ const TaskLogs: React.FC = () => {
                         </span>
                       </td>
                       <td>
-                        <span className="task-link" title={`İş #${log.taskId}`}>
+                        <span 
+                          className="task-link" 
+                          title={`İş #${log.taskId}`}
+                          onClick={() => handleTaskClick(log.taskId)}
+                        >
                           {log.taskTitle}
                         </span>
                       </td>

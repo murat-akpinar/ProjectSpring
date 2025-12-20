@@ -3,16 +3,30 @@ import { SystemLog, TaskLog, SystemLogFilter, TaskLogFilter, FrontendLogRequest,
 
 // Helper function to convert datetime-local format to ISO format
 // datetime-local: "2025-12-20T10:00" -> ISO: "2025-12-20T10:00:00"
-const formatDateForAPI = (dateString: string): string => {
+// Backend @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) bekliyor
+// ISO.DATE_TIME formatı: "YYYY-MM-DDTHH:MM:SS" (timezone olmadan)
+const formatDateForAPI = (dateString: string, isEndDate: boolean = false): string => {
   if (!dateString) return dateString;
-  // datetime-local formatı: "2025-12-20T10:00" (16 karakter)
-  // ISO formatı: "2025-12-20T10:00:00" (saniyeler eklenmiş)
-  // Backend @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) bekliyor
-  if (dateString.length === 16) {
-    // "2025-12-20T10:00" -> "2025-12-20T10:00:00"
+  
+  // datetime-local input formatı: "YYYY-MM-DDTHH:MM" (16 karakter)
+  // Backend'in beklediği format: "YYYY-MM-DDTHH:MM:SS"
+  // Sadece saniye kısmını ekleyelim (":00")
+  // Date objesi kullanmayalım çünkü timezone dönüşümü yapar ve tarih kayabilir
+  if (dateString.length === 16 && dateString.includes('T')) {
+    // "2025-12-16T10:00" -> "2025-12-16T10:00:00"
+    // Eğer bitiş tarihi ise ve saat "00:00" ise, günün sonu olarak "23:59:59" yap
+    if (isEndDate && dateString.endsWith('T00:00')) {
+      return dateString.replace('T00:00', 'T23:59:59');
+    }
     return dateString + ':00';
   }
-  // Eğer zaten formatlanmışsa olduğu gibi döndür
+  
+  // Eğer zaten formatlanmışsa (19 karakter: "YYYY-MM-DDTHH:MM:SS") olduğu gibi döndür
+  if (dateString.length === 19 && dateString.includes('T')) {
+    return dateString;
+  }
+  
+  // Diğer formatlar için olduğu gibi döndür
   return dateString;
 };
 
@@ -22,8 +36,8 @@ export const logService = {
     if (filter.source) params.append('source', filter.source);
     if (filter.level) params.append('level', filter.level);
     if (filter.userId) params.append('userId', filter.userId.toString());
-    if (filter.startDate) params.append('startDate', formatDateForAPI(filter.startDate));
-    if (filter.endDate) params.append('endDate', formatDateForAPI(filter.endDate));
+    if (filter.startDate) params.append('startDate', formatDateForAPI(filter.startDate, false));
+    if (filter.endDate) params.append('endDate', formatDateForAPI(filter.endDate, true));
     params.append('page', (filter.page || 0).toString());
     params.append('size', (filter.size || 50).toString());
     
@@ -35,8 +49,8 @@ export const logService = {
     const params = new URLSearchParams();
     if (filter.level) params.append('level', filter.level);
     if (filter.userId) params.append('userId', filter.userId.toString());
-    if (filter.startDate) params.append('startDate', formatDateForAPI(filter.startDate));
-    if (filter.endDate) params.append('endDate', formatDateForAPI(filter.endDate));
+    if (filter.startDate) params.append('startDate', formatDateForAPI(filter.startDate, false));
+    if (filter.endDate) params.append('endDate', formatDateForAPI(filter.endDate, true));
     params.append('page', (filter.page || 0).toString());
     params.append('size', (filter.size || 50).toString());
     
@@ -48,8 +62,8 @@ export const logService = {
     const params = new URLSearchParams();
     if (filter.level) params.append('level', filter.level);
     if (filter.userId) params.append('userId', filter.userId.toString());
-    if (filter.startDate) params.append('startDate', formatDateForAPI(filter.startDate));
-    if (filter.endDate) params.append('endDate', formatDateForAPI(filter.endDate));
+    if (filter.startDate) params.append('startDate', formatDateForAPI(filter.startDate, false));
+    if (filter.endDate) params.append('endDate', formatDateForAPI(filter.endDate, true));
     params.append('page', (filter.page || 0).toString());
     params.append('size', (filter.size || 50).toString());
     
@@ -62,8 +76,8 @@ export const logService = {
     if (filter.taskId) params.append('taskId', filter.taskId.toString());
     if (filter.userId) params.append('userId', filter.userId.toString());
     if (filter.action) params.append('action', filter.action);
-    if (filter.startDate) params.append('startDate', formatDateForAPI(filter.startDate));
-    if (filter.endDate) params.append('endDate', formatDateForAPI(filter.endDate));
+    if (filter.startDate) params.append('startDate', formatDateForAPI(filter.startDate, false));
+    if (filter.endDate) params.append('endDate', formatDateForAPI(filter.endDate, true));
     params.append('page', (filter.page || 0).toString());
     params.append('size', (filter.size || 50).toString());
     
