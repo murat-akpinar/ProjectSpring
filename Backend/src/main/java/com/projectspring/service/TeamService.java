@@ -29,7 +29,7 @@ public class TeamService {
         User currentUser = getCurrentUser();
         
         // Yönetici tüm ekipleri görebilir
-        if (hasRole(currentUser, Role.DAIRE_BASKANI)) {
+        if (hasRole(currentUser, Role.ADMIN)) {
             return teamRepository.findByIsActiveTrue().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
@@ -55,7 +55,7 @@ public class TeamService {
         User currentUser = getCurrentUser();
         
         // Yetki kontrolü
-        if (!hasRole(currentUser, Role.DAIRE_BASKANI)) {
+        if (!hasRole(currentUser, Role.ADMIN)) {
             if (hasRole(currentUser, Role.TAKIM_LIDERI)) {
                 if (!team.getLeader().getId().equals(currentUser.getId())) {
                     throw new RuntimeException("Access denied");
@@ -75,7 +75,7 @@ public class TeamService {
     public List<Long> getAccessibleTeamIds() {
         User currentUser = getCurrentUser();
         
-        if (hasRole(currentUser, Role.DAIRE_BASKANI)) {
+        if (hasRole(currentUser, Role.ADMIN)) {
             return teamRepository.findByIsActiveTrue().stream()
                 .map(Team::getId)
                 .collect(Collectors.toList());

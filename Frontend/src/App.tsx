@@ -6,6 +6,8 @@ import CalendarPage from './pages/CalendarPage';
 import DashboardPage from './pages/DashboardPage';
 import ProjectsPage from './pages/ProjectsPage';
 import ProjectDetailPage from './pages/ProjectDetailPage';
+import AdminPanelPage from './pages/AdminPanelPage';
+import UserProfilePage from './pages/UserProfilePage';
 import './App.css';
 
 const App: React.FC = () => {
@@ -56,6 +58,26 @@ const App: React.FC = () => {
         element={
           isAuthenticated ? (
             <ProjectDetailPage />
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          isAuthenticated ? (
+            <AdminPanelPage />
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          isAuthenticated ? (
+            <UserProfilePage />
           ) : (
             <Navigate to="/login" />
           )

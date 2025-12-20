@@ -1,0 +1,156 @@
+.user-profile {
+  background-color: var(--ctp-mantle);
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.profile-section {
+  margin-bottom: 30px;
+  padding-bottom: 30px;
+  border-bottom: 1px solid var(--ctp-surface0);
+}
+
+.profile-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.profile-section h2 {
+  color: var(--ctp-text);
+  margin-bottom: 20px;
+  font-size: 20px;
+}
+
+.profile-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.info-item label {
+  color: var(--ctp-subtext1);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.info-item span {
+  color: var(--ctp-text);
+  font-size: 16px;
+}
+
+.role-text {
+  font-style: italic;
+  color: var(--ctp-blue);
+}
+
+.profile-form {
+  max-width: 500px;
+}
+
+.profile-form .form-group {
+  margin-bottom: 15px;
+}
+
+.profile-form label {
+  display: block;
+  color: var(--ctp-text);
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.profile-form input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 4px;
+  background-color: var(--ctp-base);
+  color: var(--ctp-text);
+  font-family: 'Cascadia Mono', monospace;
+  font-size: 14px;
+}
+
+.profile-form input:focus {
+  outline: none;
+  border-color: var(--ctp-blue);
+}
+
+.btn-submit {
+  padding: 10px 20px;
+  background-color: var(--ctp-blue);
+  color: var(--ctp-base);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Cascadia Mono', monospace;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.btn-submit:hover:not(:disabled) {
+  background-color: var(--ctp-sapphire);
+}
+
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.tasks-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--ctp-base);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.tasks-table thead {
+  background-color: var(--ctp-surface0);
+}
+
+.tasks-table th {
+  padding: 12px;
+  text-align: left;
+  color: var(--ctp-text);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.tasks-table td {
+  padding: 12px;
+  color: var(--ctp-text);
+  font-size: 14px;
+  border-top: 1px solid var(--ctp-surface0);
+}
+
+.tasks-table tbody tr:hover {
+  background-color: var(--ctp-surface0);
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.no-tasks {
+  color: var(--ctp-subtext1);
+  text-align: center;
+  padding: 40px;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--ctp-subtext1);
+}
+

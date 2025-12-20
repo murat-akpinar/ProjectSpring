@@ -43,8 +43,13 @@ logging:
   level:
     com.projectspring: ${LOG_LEVEL:INFO}
     org.springframework.security: ${SECURITY_LOG_LEVEL:DEBUG}
+    com.projectspring.security: DEBUG
 
 app:
   seed:
     sample-data: ${SEED_SAMPLE_DATA:0} # Set to 1 to seed sample data (users, tasks, projects)
+  frontend:
+    url: ${FRONTEND_URL:http://frontend:80} # Frontend URL for health check (use service name in Docker)
+  encryption:
+    key: ${ENCRYPTION_KEY:default-encryption-key-change-in-production-min-32-chars} # AES encryption key (min 32 chars)
 

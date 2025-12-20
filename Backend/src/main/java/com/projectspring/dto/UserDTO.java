@@ -16,5 +16,6 @@ public class UserDTO {
     private String fullName;
     private Set<String> roles;
     private Set<Long> teamIds;
+    private Boolean isActive;
 }
 

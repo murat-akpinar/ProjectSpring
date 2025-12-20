@@ -15,5 +15,6 @@ public class TeamDTO {
     private String leaderName;
     private String color;
     private String icon;
+    private Boolean isActive;
 }
 

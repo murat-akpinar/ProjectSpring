@@ -1,0 +1,118 @@
+.team-management {
+  background-color: var(--ctp-mantle);
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.team-management-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.team-management-header h2 {
+  color: var(--ctp-text);
+  margin: 0;
+}
+
+.teams-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--ctp-base);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.teams-table thead {
+  background-color: var(--ctp-surface0);
+}
+
+.teams-table th {
+  padding: 12px;
+  text-align: left;
+  color: var(--ctp-text);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.teams-table td {
+  padding: 12px;
+  color: var(--ctp-text);
+  font-size: 14px;
+  border-top: 1px solid var(--ctp-surface0);
+}
+
+.teams-table tbody tr:hover {
+  background-color: var(--ctp-surface0);
+}
+
+.color-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: var(--ctp-base);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--ctp-subtext1);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: var(--ctp-subtext0);
+  font-size: 16px;
+}
+
+.btn-create {
+  padding: 10px 20px;
+  background-color: var(--ctp-blue);
+  color: var(--ctp-base);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Cascadia Mono', monospace;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.btn-create:hover {
+  background-color: var(--ctp-sapphire);
+}
+
+.btn-edit,
+.btn-delete {
+  padding: 6px 12px;
+  margin-right: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Cascadia Mono', monospace;
+  font-size: 12px;
+  transition: background-color 0.2s;
+}
+
+.btn-edit {
+  background-color: var(--ctp-blue);
+  color: var(--ctp-base);
+}
+
+.btn-edit:hover {
+  background-color: var(--ctp-sapphire);
+}
+
+.btn-delete {
+  background-color: var(--ctp-red);
+  color: var(--ctp-base);
+}
+
+.btn-delete:hover {
+  background-color: var(--ctp-maroon);
+}
+

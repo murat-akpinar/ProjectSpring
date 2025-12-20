@@ -41,9 +41,48 @@
   gap: 15px;
 }
 
+.admin-panel-btn {
+  padding: 8px 16px;
+  background-color: var(--ctp-blue);
+  color: var(--ctp-base);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: 'Cascadia Mono', monospace;
+  transition: background-color 0.2s;
+}
+
+.admin-panel-btn:hover {
+  background-color: var(--ctp-sapphire);
+}
+
+.user-profile-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.user-profile-section:hover {
+  background-color: var(--ctp-surface0);
+}
+
 .user-name {
   font-weight: 500;
   color: var(--ctp-text);
+  font-size: 14px;
+}
+
+.user-role {
+  font-size: 12px;
+  color: var(--ctp-subtext1);
+  font-style: italic;
+  margin-top: 2px;
 }
 
 .logout-btn {

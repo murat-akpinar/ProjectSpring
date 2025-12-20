@@ -1,0 +1,327 @@
+.ldap-import {
+  background-color: var(--ctp-mantle);
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.ldap-import h2 {
+  color: var(--ctp-text);
+  margin-bottom: 20px;
+}
+
+.search-form {
+  margin-bottom: 20px;
+}
+
+.search-input-group {
+  display: flex;
+  gap: 10px;
+}
+
+.search-input-group input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 4px;
+  background-color: var(--ctp-base);
+  color: var(--ctp-text);
+  font-family: 'Cascadia Mono', monospace;
+  font-size: 14px;
+}
+
+.search-input-group input:focus {
+  outline: none;
+  border-color: var(--ctp-blue);
+}
+
+.search-input-group button {
+  padding: 10px 20px;
+  background-color: var(--ctp-blue);
+  color: var(--ctp-base);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Cascadia Mono', monospace;
+  font-size: 14px;
+}
+
+.search-input-group button:hover:not(:disabled) {
+  background-color: var(--ctp-sapphire);
+}
+
+.search-input-group button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.search-results {
+  margin-bottom: 20px;
+}
+
+.search-results h3 {
+  color: var(--ctp-text);
+  margin-bottom: 15px;
+}
+
+.result-item {
+  background-color: var(--ctp-base);
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 4px;
+  padding: 15px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.result-item:hover {
+  background-color: var(--ctp-surface0);
+  border-color: var(--ctp-blue);
+}
+
+.result-item.selected {
+  border-color: var(--ctp-blue);
+  background-color: var(--ctp-surface0);
+}
+
+.result-info strong {
+  color: var(--ctp-text);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.result-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--ctp-subtext1);
+}
+
+.import-section {
+  background-color: var(--ctp-base);
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 4px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.import-section h3 {
+  color: var(--ctp-text);
+  margin-bottom: 15px;
+}
+
+.selected-user {
+  background-color: var(--ctp-mantle);
+  padding: 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.selected-user strong {
+  color: var(--ctp-text);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.selected-user p {
+  color: var(--ctp-subtext1);
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+.btn-import {
+  padding: 10px 20px;
+  background-color: var(--ctp-green);
+  color: var(--ctp-base);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Cascadia Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.btn-import:hover {
+  background-color: #a6d189;
+}
+
+/* LDAP Settings Section */
+.ldap-settings-section {
+  background-color: var(--ctp-base);
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 4px;
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+.ldap-settings-section h3 {
+  color: var(--ctp-text);
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+
+.ldap-settings-form {
+  display: grid;
+  gap: 15px;
+}
+
+.ldap-settings-form .form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.ldap-settings-form label {
+  color: var(--ctp-text);
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.ldap-settings-form input[type="text"],
+.ldap-settings-form input[type="password"] {
+  padding: 10px;
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 4px;
+  background-color: var(--ctp-mantle);
+  color: var(--ctp-text);
+  font-family: 'Cascadia Mono', monospace;
+  font-size: 14px;
+}
+
+.ldap-settings-form input[type="text"]:focus,
+.ldap-settings-form input[type="password"]:focus {
+  outline: none;
+  border-color: var(--ctp-blue);
+}
+
+.ldap-settings-form input[type="text"]:disabled,
+.ldap-settings-form input[type="password"]:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Checkbox styles inherited from App.css */
+
+.form-hint {
+  color: var(--ctp-subtext0);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.ldap-settings-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.btn-test,
+.btn-save {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Cascadia Mono', monospace;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.btn-test {
+  background-color: var(--ctp-yellow);
+  color: var(--ctp-base);
+}
+
+.btn-test:hover:not(:disabled) {
+  background-color: #e5c890;
+}
+
+.btn-save {
+  background-color: var(--ctp-blue);
+  color: var(--ctp-base);
+}
+
+.btn-save:hover:not(:disabled) {
+  background-color: var(--ctp-sapphire);
+}
+
+.btn-test:disabled,
+.btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.test-result {
+  margin-top: 15px;
+  padding: 15px;
+  border-radius: 4px;
+  border: 1px solid;
+}
+
+.test-result.success {
+  background-color: rgba(166, 209, 137, 0.1);
+  border-color: var(--ctp-green);
+  color: var(--ctp-green);
+}
+
+.test-result.error {
+  background-color: rgba(243, 139, 168, 0.1);
+  border-color: var(--ctp-red);
+  color: var(--ctp-red);
+}
+
+.test-result strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.test-result p {
+  margin: 4px 0;
+  font-size: 13px;
+}
+
+.test-result details {
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.test-result summary {
+  cursor: pointer;
+  margin-bottom: 4px;
+}
+
+.test-result pre {
+  background-color: var(--ctp-mantle);
+  padding: 8px;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin-top: 4px;
+  font-size: 11px;
+}
+
+.ldap-search-section {
+  margin-top: 30px;
+}
+
+.ldap-search-section h3 {
+  color: var(--ctp-text);
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.connection-warning {
+  background-color: rgba(230, 180, 75, 0.1);
+  border: 1px solid var(--ctp-yellow);
+  border-radius: 4px;
+  padding: 15px;
+  margin-bottom: 20px;
+  color: var(--ctp-yellow);
+}
+
+.connection-warning p {
+  margin: 0;
+  font-size: 14px;
+}
+

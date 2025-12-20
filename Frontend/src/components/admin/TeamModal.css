@@ -1,0 +1,37 @@
+.team-form {
+  padding: 20px;
+}
+
+.team-form textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 4px;
+  background-color: var(--ctp-mantle);
+  color: var(--ctp-text);
+  font-family: 'Cascadia Mono', monospace;
+  font-size: 14px;
+  resize: vertical;
+}
+
+.team-form textarea:focus {
+  outline: none;
+  border-color: var(--ctp-blue);
+}
+
+.team-form select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 4px;
+  background-color: var(--ctp-mantle);
+  color: var(--ctp-text);
+  font-family: 'Cascadia Mono', monospace;
+  font-size: 14px;
+}
+
+.team-form select:focus {
+  outline: none;
+  border-color: var(--ctp-blue);
+}
+

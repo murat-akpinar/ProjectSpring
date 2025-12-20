@@ -13,6 +13,8 @@
     <include file="db/changelog/changes/V6__add_task_type_and_priority.xml"/>
     <include file="db/changelog/changes/V7__add_team_color_and_icon.xml"/>
     <include file="db/changelog/changes/V8__add_projects.xml"/>
+    <include file="db/changelog/changes/V10__rename_daire_baskani_to_admin.xml"/>
+    <include file="db/changelog/changes/V11__create_ldap_settings.xml"/>
     
 </databaseChangeLog>
 

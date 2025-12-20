@@ -5,5 +5,6 @@ export interface User {
   fullName: string;
   roles: string[];
   teamIds: number[];
+  isActive?: boolean;
 }
 
