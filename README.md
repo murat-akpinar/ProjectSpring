@@ -8,6 +8,18 @@ ProjectSpring — Takımlar için takvim odaklı proje ve görev yönetim platfo
 - **Hibrit Authentication**: Hem LDAP hem de Local User desteği (LDAP önce denenir, başarısız olursa local user kontrol edilir)
 - **JWT Authentication**: Stateless authentication (session problemi yok, yatay ölçeklendirme için uygun)
 - **Otomatik Database Migration**: Liquibase ile veritabanı şeması otomatik oluşturulur
+- **Yönetim Paneli**: 
+  - Kullanıcı yönetimi (oluşturma, düzenleme, silme, admin rolü atama)
+  - Takım yönetimi (oluşturma, düzenleme, silme, renk/ikon ayarlama)
+  - Rol yönetimi (genel rol havuzu)
+  - LDAP ayarları yönetimi (UI'dan bağlantı ayarları, şifreli saklama, test butonu)
+  - LDAP kullanıcı import (arama ve import)
+  - Sistem sağlığı kontrolü (Backend, Database, Frontend API)
+- **Kullanıcı Profil Sistemi**: 
+  - Profil bilgileri görüntüleme
+  - Atanan işler listesi
+  - İsim değiştirme
+  - Şifre değiştirme
 - **Çoklu Görünüm Modları**: 
   - Takvim Görünümü: Günlük takvim görünümü, hafta sonu günleri soluk
   - Gantt Chart: Timeline bazlı Gantt chart, hafta seçimi, hiyerarşik subtask desteği
@@ -111,9 +123,10 @@ npm run dev
 
 ## Veritabanı Yapısı
 
-- `users` - Kullanıcılar
-- `roles` - Roller (DAIRE_BASKANI, TAKIM_LIDERI, YAZILIMCI, DEVOPS, IS_ANALISTI, TESTCI)
-- `teams` - Ekipler (her ekibin kendine özel rengi ve ikonu var)
+- `users` - Kullanıcılar (soft delete desteği ile isActive alanı)
+- `roles` - Roller (ADMIN, TAKIM_LIDERI, YAZILIMCI, DEVOPS, IS_ANALISTI, TESTCI)
+- `teams` - Ekipler (her ekibin kendine özel rengi ve ikonu var, soft delete desteği ile isActive alanı)
+- `ldap_settings` - LDAP bağlantı ayarları (şifreli saklama)
 - `projects` - Projeler (başlangıç/bitiş tarihi, durum, ekip atamaları)
 - `project_teams` - Proje-Ekip ilişkisi (many-to-many)
 - `tasks` - İş kartları (projeye bağlı olabilir)
@@ -177,7 +190,7 @@ npm run dev
 Uygulama ilk başlatıldığında otomatik olarak bir admin kullanıcı oluşturulur:
 - **Kullanıcı Adı:** `admin`
 - **Şifre:** `admin`
-- **Rol:** Yönetici (DAIRE_BASKANI)
+- **Rol:** Yönetici (ADMIN)
 - **Erişim:** Tüm ekiplere ve işlere erişim
 
 **Önemli:** İlk girişten sonra şifrenizi değiştirmeniz önerilir.
@@ -220,6 +233,9 @@ POST /api/auth/register
 - `V6__add_task_type_and_priority.xml` - İşlere tür ve öncelik alanları eklenir
 - `V7__add_team_color_and_icon.xml` - Ekiplere renk ve ikon kolonları eklenir
 - `V8__add_projects.xml` - Projeler tablosu ve ilişkileri oluşturulur
+- `V9__add_soft_delete.xml` - Kullanıcı ve takımlara soft delete desteği (isActive alanı)
+- `V10__rename_daire_baskani_to_admin.xml` - DAIRE_BASKANI rolü ADMIN olarak yeniden adlandırılır
+- `V11__create_ldap_settings.xml` - LDAP ayarları tablosu oluşturulur (şifreli saklama)
 
 Manuel bir şey yapmanıza gerek yok, uygulama ilk çalıştığında tüm tablolar otomatik oluşturulur.
 
@@ -276,6 +292,49 @@ Bu özellik şunları ekler:
 - İşlerin %30'unda alt görevler
 
 **Not:** Örnek veriler sadece ilk çalıştırmada eklenir. Mevcut kullanıcılar/işler varsa tekrar eklenmez.
+
+## Yönetim Paneli Özellikleri
+
+### Kullanıcı Yönetimi
+- Local kullanıcı oluşturma (isim, email, username, şifre)
+- Kullanıcı düzenleme (roller, takımlar, admin checkbox)
+- Kullanıcı silme/deaktive etme (soft delete)
+- Admin rolü atama/revoke (checkbox ile)
+
+### Takım Yönetimi
+- Takım oluşturma (isim, açıklama, renk, ikon, lider)
+- Takım düzenleme
+- Takım silme/deaktive etme (soft delete)
+
+### Rol Yönetimi
+- Genel rol havuzu (takıma özel değil)
+- Rol oluşturma, düzenleme, silme
+
+### LDAP Yönetimi
+- LDAP bağlantı ayarları (URLs, Base DN, Username, Password, User Search Base, User Search Filter)
+- Ayarların şifreli saklanması (AES-256 encryption)
+- Test butonu ile bağlantı kontrolü
+- LDAP kullanıcı arama ve import
+
+### Sistem Sağlığı
+- Backend durumu kontrolü
+- Database bağlantı kontrolü
+- Frontend API erişilebilirlik kontrolü
+- Otomatik yenileme (30 saniye)
+
+## Kullanıcı Profil Sistemi
+
+- Profil bilgileri görüntüleme (isim, email, username, roller)
+- Atanan işler listesi
+- İsim değiştirme
+- Şifre değiştirme (eski şifre doğrulaması ile)
+
+## UI/UX İyileştirmeleri
+
+- **Tutarlı Checkbox Tasarımı**: Tüm checkbox'lar için genel stil (20x20px, özel checkmark, hover efektleri)
+- **Görünüm Seçimi**: Dropdown yerine yan yana butonlar
+- **Hafta Sonu Görünümü**: Takvim görünümünde hafta sonu günleri soluk
+- **Proje Uyarı Sistemi**: Bitim tarihine 1 gün kalan projeler yanıp söner
 
 ## Lisans
 
