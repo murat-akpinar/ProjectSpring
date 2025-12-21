@@ -24,10 +24,10 @@
 
 /* Sol Panel - Task Listesi */
 .gantt-left-panel {
-  min-width: 400px;
-  max-width: 500px;
-  width: 400px;
-  flex: 0 0 400px;
+  min-width: 420px;
+  max-width: 520px;
+  width: 420px;
+  flex: 0 0 420px;
   border-right: 2px solid var(--ctp-surface0);
   background-color: var(--ctp-mantle);
   display: flex;
@@ -37,9 +37,9 @@
 
 .gantt-table-header {
   display: grid;
-  grid-template-columns: 2.2fr 0.6fr 0.8fr 0.8fr 2.2fr;
-  gap: 8px;
-  padding: 12px 10px;
+  grid-template-columns: 2fr 1fr 1.2fr 1.2fr 2.2fr;
+  gap: 10px;
+  padding: 12px 12px;
   background-color: var(--ctp-crust);
   border-bottom: 2px solid var(--ctp-surface0);
   font-weight: 600;
@@ -49,6 +49,7 @@
   position: sticky;
   top: 0;
   z-index: 10;
+  min-width: 0;
 }
 
 .gantt-col-subject,
@@ -60,11 +61,21 @@
   align-items: center;
   min-width: 0;
   overflow: hidden;
+  padding: 0 2px;
 }
 
 .gantt-col-subject {
   flex: 1;
   min-width: 0;
+}
+
+.gantt-col-type,
+.gantt-col-status,
+.gantt-col-priority {
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .gantt-col-assignee {
@@ -80,14 +91,15 @@
 
 .gantt-table-row {
   display: grid;
-  grid-template-columns: 2.2fr 0.6fr 0.8fr 0.8fr 2.2fr;
-  gap: 8px;
-  padding: 10px;
+  grid-template-columns: 2fr 1fr 1.2fr 1.2fr 2.2fr;
+  gap: 10px;
+  padding: 10px 12px;
   border-bottom: 1px solid var(--ctp-surface0);
   cursor: pointer;
   transition: background-color 0.2s;
   min-height: 40px;
   align-items: center;
+  min-width: 0;
 }
 
 .gantt-table-row:hover {
@@ -146,6 +158,8 @@
   font-weight: 600;
   color: var(--ctp-base);
   text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .status-dot,
@@ -153,6 +167,7 @@
   display: inline-block;
   margin-right: 4px;
   font-size: 12px;
+  flex-shrink: 0;
 }
 
 .priority-dot {
@@ -410,15 +425,15 @@
 /* Responsive breakpoints */
 @media (max-width: 1400px) {
   .gantt-left-panel {
-    min-width: 360px;
-    max-width: 420px;
-    width: 360px;
-    flex: 0 0 360px;
+    min-width: 380px;
+    max-width: 450px;
+    width: 380px;
+    flex: 0 0 380px;
   }
   
   .gantt-table-header,
   .gantt-table-row {
-    grid-template-columns: 2fr 0.6fr 0.8fr 0.8fr 2fr;
+    grid-template-columns: 1.8fr 0.9fr 1.1fr 1.1fr 1.9fr;
     gap: 6px;
   }
   
@@ -435,15 +450,15 @@
 
 @media (max-width: 1200px) {
   .gantt-left-panel {
-    min-width: 320px;
-    max-width: 380px;
-    width: 320px;
-    flex: 0 0 320px;
+    min-width: 360px;
+    max-width: 420px;
+    width: 360px;
+    flex: 0 0 360px;
   }
   
   .gantt-table-header,
   .gantt-table-row {
-    grid-template-columns: 1.8fr 0.5fr 0.7fr 0.7fr 1.8fr;
+    grid-template-columns: 1.6fr 0.8fr 1fr 1fr 1.6fr;
     gap: 5px;
     padding: 8px;
   }

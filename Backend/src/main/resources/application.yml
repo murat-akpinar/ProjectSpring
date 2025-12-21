@@ -20,17 +20,20 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml
   
-  ldap:
-    urls: ${LDAP_URLS:ldap://localhost:389}
-    base: ${LDAP_BASE:dc=example,dc=com}
-    username: ${LDAP_USERNAME:}
-    password: ${LDAP_PASSWORD:}
-    user-search-base: ${LDAP_USER_SEARCH_BASE:ou=users}
-    user-search-filter: ${LDAP_USER_SEARCH_FILTER:(uid={0})}
+  # LDAP ayarları artık sadece yönetim panelinden (database) okunuyor
+  # Bu ayarlar kullanılmıyor, sadece geriye dönük uyumluluk için tutuluyor
+  # ldap:
+  #   urls: ${LDAP_URLS:ldap://ldap-test:389}
+  #   base: ${LDAP_BASE:dc=test,dc=local}
+  #   username: ${LDAP_USERNAME:cn=admin,dc=test,dc=local}
+  #   password: ${LDAP_PASSWORD:admin123}
+  #   user-search-base: ${LDAP_USER_SEARCH_BASE:ou=users}
+  #   user-search-filter: ${LDAP_USER_SEARCH_FILTER:(uid={0})}
 
-auth:
-  ldap:
-    enabled: ${LDAP_ENABLED:true} # Set to false to disable LDAP and use only local users
+# LDAP enabled durumu artık sadece yönetim panelinden (database) okunuyor
+# auth:
+#   ldap:
+#     enabled: ${LDAP_ENABLED:true} # Set to false to disable LDAP and use only local users
 
 server:
   port: ${SERVER_PORT:8080}
