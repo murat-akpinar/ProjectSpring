@@ -9,12 +9,59 @@
   overflow-y: auto;
   z-index: 1000;
   border-right: 1px solid var(--ctp-surface0);
+  transition: transform 0.3s ease, width 0.3s ease;
+}
+
+.sidebar.collapsed {
+  width: 50px;
+  overflow: hidden;
+}
+
+.sidebar.collapsed .sidebar-navigation,
+.sidebar.collapsed .team-list {
+  display: none;
 }
 
 .sidebar-header {
   padding: 20px;
   background-color: var(--ctp-mantle);
   border-bottom: 1px solid var(--ctp-surface0);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.sidebar-toggle-btn {
+  background: none;
+  border: none;
+  color: var(--ctp-text);
+  cursor: pointer;
+  font-size: 18px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.sidebar-toggle-btn:hover {
+  background-color: var(--ctp-surface0);
+  color: var(--ctp-blue);
+}
+
+.sidebar.collapsed .sidebar-header {
+  padding: 20px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar.collapsed .sidebar-title,
+.sidebar.collapsed .sidebar-subtitle {
+  display: none;
 }
 
 .sidebar-title {

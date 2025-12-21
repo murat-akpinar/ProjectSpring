@@ -6,12 +6,15 @@ import UserManagement from '../components/admin/UserManagement';
 import TeamManagement from '../components/admin/TeamManagement';
 import RoleManagement from '../components/admin/RoleManagement';
 import LdapImport from '../components/admin/LdapImport';
+import SystemLogs from '../components/admin/SystemLogs';
+import TaskLogs from '../components/admin/TaskLogs';
 import './AdminPanelPage.css';
 
 const AdminPanelPage: React.FC = () => {
   const { user, hasRole, loading } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'users' | 'teams' | 'roles' | 'ldap'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'teams' | 'roles' | 'ldap' | 'logs'>('users');
+  const [activeLogTab, setActiveLogTab] = useState<'system' | 'tasks'>('system');
 
   useEffect(() => {
     // Check if user is authenticated
@@ -44,7 +47,15 @@ const AdminPanelPage: React.FC = () => {
 
   return (
     <div className="admin-panel-page">
-      <h1>Yönetim Paneli</h1>
+      <div className="admin-panel-header">
+        <h1>Yönetim Paneli</h1>
+        <button 
+          className="btn-back-to-home"
+          onClick={() => navigate('/')}
+        >
+          ← Anasayfaya Dön
+        </button>
+      </div>
       
       <SystemHealth />
       
@@ -73,6 +84,12 @@ const AdminPanelPage: React.FC = () => {
         >
           LDAP Import
         </button>
+        <button
+          className={activeTab === 'logs' ? 'active' : ''}
+          onClick={() => setActiveTab('logs')}
+        >
+          Loglar
+        </button>
       </div>
 
       <div className="admin-tab-content">
@@ -80,6 +97,26 @@ const AdminPanelPage: React.FC = () => {
         {activeTab === 'teams' && <TeamManagement />}
         {activeTab === 'roles' && <RoleManagement />}
         {activeTab === 'ldap' && <LdapImport />}
+        {activeTab === 'logs' && (
+          <div className="logs-tab-content">
+            <div className="logs-sub-tabs">
+              <button
+                className={activeLogTab === 'system' ? 'active' : ''}
+                onClick={() => setActiveLogTab('system')}
+              >
+                Sistem Logları
+              </button>
+              <button
+                className={activeLogTab === 'tasks' ? 'active' : ''}
+                onClick={() => setActiveLogTab('tasks')}
+              >
+                İş Logları
+              </button>
+            </div>
+            {activeLogTab === 'system' && <SystemLogs />}
+            {activeLogTab === 'tasks' && <TaskLogs />}
+          </div>
+        )}
       </div>
     </div>
   );

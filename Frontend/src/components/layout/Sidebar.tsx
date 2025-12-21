@@ -7,9 +7,11 @@ import './Sidebar.css';
 interface SidebarProps {
   selectedTeamId: number | null;
   onTeamSelect: (teamId: number | null) => void;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ selectedTeamId, onTeamSelect }) => {
+const Sidebar: React.FC<SidebarProps> = ({ selectedTeamId, onTeamSelect, isCollapsed = false, onToggleCollapse }) => {
   const location = useLocation();
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,10 +32,26 @@ const Sidebar: React.FC<SidebarProps> = ({ selectedTeamId, onTeamSelect }) => {
   }, []);
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-header">
-        <div className="sidebar-title">ProjectSpring</div>
-        <div className="sidebar-subtitle">İş Takip Sistemi</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+          {!isCollapsed && (
+            <div>
+              <div className="sidebar-title">ProjectSpring</div>
+              <div className="sidebar-subtitle">İş Takip Sistemi</div>
+            </div>
+          )}
+          {onToggleCollapse && (
+            <button
+              className="sidebar-toggle-btn"
+              onClick={onToggleCollapse}
+              title={isCollapsed ? 'Menüyü Göster' : 'Menüyü Gizle'}
+              style={isCollapsed ? { width: '100%', justifyContent: 'center' } : {}}
+            >
+              {isCollapsed ? '→' : '←'}
+            </button>
+          )}
+        </div>
       </div>
       <div className="sidebar-navigation">
         <Link

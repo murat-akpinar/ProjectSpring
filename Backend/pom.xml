@@ -106,6 +106,12 @@
             <version>8.7.0</version>
         </dependency>
         
+        <!-- AOP for AspectJ -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+        
         <!-- Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

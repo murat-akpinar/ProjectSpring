@@ -44,6 +44,9 @@ public class TaskService {
     @Autowired
     private ProjectRepository projectRepository;
     
+    @Autowired
+    private TaskLogService taskLogService;
+    
     public List<TaskDTO> getTasks(Long teamId, Integer year, Integer month, Long projectId) {
         List<Long> accessibleTeamIds = teamService.getAccessibleTeamIds();
         
@@ -165,6 +168,9 @@ public class TaskService {
             }
         }
         
+        // Log task creation
+        taskLogService.logTaskAction(task, "CREATED", currentUser, "Task created", null, convertToDTO(task));
+        
         return convertToDTO(task);
     }
     
@@ -176,6 +182,11 @@ public class TaskService {
         if (!accessibleTeamIds.contains(task.getTeam().getId())) {
             throw new RuntimeException("Access denied");
         }
+        
+        User currentUser = getCurrentUser();
+        
+        // Store old values for logging
+        TaskDTO oldTaskDTO = convertToDTO(task);
         
         task.setTitle(request.getTitle());
         task.setContent(request.getContent());
@@ -234,7 +245,12 @@ public class TaskService {
         }
         
         task = taskRepository.save(task);
-        return convertToDTO(task);
+        
+        // Log task update
+        TaskDTO newTaskDTO = convertToDTO(task);
+        taskLogService.logTaskAction(task, "UPDATED", currentUser, "Task updated", oldTaskDTO, newTaskDTO);
+        
+        return newTaskDTO;
     }
     
     public void deleteTask(Long id) {
@@ -245,6 +261,12 @@ public class TaskService {
         if (!accessibleTeamIds.contains(task.getTeam().getId())) {
             throw new RuntimeException("Access denied");
         }
+        
+        User currentUser = getCurrentUser();
+        
+        // Log task deletion before deleting
+        TaskDTO taskDTO = convertToDTO(task);
+        taskLogService.logTaskAction(task, "DELETED", currentUser, "Task deleted", taskDTO, null);
         
         taskRepository.delete(task);
     }
@@ -284,6 +306,16 @@ public class TaskService {
         task.setStatus(request.getStatus());
         task = taskRepository.save(task);
         statusHistoryRepository.save(history);
+        
+        // Log status change in task logs
+        taskLogService.logTaskAction(
+            task, 
+            "STATUS_CHANGED", 
+            currentUser, 
+            request.getChangeReason(), 
+            oldStatus.name(), 
+            request.getStatus().name()
+        );
         
         return convertToDTO(task);
     }

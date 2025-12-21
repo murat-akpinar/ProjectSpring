@@ -11,6 +11,7 @@ import { Project } from '../types/Project';
 import { taskService } from '../services/taskService';
 import { projectService } from '../services/projectService';
 import { getMonthName, getWeeksInMonth } from '../utils/dateUtils';
+import { useSidebar } from '../hooks/useSidebar';
 import '../App.css';
 
 type ViewMode = 'calendar' | 'gantt' | 'kanban';
@@ -28,6 +29,7 @@ const CalendarPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const { isCollapsed, toggleSidebar } = useSidebar();
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -118,8 +120,13 @@ const CalendarPage: React.FC = () => {
 
   return (
     <div className="app-container">
-      <Sidebar selectedTeamId={selectedTeamId} onTeamSelect={setSelectedTeamId} />
-      <div className="main-content">
+      <Sidebar 
+        selectedTeamId={selectedTeamId} 
+        onTeamSelect={setSelectedTeamId}
+        isCollapsed={isCollapsed}
+        onToggleCollapse={toggleSidebar}
+      />
+      <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
         <Header selectedYear={selectedYear} onYearChange={setSelectedYear} />
         <div className="content-area">
           {selectedMonth ? (

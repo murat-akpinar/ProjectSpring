@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+    
+    <!-- Create system_logs table for storing backend and frontend logs -->
+    <changeSet id="create_system_logs_table" author="projectspring">
+        <comment>Create system_logs table to store backend and frontend application logs</comment>
+        
+        <createTable tableName="system_logs">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="level" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="message" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="true" foreignKeyName="fk_system_logs_user" references="users(id)"/>
+            </column>
+            <column name="ip_address" type="VARCHAR(45)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="endpoint" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="exception" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        <!-- Indexes for performance -->
+        <createIndex indexName="idx_system_logs_source" tableName="system_logs">
+            <column name="source"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_system_logs_level" tableName="system_logs">
+            <column name="level"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_system_logs_created_at" tableName="system_logs">
+            <column name="created_at"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_system_logs_user_id" tableName="system_logs">
+            <column name="user_id"/>
+        </createIndex>
+        
+        <!-- Composite indexes for common queries -->
+        <createIndex indexName="idx_system_logs_source_level" tableName="system_logs">
+            <column name="source"/>
+            <column name="level"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_system_logs_source_created" tableName="system_logs">
+            <column name="source"/>
+            <column name="created_at"/>
+        </createIndex>
+    </changeSet>
+    
+</databaseChangeLog>
+

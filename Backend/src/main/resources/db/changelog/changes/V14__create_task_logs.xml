@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+    
+    <!-- Create task_logs table for storing all task operations -->
+    <changeSet id="create_task_logs_table" author="projectspring">
+        <comment>Create task_logs table to store all task operations (create, update, delete, status change, etc.)</comment>
+        
+        <createTable tableName="task_logs">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="task_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_task_logs_task" references="tasks(id)" deleteCascade="true"/>
+            </column>
+            <column name="action" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="old_value" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="new_value" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="changed_by" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_task_logs_user" references="users(id)"/>
+            </column>
+            <column name="change_reason" type="VARCHAR(500)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        <!-- Indexes for performance -->
+        <createIndex indexName="idx_task_logs_task_id" tableName="task_logs">
+            <column name="task_id"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_task_logs_changed_by" tableName="task_logs">
+            <column name="changed_by"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_task_logs_action" tableName="task_logs">
+            <column name="action"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_task_logs_created_at" tableName="task_logs">
+            <column name="created_at"/>
+        </createIndex>
+        
+        <!-- Composite indexes for common queries -->
+        <createIndex indexName="idx_task_logs_changed_by_action" tableName="task_logs">
+            <column name="changed_by"/>
+            <column name="action"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_task_logs_task_created" tableName="task_logs">
+            <column name="task_id"/>
+            <column name="created_at"/>
+        </createIndex>
+    </changeSet>
+    
+</databaseChangeLog>
+

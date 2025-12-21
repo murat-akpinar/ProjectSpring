@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import LoginPage from './pages/LoginPage';
@@ -8,10 +8,15 @@ import ProjectsPage from './pages/ProjectsPage';
 import ProjectDetailPage from './pages/ProjectDetailPage';
 import AdminPanelPage from './pages/AdminPanelPage';
 import UserProfilePage from './pages/UserProfilePage';
+import { initializeErrorLogger } from './utils/errorLogger';
 import './App.css';
 
 const App: React.FC = () => {
   const { isAuthenticated, loading } = useAuth();
+  
+  useEffect(() => {
+    initializeErrorLogger();
+  }, []);
 
   if (loading) {
     return <div>Yükleniyor...</div>;

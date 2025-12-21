@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../components/layout/Header';
 import Sidebar from '../components/layout/Sidebar';
+import { useSidebar } from '../hooks/useSidebar';
 import GanttChartView from '../components/calendar/GanttChartView';
 import TaskModal from '../components/task/TaskModal';
 import { Project } from '../types/Project';
@@ -22,6 +23,7 @@ const ProjectDetailPage: React.FC = () => {
   const [selectedWeek, setSelectedWeek] = useState(0);
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
   const [project, setProject] = useState<Project | null>(null);
+  const { isCollapsed, toggleSidebar } = useSidebar();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
@@ -164,8 +166,13 @@ const ProjectDetailPage: React.FC = () => {
 
   return (
     <div className="app-container">
-      <Sidebar selectedTeamId={selectedTeamId} onTeamSelect={handleTeamSelect} />
-      <div className="main-content">
+      <Sidebar 
+        selectedTeamId={selectedTeamId} 
+        onTeamSelect={handleTeamSelect}
+        isCollapsed={isCollapsed}
+        onToggleCollapse={toggleSidebar}
+      />
+      <div className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
         <Header selectedYear={selectedYear} onYearChange={setSelectedYear} />
         <div className="content-area">
           <div className="project-detail-container">

@@ -1,0 +1,252 @@
+.task-logs {
+  background-color: var(--ctp-mantle);
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.task-logs-header {
+  margin-bottom: 20px;
+}
+
+.task-logs-header h2 {
+  color: var(--ctp-text);
+  margin: 0;
+}
+
+.task-logs-filters {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.filter-group label {
+  color: var(--ctp-text);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.filter-group select,
+.filter-group input[type="datetime-local"],
+.filter-group input[type="text"] {
+  padding: 8px;
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 4px;
+  background-color: var(--ctp-base);
+  color: var(--ctp-text);
+  font-family: 'Cascadia Mono', monospace;
+  font-size: 14px;
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+  outline: none;
+  border-color: var(--ctp-blue);
+}
+
+.user-search-group {
+  position: relative;
+  min-width: 250px;
+}
+
+.user-search-container {
+  position: relative;
+}
+
+.user-search-container input {
+  width: 100%;
+  padding-right: 30px;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: var(--ctp-base);
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 4px;
+  margin-top: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 100;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.user-dropdown-item {
+  padding: 10px;
+  color: var(--ctp-text);
+  cursor: pointer;
+  font-size: 14px;
+  border-bottom: 1px solid var(--ctp-surface0);
+}
+
+.user-dropdown-item:hover {
+  background-color: var(--ctp-surface0);
+}
+
+.user-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.btn-clear-user {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--ctp-subtext1);
+  cursor: pointer;
+  font-size: 18px;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-clear-user:hover {
+  color: var(--ctp-text);
+}
+
+.btn-refresh {
+  padding: 8px 16px;
+  background-color: var(--ctp-blue);
+  color: var(--ctp-base);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Cascadia Mono', monospace;
+  font-size: 14px;
+  transition: background-color 0.2s;
+  height: fit-content;
+}
+
+.btn-refresh:hover {
+  background-color: var(--ctp-sapphire);
+}
+
+.logs-table-container {
+  overflow-x: auto;
+}
+
+.logs-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--ctp-base);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.logs-table thead {
+  background-color: var(--ctp-surface0);
+}
+
+.logs-table th {
+  padding: 12px;
+  text-align: left;
+  color: var(--ctp-text);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.logs-table td {
+  padding: 12px;
+  color: var(--ctp-text);
+  font-size: 14px;
+  border-top: 1px solid var(--ctp-surface0);
+}
+
+.logs-table tbody tr:hover {
+  background-color: var(--ctp-surface0);
+}
+
+.action-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: var(--ctp-base);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.task-link {
+  color: var(--ctp-blue);
+  cursor: pointer;
+}
+
+.task-link:hover {
+  text-decoration: underline;
+}
+
+.reason-cell {
+  max-width: 200px;
+  word-break: break-word;
+}
+
+.btn-view-detail {
+  padding: 4px 8px;
+  background-color: var(--ctp-surface0);
+  color: var(--ctp-text);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Cascadia Mono', monospace;
+  font-size: 12px;
+  transition: background-color 0.2s;
+}
+
+.btn-view-detail:hover {
+  background-color: var(--ctp-surface1);
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.pagination button {
+  padding: 8px 16px;
+  background-color: var(--ctp-surface0);
+  color: var(--ctp-text);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Cascadia Mono', monospace;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.pagination button:hover:not(:disabled) {
+  background-color: var(--ctp-surface1);
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  color: var(--ctp-text);
+  font-size: 14px;
+}
+
+.loading,
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: var(--ctp-subtext1);
+}
+

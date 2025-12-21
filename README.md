@@ -21,10 +21,11 @@ ProjectSpring — Takımlar için takvim odaklı proje ve görev yönetim platfo
   - İsim değiştirme
   - Şifre değiştirme
 - **Çoklu Görünüm Modları**: 
-  - Takvim Görünümü: Günlük takvim görünümü, hafta sonu günleri soluk
-  - Gantt Chart: Timeline bazlı Gantt chart, hafta seçimi, hiyerarşik subtask desteği
-  - Kanban Board: Status bazlı Kanban board, her takım için ayrı
-- **Aylık Görünüm**: 12 ay grid görünümü, mevsim renkleri ile
+  - Takvim Görünümü: Günlük takvim görünümü, hafta sonu günleri soluk, responsive tasarım
+  - Gantt Chart: Timeline bazlı Gantt chart, hafta seçimi, hiyerarşik subtask desteği, responsive tasarım
+  - Kanban Board: Status bazlı Kanban board, her takım için ayrı, responsive tasarım
+- **Aylık Görünüm**: 12 ay grid görünümü, mevsim renkleri ile, responsive grid düzeni
+- **Sidebar Toggle**: Sol menüyü gizleme/gösterme özelliği (localStorage ile state yönetimi)
 - **Proje Yönetimi**: Proje oluşturma, düzenleme, silme. Projelere ekip atama ve iş ekleme
 - **Proje Detay Görünümü**: Durum dağılımı grafiği, görev listesi ve Gantt chart ile detaylı proje takibi
 - **Proje Uyarı Sistemi**: Bitim tarihine 1 gün kalan projeler otomatik yanıp söner
@@ -132,8 +133,11 @@ npm run dev
 - `tasks` - İş kartları (projeye bağlı olabilir)
 - `subtasks` - Alt işler
 - `task_status_history` - İş durum geçmişi
+- `task_logs` - İş işlem logları (oluşturma, güncelleme, silme, durum değişiklikleri)
+- `system_logs` - Sistem logları (backend ve frontend logları)
 - `user_teams` - Kullanıcı-Ekip ilişkisi
 - `user_roles` - Kullanıcı-Rol ilişkisi
+- `login_attempts` - Giriş denemeleri (rate limiting ve account lockout için)
 
 ## API Endpoints
 
@@ -161,6 +165,14 @@ npm run dev
 - `POST /api/projects` - Yeni proje oluştur
 - `PUT /api/projects/{id}` - Proje güncelle
 - `DELETE /api/projects/{id}` - Proje sil
+
+### Admin Logs (ADMIN rolü gerekli)
+- `GET /api/admin/logs/system` - Sistem logları (source, level, userId, startDate, endDate parametreleri ile)
+- `GET /api/admin/logs/system/backend` - Backend logları
+- `GET /api/admin/logs/system/frontend` - Frontend logları
+- `POST /api/admin/logs/system/frontend` - Frontend'den log gönderme
+- `GET /api/admin/logs/tasks` - İş logları (taskId, userId, action, startDate, endDate parametreleri ile)
+- `GET /api/admin/logs/tasks/user/{userId}` - Belirli kullanıcının iş geçmişi
 
 ### Calendar
 - `GET /api/calendar/{year}` - Yıl bazlı takvim verisi
@@ -236,6 +248,9 @@ POST /api/auth/register
 - `V9__add_soft_delete.xml` - Kullanıcı ve takımlara soft delete desteği (isActive alanı)
 - `V10__rename_daire_baskani_to_admin.xml` - DAIRE_BASKANI rolü ADMIN olarak yeniden adlandırılır
 - `V11__create_ldap_settings.xml` - LDAP ayarları tablosu oluşturulur (şifreli saklama)
+- `V12__create_login_attempts.xml` - Giriş denemeleri tablosu oluşturulur (rate limiting için)
+- `V13__create_system_logs.xml` - Sistem logları tablosu oluşturulur (backend ve frontend logları)
+- `V14__create_task_logs.xml` - İş logları tablosu oluşturulur (tüm task işlemleri için)
 
 Manuel bir şey yapmanıza gerek yok, uygulama ilk çalıştığında tüm tablolar otomatik oluşturulur.
 
@@ -322,6 +337,30 @@ Bu özellik şunları ekler:
 - Frontend API erişilebilirlik kontrolü
 - Otomatik yenileme (30 saniye)
 
+### Log Sistemi
+Admin panelinde "Loglar" sekmesi altında iki tür log görüntüleme sistemi bulunur:
+
+#### Sistem Logları
+- **Backend Logları**: Backend API istekleri ve hataları
+- **Frontend Logları**: Frontend'den gönderilen hata ve uyarı logları
+- **Filtreleme**: Seviye (INFO, WARN, ERROR, DEBUG), tarih aralığı
+- **Otomatik Loglama**: LoggingAspect ile tüm controller method'ları otomatik loglanır
+- **Güvenlik**: Hassas veriler (şifreler, token'lar) otomatik olarak maskelenir
+
+#### İş Logları
+- **İşlem Takibi**: Tüm task işlemleri loglanır (CREATED, UPDATED, DELETED, STATUS_CHANGED, ASSIGNEE_ADDED, ASSIGNEE_REMOVED)
+- **Kullanıcı Arama**: Kullanıcı adı veya tam adı ile arama yapılabilir
+- **Filtreleme**: İşlem türü, kullanıcı, tarih aralığı
+- **Detaylı Bilgi**: Her işlem için eski ve yeni değerler JSON formatında saklanır
+- **Otomatik Loglama**: TaskService method'ları otomatik olarak log kaydı oluşturur
+
+**Özellikler:**
+- Pagination desteği (sayfa başına 50 kayıt)
+- Tarih bazlı filtreleme
+- Kullanıcı bazlı arama (iş loglarında)
+- Seviye bazlı filtreleme (sistem loglarında)
+- Backend/Frontend ayrımı (sistem loglarında)
+
 ## Kullanıcı Profil Sistemi
 
 - Profil bilgileri görüntüleme (isim, email, username, roller)
@@ -335,6 +374,13 @@ Bu özellik şunları ekler:
 - **Görünüm Seçimi**: Dropdown yerine yan yana butonlar
 - **Hafta Sonu Görünümü**: Takvim görünümünde hafta sonu günleri soluk
 - **Proje Uyarı Sistemi**: Bitim tarihine 1 gün kalan projeler yanıp söner
+- **Sidebar Toggle**: Sol menüyü gizleme/gösterme butonu (localStorage ile state kalıcılığı)
+- **Responsive Tasarım**: 
+  - Gantt Chart: Ekran boyutuna göre otomatik ölçeklenme, sol panel responsive genişlik
+  - Kanban Board: Kolonlar ekrana eşit dağılıyor, mobil uyumlu
+  - Calendar View: Responsive grid düzeni (desktop: 4 kolon, tablet: 2-3 kolon, mobil: 1 kolon)
+  - MonthView: Ekran boyutuna göre grid kolon sayısı ayarlanıyor
+- **Content Overflow Kontrolü**: Tüm görünümlerde ekrandan taşma sorunu çözüldü
 
 ## Lisans
 
