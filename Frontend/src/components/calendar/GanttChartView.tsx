@@ -291,7 +291,7 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
                         }}
                       />
                     )}
-                    <span className="task-title">{task.title}</span>
+                    <span className="task-title" title={task.title}>{task.title}</span>
                   </div>
                   <div className="gantt-col-type">
                     <span
@@ -317,7 +317,7 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
                   </div>
                   <div className="gantt-col-assignee">
                     {task.assigneeNames && task.assigneeNames.length > 0 ? (
-                      <div className="assignee-info">
+                      <div className="assignee-info" title={task.assigneeNames[0]}>
                         <div className="assignee-avatar-small">
                           {getInitials(task.assigneeNames[0])}
                         </div>

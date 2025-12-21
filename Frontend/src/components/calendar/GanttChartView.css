@@ -1,8 +1,13 @@
 .gantt-chart-view {
   padding: 20px;
-  overflow: auto;
+  overflow: hidden;
   background-color: var(--ctp-base);
   border-radius: 8px;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .gantt-container {
@@ -12,24 +17,28 @@
   background-color: var(--ctp-base);
   border: 1px solid var(--ctp-surface0);
   border-radius: 8px;
-  overflow: hidden;
+  overflow: visible;
+  flex: 1;
+  min-height: 0;
 }
 
 /* Sol Panel - Task Listesi */
 .gantt-left-panel {
-  min-width: 300px;
-  max-width: 400px;
-  flex: 0 0 auto;
+  min-width: 400px;
+  max-width: 500px;
+  width: 400px;
+  flex: 0 0 400px;
   border-right: 2px solid var(--ctp-surface0);
   background-color: var(--ctp-mantle);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .gantt-table-header {
   display: grid;
-  grid-template-columns: 2fr 0.8fr 1fr 1fr 1.2fr;
-  gap: 10px;
+  grid-template-columns: 2.2fr 0.6fr 0.8fr 0.8fr 2.2fr;
+  gap: 8px;
   padding: 12px 10px;
   background-color: var(--ctp-crust);
   border-bottom: 2px solid var(--ctp-surface0);
@@ -49,6 +58,19 @@
 .gantt-col-assignee {
   display: flex;
   align-items: center;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.gantt-col-subject {
+  flex: 1;
+  min-width: 0;
+}
+
+.gantt-col-assignee {
+  flex: 1;
+  min-width: 0;
+  overflow: visible;
 }
 
 .gantt-table-body {
@@ -58,8 +80,8 @@
 
 .gantt-table-row {
   display: grid;
-  grid-template-columns: 2fr 0.8fr 1fr 1fr 1.2fr;
-  gap: 10px;
+  grid-template-columns: 2.2fr 0.6fr 0.8fr 0.8fr 2.2fr;
+  gap: 8px;
   padding: 10px;
   border-bottom: 1px solid var(--ctp-surface0);
   cursor: pointer;
@@ -109,6 +131,11 @@
   font-size: 14px;
   color: var(--ctp-text);
   font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
 }
 
 .type-badge {
@@ -141,6 +168,15 @@
   align-items: center;
   gap: 6px;
   font-size: 13px;
+  min-width: 0;
+  flex: 1;
+}
+
+.assignee-info span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .assignee-avatar-small {
@@ -167,19 +203,22 @@
   flex: 1;
   min-width: 0;
   overflow-x: auto;
+  overflow-y: hidden;
   display: flex;
   flex-direction: column;
+  width: 0; /* Flexbox için gerekli */
 }
 
 .gantt-timeline-header {
   display: grid;
-  grid-template-columns: repeat(var(--days-count, 35), 1fr);
+  grid-template-columns: repeat(var(--days-count, 35), minmax(40px, 1fr));
   gap: 1px;
   background-color: var(--ctp-surface0);
   border-bottom: 2px solid var(--ctp-surface0);
   position: sticky;
   top: 0;
   z-index: 10;
+  min-width: max-content;
 }
 
 .timeline-day-header {
@@ -238,12 +277,13 @@
 
 .timeline-bars-container {
   display: grid;
-  grid-template-columns: repeat(var(--days-count, 35), 1fr);
+  grid-template-columns: repeat(var(--days-count, 35), minmax(40px, 1fr));
   gap: 1px;
   width: 100%;
   height: 100%;
   position: relative;
   overflow: visible;
+  min-width: max-content;
 }
 
 .timeline-cell {
@@ -370,25 +410,101 @@
 /* Responsive breakpoints */
 @media (max-width: 1400px) {
   .gantt-left-panel {
-    min-width: 300px;
-    max-width: 350px;
+    min-width: 360px;
+    max-width: 420px;
+    width: 360px;
+    flex: 0 0 360px;
+  }
+  
+  .gantt-table-header,
+  .gantt-table-row {
+    grid-template-columns: 2fr 0.6fr 0.8fr 0.8fr 2fr;
+    gap: 6px;
+  }
+  
+  .gantt-timeline-header,
+  .timeline-bars-container {
+    grid-template-columns: repeat(var(--days-count, 35), minmax(35px, 1fr));
+  }
+  
+  .timeline-day-header {
+    min-width: 35px;
+    padding: 6px 3px;
   }
 }
 
 @media (max-width: 1200px) {
   .gantt-left-panel {
-    min-width: 250px;
-    max-width: 300px;
+    min-width: 320px;
+    max-width: 380px;
+    width: 320px;
+    flex: 0 0 320px;
+  }
+  
+  .gantt-table-header,
+  .gantt-table-row {
+    grid-template-columns: 1.8fr 0.5fr 0.7fr 0.7fr 1.8fr;
+    gap: 5px;
+    padding: 8px;
+  }
+  
+  .task-title {
+    font-size: 13px;
+  }
+  
+  .gantt-timeline-header,
+  .timeline-bars-container {
+    grid-template-columns: repeat(var(--days-count, 35), minmax(30px, 1fr));
+  }
+  
+  .timeline-day-header {
+    min-width: 30px;
+    padding: 5px 2px;
+  }
+  
+  .day-number {
+    font-size: 12px;
+  }
+  
+  .day-name {
+    font-size: 9px;
   }
 }
 
 @media (max-width: 768px) {
+  .gantt-chart-view {
+    padding: 10px;
+  }
+  
   .gantt-left-panel {
     display: none;
   }
   
   .gantt-right-panel {
     width: 100%;
+    flex: 1;
+  }
+  
+  .gantt-timeline-header,
+  .timeline-bars-container {
+    grid-template-columns: repeat(var(--days-count, 35), minmax(25px, 1fr));
+  }
+  
+  .timeline-day-header {
+    min-width: 25px;
+    padding: 4px 1px;
+  }
+  
+  .day-number {
+    font-size: 10px;
+  }
+  
+  .day-name {
+    font-size: 8px;
+  }
+  
+  .gantt-bar-title {
+    font-size: 10px;
   }
 }
 

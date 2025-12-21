@@ -39,6 +39,26 @@
   box-sizing: border-box;
 }
 
+/* Gantt chart için özel overflow ayarı */
+.content-area:has(.gantt-chart-view) {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Takvim görünümü için overflow düzeltmesi */
+.content-area:has(.calendar-view) {
+  overflow-x: auto;
+  overflow-y: auto;
+  padding: 20px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
 /* Header Styles */
 .header {
   background-color: var(--ctp-mantle);
