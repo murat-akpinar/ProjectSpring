@@ -59,8 +59,11 @@ services:
     ports:
       - "80:80"
     depends_on:
+      postgres:
+        condition: service_healthy
       backend:
         condition: service_healthy
+    restart: unless-stopped
     networks:
       - projectspring-network
 
