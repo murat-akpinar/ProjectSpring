@@ -4,7 +4,6 @@ import com.projectspring.model.LdapSettings;
 import com.projectspring.repository.LdapSettingsRepository;
 import com.projectspring.service.EncryptionService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -22,24 +21,12 @@ public class LdapConfig {
     @Autowired(required = false)
     private EncryptionService encryptionService;
     
-    @Value("${spring.ldap.urls:ldap://localhost:389}")
-    private String ldapUrls;
-    
-    @Value("${spring.ldap.base:dc=example,dc=com}")
-    private String ldapBase;
-    
-    @Value("${spring.ldap.username:}")
-    private String ldapUsername;
-    
-    @Value("${spring.ldap.password:}")
-    private String ldapPassword;
-    
     @Bean
     @Primary
     public LdapContextSource contextSource() {
         LdapContextSource contextSource = new LdapContextSource();
         
-        // Try to get settings from database first
+        // Only read from database - no fallback to application.yml or docker-compose
         if (ldapSettingsRepository != null) {
             Optional<LdapSettings> settingsOpt = ldapSettingsRepository.findByIsEnabledTrue();
             if (settingsOpt.isPresent()) {
@@ -66,18 +53,10 @@ public class LdapConfig {
             }
         }
         
-        // Fallback to application.yml properties
-        contextSource.setUrl(ldapUrls);
-        contextSource.setBase(ldapBase);
-        
-        if (ldapUsername != null && !ldapUsername.isEmpty()) {
-            contextSource.setUserDn(ldapUsername);
-        }
-        
-        if (ldapPassword != null && !ldapPassword.isEmpty()) {
-            contextSource.setPassword(ldapPassword);
-        }
-        
+        // If no settings in database or LDAP disabled, return empty context source
+        // LDAP will be silently disabled - application continues to work
+        contextSource.setUrl("ldap://localhost:389");
+        contextSource.setBase("dc=example,dc=com");
         contextSource.afterPropertiesSet();
         return contextSource;
     }

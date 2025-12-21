@@ -35,12 +35,15 @@ api.interceptors.response.use(
     const token = localStorage.getItem('token');
     
     if (status === 401) {
-      console.error('401 Unauthorized error:', {
-        url: errorUrl,
-        path: currentPath,
-        hasToken: !!token,
-        tokenPreview: token ? token.substring(0, 20) + '...' : 'null'
-      });
+      // Don't log errors for log endpoint to avoid infinite loop
+      if (!errorUrl.includes('/admin/logs/system/frontend')) {
+        console.error('401 Unauthorized error:', {
+          url: errorUrl,
+          path: currentPath,
+          hasToken: !!token,
+          tokenPreview: token ? token.substring(0, 20) + '...' : 'null'
+        });
+      }
       
       // Only auto-redirect for /auth/me endpoint (token validation)
       // This means the token is invalid/expired

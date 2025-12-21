@@ -6,8 +6,8 @@ import com.projectspring.model.enums.Role;
 import com.projectspring.repository.RoleRepository;
 import com.projectspring.repository.UserRepository;
 import com.projectspring.util.LdapInputSanitizer;
+import com.projectspring.model.LdapSettings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ldap.core.AttributesMapper;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.filter.EqualsFilter;
@@ -23,6 +23,7 @@ import org.springframework.security.ldap.authentication.ad.ActiveDirectoryLdapAu
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.naming.Name;
 import javax.naming.directory.Attributes;
 import java.util.Optional;
 
@@ -47,33 +48,42 @@ public class LdapAuthService {
     @Autowired
     private PasswordEncoder passwordEncoder;
     
-    @Value("${spring.ldap.user-search-base}")
-    private String userSearchBase;
-    
-    @Value("${spring.ldap.user-search-filter}")
-    private String userSearchFilter;
-    
-    @Value("${auth.ldap.enabled:true}")
-    private boolean ldapEnabled;
+    @Autowired
+    private LdapSettingsService ldapSettingsService;
     
     public String authenticate(String username, String password) {
         // Sanitize username input to prevent LDAP injection
         String sanitizedUsername = LdapInputSanitizer.sanitizeUsername(username);
         
+        // Check LDAP settings from database
+        LdapSettings activeSettings = ldapSettingsService.getActiveLdapSettings();
+        boolean ldapEnabled = activeSettings != null && activeSettings.getIsEnabled() != null && activeSettings.getIsEnabled();
+        
         // Try LDAP first if enabled
         if (ldapEnabled) {
             try {
+                // Get userSearchBase from database settings
+                String userSearchBase = activeSettings.getUserSearchBase();
+                String userSearchFilter = activeSettings.getUserSearchFilter() != null 
+                    ? activeSettings.getUserSearchFilter() 
+                    : "(uid={0})";
+                
+                // Use userSearchBase if available, otherwise use base DN
+                Name searchBase = (userSearchBase != null && !userSearchBase.isEmpty())
+                    ? LdapUtils.newLdapName(userSearchBase)
+                    : LdapUtils.emptyLdapName();
+                
                 // LDAP authentication
                 EqualsFilter filter = new EqualsFilter("uid", sanitizedUsername);
                 boolean authenticated = ldapTemplate.authenticate(
-                    LdapUtils.emptyLdapName(),
+                    searchBase,
                     filter.encode(),
                     password
                 );
                 
                 if (authenticated) {
                     // Get user details from LDAP
-                    String userDn = findUserDn(sanitizedUsername);
+                    String userDn = findUserDn(sanitizedUsername, activeSettings);
                     
                     // Sync user to database
                     User user = syncUserFromLdap(sanitizedUsername, userDn);
@@ -112,10 +122,16 @@ public class LdapAuthService {
         throw new RuntimeException("User not found or authentication failed");
     }
     
-    private String findUserDn(String username) {
+    private String findUserDn(String username, LdapSettings settings) {
         EqualsFilter filter = new EqualsFilter("uid", username);
+        
+        // Use userSearchBase if available, otherwise use base DN
+        Name searchBase = (settings.getUserSearchBase() != null && !settings.getUserSearchBase().isEmpty())
+            ? LdapUtils.newLdapName(settings.getUserSearchBase())
+            : LdapUtils.emptyLdapName();
+        
         return ldapTemplate.search(
-            LdapUtils.emptyLdapName(),
+            searchBase,
             filter.encode(),
             (AttributesMapper<String>) attrs -> {
                 return (String) attrs.get("distinguishedName").get();
@@ -153,11 +169,23 @@ public class LdapAuthService {
     
     public boolean validateCredentials(String username, String password) {
         try {
+            // Check LDAP settings from database
+            LdapSettings activeSettings = ldapSettingsService.getActiveLdapSettings();
+            if (activeSettings == null || activeSettings.getIsEnabled() == null || !activeSettings.getIsEnabled()) {
+                return false;
+            }
+            
             // Sanitize username input to prevent LDAP injection
             String sanitizedUsername = LdapInputSanitizer.sanitizeUsername(username);
             EqualsFilter filter = new EqualsFilter("uid", sanitizedUsername);
+            
+            // Use userSearchBase if available, otherwise use base DN
+            Name searchBase = (activeSettings.getUserSearchBase() != null && !activeSettings.getUserSearchBase().isEmpty())
+                ? LdapUtils.newLdapName(activeSettings.getUserSearchBase())
+                : LdapUtils.emptyLdapName();
+            
             return ldapTemplate.authenticate(
-                LdapUtils.emptyLdapName(),
+                searchBase,
                 filter.encode(),
                 password
             );

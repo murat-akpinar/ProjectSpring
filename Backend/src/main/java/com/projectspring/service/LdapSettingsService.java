@@ -86,25 +86,59 @@ public class LdapSettingsService {
             // Create a temporary LDAP template
             LdapTemplate testTemplate = new LdapTemplate(testContextSource);
             
-            // Try to perform a simple search to test connection
-            String searchBase = request.getUserSearchBase() != null && !request.getUserSearchBase().isEmpty() 
-                ? request.getUserSearchBase() 
-                : request.getBase();
+            // Test connection: First try base DN (always exists), then userSearchBase if provided
+            String baseDn = request.getBase();
+            String userSearchBase = request.getUserSearchBase();
             
-            String searchFilter = request.getUserSearchFilter() != null && !request.getUserSearchFilter().isEmpty()
-                ? request.getUserSearchFilter().replace("{0}", "*")
-                : "(uid=*)";
+            // Step 1: Test base DN connection by trying to lookup or search the base DN
+            try {
+                // Try to lookup the base DN to verify it exists and is accessible
+                testTemplate.lookup(LdapUtils.newLdapName(baseDn));
+            } catch (Exception e) {
+                // If lookup fails, try a simple search as fallback (scope: base)
+                try {
+                    EqualsFilter filter = new EqualsFilter("objectClass", "*");
+                    testTemplate.search(
+                        LdapUtils.newLdapName(baseDn),
+                        filter.encode(),
+                        (org.springframework.ldap.core.AttributesMapper<Object>) attrs -> null
+                    );
+                } catch (Exception e2) {
+                    // If both fail, the base DN doesn't exist or is not accessible
+                    String errorMsg = "LDAP bağlantısı başarısız: Base DN '" + baseDn + "' bulunamadı veya erişilemedi. " + 
+                        "Lütfen şunları kontrol edin:\n" +
+                        "1. LDAP sunucusunda bu DN'in mevcut olduğundan emin olun\n" +
+                        "2. Kullanıcı adı ve şifrenin doğru olduğundan emin olun\n" +
+                        "3. LDAP URL'sinin doğru olduğundan emin olun (Docker içinden: ldap://ldap-test:389)\n" +
+                        "Hata: " + e2.getMessage();
+                    return new LdapTestResponse(false, errorMsg, e2.getMessage());
+                }
+            }
             
-            // Try to search (limit to 1 result for performance)
-            // Use a simple filter that should work on most LDAP servers
-            EqualsFilter filter = new EqualsFilter("objectClass", "*");
-            testTemplate.search(
-                LdapUtils.newLdapName(searchBase),
-                filter.encode(),
-                (org.springframework.ldap.core.AttributesMapper<Object>) attrs -> null // Simple mapper - we just need to test connection
-            );
+            // Step 2: If userSearchBase is provided, test it (optional)
+            String warningMessage = null;
+            if (userSearchBase != null && !userSearchBase.isEmpty()) {
+                try {
+                    EqualsFilter filter = new EqualsFilter("objectClass", "*");
+                    testTemplate.search(
+                        LdapUtils.newLdapName(userSearchBase),
+                        filter.encode(),
+                        (org.springframework.ldap.core.AttributesMapper<Object>) attrs -> null
+                    );
+                } catch (Exception e) {
+                    // userSearchBase doesn't exist, but base connection is OK
+                    warningMessage = "LDAP bağlantısı başarılı, ancak User Search Base '" + userSearchBase + "' bulunamadı. " +
+                        "Lütfen bu DN'in LDAP sunucusunda mevcut olduğundan emin olun. " +
+                        "Hata: " + e.getMessage();
+                }
+            }
             
-            return new LdapTestResponse(true, "LDAP bağlantısı başarılı", null);
+            // Connection successful
+            String successMessage = warningMessage != null 
+                ? "LDAP bağlantısı başarılı. Uyarı: " + warningMessage
+                : "LDAP bağlantısı başarılı";
+            
+            return new LdapTestResponse(true, successMessage, warningMessage);
             
         } catch (Exception e) {
             return new LdapTestResponse(false, "LDAP bağlantısı başarısız", e.getMessage());

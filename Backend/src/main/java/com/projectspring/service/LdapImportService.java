@@ -7,8 +7,8 @@ import com.projectspring.model.User;
 import com.projectspring.repository.RoleRepository;
 import com.projectspring.repository.UserRepository;
 import com.projectspring.util.LdapInputSanitizer;
+import com.projectspring.model.LdapSettings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ldap.core.AttributesMapper;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.filter.EqualsFilter;
@@ -16,6 +16,7 @@ import org.springframework.ldap.support.LdapUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.naming.Name;
 import javax.naming.directory.Attributes;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -36,21 +37,32 @@ public class LdapImportService {
     @Autowired
     private RoleRepository roleRepository;
 
-    @Value("${spring.ldap.user-search-base:}")
-    private String userSearchBase;
-
-    @Value("${spring.ldap.user-search-filter:(uid={0})}")
-    private String userSearchFilter;
+    @Autowired
+    private LdapSettingsService ldapSettingsService;
 
     public List<LdapUserDTO> searchUsers(String username) {
         List<LdapUserDTO> results = new ArrayList<>();
 
         try {
+            // Check LDAP settings from database
+            LdapSettings activeSettings = ldapSettingsService.getActiveLdapSettings();
+            if (activeSettings == null || activeSettings.getIsEnabled() == null || !activeSettings.getIsEnabled()) {
+                return results; // Return empty list if LDAP is disabled
+            }
+            
+            // Get userSearchBase from database settings
+            String userSearchBase = activeSettings.getUserSearchBase();
+            
+            // Use userSearchBase if available, otherwise use base DN
+            Name searchBase = (userSearchBase != null && !userSearchBase.isEmpty())
+                ? LdapUtils.newLdapName(userSearchBase)
+                : LdapUtils.emptyLdapName();
+            
             // Sanitize username input to prevent LDAP injection
             String sanitizedUsername = LdapInputSanitizer.sanitizeUsername(username);
             EqualsFilter filter = new EqualsFilter("uid", sanitizedUsername);
             List<LdapUserDTO> users = ldapTemplate.search(
-                    LdapUtils.emptyLdapName(),
+                    searchBase,
                     filter.encode(),
                     (AttributesMapper<LdapUserDTO>) attrs -> {
                         LdapUserDTO dto = new LdapUserDTO();

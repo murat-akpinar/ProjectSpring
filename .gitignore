@@ -30,3 +30,8 @@ Thumbs.db
 
 # Plan file (local reference only)
 plan.md
+
+# LDAP test data (Docker volumes)
+ldap_test/ldap_config/
+ldap_test/ldap_data/
+ldap_test/ldif/
