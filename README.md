@@ -250,28 +250,49 @@ Proje içinde LDAP test sunucusu bulunmaktadır (`ldap_test` dizini). Test sunuc
 
 **Kurulum:**
 ```bash
-# Ana projeyi başlatın
+# Ana projeyi başlatın (eğer henüz başlatmadıysanız)
 docker-compose up -d
 
-# LDAP test sunucusunu başlatın
+# LDAP test sunucusunu başlatın (ana proje dizininden)
+docker-compose -f ldap_test/docker-compose.yml up -d
+
+# VEYA ldap_test dizinine girip:
 cd ldap_test
 docker-compose up -d
+```
 
-# Test kullanıcılarını ekleyin
-./init-ldap.sh
+**Test Kullanıcılarını Ekleme:**
+LDAP container başladıktan sonra test kullanıcılarını eklemek için init scriptini manuel olarak çalıştırın:
+```bash
+docker exec ldap-test bash /init-users.sh
 ```
 
 **Yönetim Panelinden Yapılandırma:**
-1. Admin panel → LDAP Ayarları
-2. Aşağıdaki bilgileri girin:
-   - **URLs**: `ldap://ldap-test:389` (Docker içinden) veya `ldap://localhost:389` (host'tan test için)
+1. LDAP test sunucusu başlatıldıktan sonra test kullanıcılarını eklemek için `docker exec ldap-test bash /init-users.sh` komutunu çalıştırın (`ou=users` ve `ou=groups` OU'ları otomatik oluşturulur).
+
+2. Admin panel → LDAP Ayarları
+3. Aşağıdaki bilgileri girin:
+   - **URLs**: `ldap://ldap-test:389` (Backend container'ı aynı Docker network'ünde olduğu için `ldap-test` hostname'i kullanılmalı)
    - **Base**: `dc=test,dc=local`
    - **Username**: `cn=admin,dc=test,dc=local`
    - **Password**: `admin123`
-   - **User Search Base**: `ou=users`
+   - **User Search Base**: `ou=users,dc=test,dc=local` (tam DN path'i gerekli - init-ldap.sh çalıştırıldıktan sonra)
    - **User Search Filter**: `(uid={0})`
-3. "LDAP'ı Aktif Et" checkbox'ını işaretleyin
-4. "Bağlantıyı Test Et" butonuna tıklayın
+4. "LDAP'ı Aktif Et" checkbox'ını işaretleyin
+5. "Bağlantıyı Test Et" butonuna tıklayın
+
+**Önemli Notlar:**
+- **User Search Base için tam DN path'i kullanın:** `ou=users,dc=test,dc=local`
+- Eğer User Search Base boş bırakılırsa, Base DN (`dc=test,dc=local`) kullanılır
+- LDAP container başladıktan sonra `docker exec ldap-test bash /init-users.sh` komutu ile test kullanıcıları eklenir
+
+**Test Kullanıcıları:**
+`docker exec ldap-test bash /init-users.sh` komutu çalıştırıldığında aşağıdaki test kullanıcıları oluşturulur:
+- **ldap_user1** / Password: `ldappass123`
+- **ldap_user2** / Password: `ldappass123`
+- **testuser1** / Password: `testpass123`
+- **testuser2** / Password: `testpass123`
+- **adminuser** / Password: `adminpass123`
 
 **phpLDAPadmin:** http://localhost:8082 adresinden web tabanlı LDAP yönetim arayüzüne erişebilirsiniz.
 

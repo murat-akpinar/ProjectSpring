@@ -2,12 +2,17 @@ import { logService } from '../services/logService';
 import { authService } from '../services/authService';
 
 let errorLoggerInitialized = false;
-let isLoggingEnabled = false;
 
 // Helper function to check if logging should be enabled
+// Always check authentication status in real-time
 const shouldLog = (): boolean => {
   // Only log if user is authenticated
-  return authService.isAuthenticated();
+  try {
+    return authService.isAuthenticated();
+  } catch (e) {
+    // If authService check fails, don't log
+    return false;
+  }
 };
 
 export const initializeErrorLogger = () => {
@@ -17,20 +22,10 @@ export const initializeErrorLogger = () => {
   
   errorLoggerInitialized = true;
   
-  // Check authentication status periodically and enable/disable logging
-  const checkAuthStatus = () => {
-    isLoggingEnabled = shouldLog();
-  };
-  
-  // Check initially
-  checkAuthStatus();
-  
-  // Check on storage events (when token is set/removed in another tab)
-  window.addEventListener('storage', checkAuthStatus);
-  
   // Global error handler
   window.onerror = (message, source, lineno, colno, error) => {
-    if (!isLoggingEnabled) {
+    // Check authentication status before logging
+    if (!shouldLog()) {
       return false; // Don't prevent default error handling
     }
     try {
@@ -44,7 +39,8 @@ export const initializeErrorLogger = () => {
   
   // Unhandled promise rejection handler
   window.addEventListener('unhandledrejection', (event) => {
-    if (!isLoggingEnabled) {
+    // Check authentication status before logging
+    if (!shouldLog()) {
       return;
     }
     try {
@@ -59,7 +55,8 @@ export const initializeErrorLogger = () => {
   const originalError = console.error;
   console.error = (...args: any[]) => {
     originalError.apply(console, args);
-    if (!isLoggingEnabled) {
+    // Check authentication status before logging
+    if (!shouldLog()) {
       return;
     }
     try {
@@ -68,7 +65,9 @@ export const initializeErrorLogger = () => {
       ).join(' ');
       // Skip logging if message is about failed log sending to avoid loop
       if (message.includes('Failed to send frontend log') || 
-          message.includes('/admin/logs/system/frontend')) {
+          message.includes('/admin/logs/system/frontend') ||
+          message.includes('401') ||
+          message.includes('403')) {
         return;
       }
       logService.sendFrontendLog('ERROR', message);
@@ -81,7 +80,8 @@ export const initializeErrorLogger = () => {
   const originalWarn = console.warn;
   console.warn = (...args: any[]) => {
     originalWarn.apply(console, args);
-    if (!isLoggingEnabled) {
+    // Check authentication status before logging
+    if (!shouldLog()) {
       return;
     }
     try {
@@ -91,7 +91,9 @@ export const initializeErrorLogger = () => {
       // Skip logging if message is about failed log sending to avoid loop
       if (message.includes('Failed to send frontend log') || 
           message.includes('/admin/logs/system/frontend') ||
-          message.includes('No token found')) {
+          message.includes('No token found') ||
+          message.includes('401') ||
+          message.includes('403')) {
         return;
       }
       logService.sendFrontendLog('WARN', message);

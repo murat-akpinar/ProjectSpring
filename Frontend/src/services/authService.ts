@@ -4,6 +4,7 @@ import { User } from '../types/User';
 export interface LoginRequest {
   username: string;
   password: string;
+  loginType?: string; // "ldap" or "standard"
 }
 
 export interface LoginResponse {
