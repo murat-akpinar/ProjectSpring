@@ -11,6 +11,8 @@ import com.projectspring.service.LoginAttemptService;
 import com.projectspring.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +29,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "*")
 public class AuthController {
+    
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     
     @Autowired
     private LdapAuthService ldapAuthService;
@@ -57,8 +61,11 @@ public class AuthController {
         String ipAddress = getClientIpAddress(httpRequest);
         String username = request.getUsername();
         
+        logger.info("Login attempt for user: {} from IP: {}", username, ipAddress);
+        
         // Check IP-based rate limiting
         if (loginAttemptService.isIpBlocked(ipAddress)) {
+            logger.warn("IP blocked for login attempt: {} from IP: {}", username, ipAddress);
             loginAttemptService.recordLoginAttempt(username, ipAddress, false);
             Map<String, Object> error = new HashMap<>();
             error.put("error", "Too many login attempts from this IP. Please try again later.");
@@ -68,6 +75,7 @@ public class AuthController {
         
         // Check account lockout
         if (loginAttemptService.isAccountLocked(username)) {
+            logger.warn("Account locked for login attempt: {}", username);
             loginAttemptService.recordLoginAttempt(username, ipAddress, false);
             Map<String, Object> error = new HashMap<>();
             error.put("error", "Account is temporarily locked due to too many failed login attempts. Please try again later.");
@@ -76,7 +84,10 @@ public class AuthController {
         }
         
         try {
-            String token = ldapAuthService.authenticate(username, request.getPassword());
+            String loginType = request.getLoginType();
+            logger.info("Attempting authentication for user: {} with loginType: {}", username, loginType != null ? loginType : "auto");
+            String token = ldapAuthService.authenticate(username, request.getPassword(), loginType);
+            logger.info("Authentication successful for user: {}", username);
             
             // Record successful login
             loginAttemptService.recordLoginAttempt(username, ipAddress, true);
@@ -102,6 +113,7 @@ public class AuthController {
             
             return ResponseEntity.ok(response);
         } catch (Exception e) {
+            logger.error("Authentication failed for user: {} - Error: {}", username, e.getMessage(), e);
             // Record failed login
             loginAttemptService.recordLoginAttempt(username, ipAddress, false);
             

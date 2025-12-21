@@ -32,7 +32,8 @@ public class LdapConfig {
             if (settingsOpt.isPresent()) {
                 LdapSettings settings = settingsOpt.get();
                 contextSource.setUrl(settings.getUrls());
-                contextSource.setBase(settings.getBase());
+                // Don't set Base DN - it interferes with search operations
+                // Base DN will be used in search operations explicitly when needed
                 
                 if (settings.getUsername() != null && !settings.getUsername().isEmpty()) {
                     contextSource.setUserDn(settings.getUsername());
@@ -42,10 +43,14 @@ public class LdapConfig {
                     try {
                         String decryptedPassword = encryptionService.decrypt(settings.getPasswordEncrypted());
                         contextSource.setPassword(decryptedPassword);
+                        System.out.println("LDAP Config - Password decrypted successfully, length: " + (decryptedPassword != null ? decryptedPassword.length() : 0));
                     } catch (Exception e) {
                         // If decryption fails, use empty password
                         System.err.println("Failed to decrypt LDAP password: " + e.getMessage());
+                        e.printStackTrace();
                     }
+                } else {
+                    System.err.println("LDAP Config - No password found or encryption service not available");
                 }
                 
                 contextSource.afterPropertiesSet();

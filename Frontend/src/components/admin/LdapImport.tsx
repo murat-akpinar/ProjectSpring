@@ -27,12 +27,63 @@ const LdapImport: React.FC = () => {
   const [testingConnection, setTestingConnection] = useState(false);
   const [testResult, setTestResult] = useState<LdapTestResponse | null>(null);
   const [savingSettings, setSavingSettings] = useState(false);
-  const [connectionTested, setConnectionTested] = useState(false);
+  const [connectionTested, setConnectionTested] = useState(() => {
+    // localStorage'dan connectionTested durumunu oku
+    const saved = localStorage.getItem('ldap_connection_tested');
+    return saved === 'true';
+  });
+  const [isSettingsExpanded, setIsSettingsExpanded] = useState(false);
 
   useEffect(() => {
     fetchRoles();
     fetchLdapSettings();
   }, []);
+
+  // 6 saatte bir otomatik LDAP bağlantı testi (kayıtlı şifreyle)
+  useEffect(() => {
+    const testLdapConnectionPeriodically = async () => {
+      // Sadece LDAP aktifse ve ayarlar varsa test et
+      if (ldapSettings.isEnabled && ldapSettings.urls && ldapSettings.base) {
+        try {
+          // Backend'de kayıtlı şifreyle otomatik test yap
+          const result = await ldapSettingsService.testLdapConnectionAuto();
+          if (result.success) {
+            setConnectionTested(true);
+            console.log('LDAP bağlantı testi başarılı (otomatik kontrol - 6 saatte bir)');
+          } else {
+            setConnectionTested(false);
+            localStorage.removeItem('ldap_connection_tested');
+            console.warn('LDAP bağlantı testi başarısız (otomatik kontrol):', result.message);
+          }
+        } catch (error: any) {
+          console.error('LDAP otomatik bağlantı testi hatası:', error);
+          setConnectionTested(false);
+          localStorage.removeItem('ldap_connection_tested');
+        }
+      }
+    };
+
+    // İlk testi hemen yap (eğer LDAP aktifse)
+    if (ldapSettings.isEnabled && ldapSettings.urls && ldapSettings.base) {
+      testLdapConnectionPeriodically();
+    }
+
+    // 6 saatte bir (21600000 ms) test et
+    const interval = setInterval(() => {
+      testLdapConnectionPeriodically();
+    }, 6 * 60 * 60 * 1000); // 6 saat
+
+    return () => clearInterval(interval);
+  }, [ldapSettings.isEnabled, ldapSettings.urls, ldapSettings.base]);
+
+  // connectionTested değiştiğinde localStorage'a kaydet
+  useEffect(() => {
+    if (connectionTested) {
+      localStorage.setItem('ldap_connection_tested', 'true');
+    } else {
+      localStorage.removeItem('ldap_connection_tested');
+    }
+  }, [connectionTested]);
 
   const fetchRoles = async () => {
     try {
@@ -62,11 +113,17 @@ const LdapImport: React.FC = () => {
     if (!searchUsername.trim()) return;
 
     setLoading(true);
+    setSearchResults([]); // Clear previous results
     try {
       const results = await ldapService.searchUsers({ username: searchUsername });
+      console.log('LDAP Search Results:', results);
       setSearchResults(results);
+      if (results.length === 0) {
+        alert('Kullanıcı bulunamadı. LDAP ayarlarınızı kontrol edin.');
+      }
     } catch (error: any) {
-      alert(error.response?.data?.error || 'LDAP araması başarısız oldu');
+      console.error('LDAP Search Error:', error);
+      alert(error.response?.data?.error || 'LDAP araması başarısız oldu: ' + (error.message || 'Bilinmeyen hata'));
     } finally {
       setLoading(false);
     }
@@ -99,8 +156,15 @@ const LdapImport: React.FC = () => {
     try {
       const settings = await ldapSettingsService.getLdapSettings();
       setLdapSettings(settings);
+      // Eğer LDAP aktifse ve temel ayarlar varsa, connectionTested'ı true yap
+      if (settings.isEnabled && settings.urls && settings.base) {
+        setConnectionTested(true);
+      } else {
+        setConnectionTested(false);
+      }
     } catch (error: any) {
       console.error('Failed to fetch LDAP settings:', error);
+      setConnectionTested(false);
     }
   };
 
@@ -108,6 +172,11 @@ const LdapImport: React.FC = () => {
     if (!ldapSettings.urls || !ldapSettings.base) {
       alert('LDAP URLs ve Base DN alanları zorunludur');
       return;
+    }
+
+    // Form'u aç (eğer kapalıysa)
+    if (!isSettingsExpanded) {
+      setIsSettingsExpanded(true);
     }
 
     setTestingConnection(true);
@@ -129,6 +198,8 @@ const LdapImport: React.FC = () => {
       
       if (result.success) {
         alert('LDAP bağlantısı başarılı! Artık kullanıcı import edebilirsiniz.');
+        // Form'u kapat
+        setIsSettingsExpanded(false);
       } else {
         alert('LDAP bağlantısı başarısız: ' + result.message);
       }
@@ -167,7 +238,10 @@ const LdapImport: React.FC = () => {
       await ldapSettingsService.updateLdapSettings(updateRequest);
       alert('LDAP ayarları başarıyla kaydedildi');
       setLdapPassword(''); // Clear password field after saving
-      fetchLdapSettings();
+      setTestPassword(''); // Clear test password field
+      await fetchLdapSettings(); // Refresh settings
+      // Form'u kapat
+      setIsSettingsExpanded(false);
     } catch (error: any) {
       alert('LDAP ayarları kaydedilemedi: ' + (error.response?.data?.error || error.message));
     } finally {
@@ -181,7 +255,35 @@ const LdapImport: React.FC = () => {
 
       {/* LDAP Settings Form */}
       <div className="ldap-settings-section">
-        <h3>LDAP Bağlantı Ayarları</h3>
+        <div className="ldap-settings-header">
+          <h3>LDAP Bağlantı Ayarları</h3>
+          <div className="ldap-settings-header-actions">
+            {!isSettingsExpanded && (
+              <button
+                type="button"
+                className="btn-edit"
+                onClick={() => setIsSettingsExpanded(true)}
+              >
+                Düzenle
+              </button>
+            )}
+            {isSettingsExpanded && (
+              <button
+                type="button"
+                className="btn-close"
+                onClick={() => {
+                  setIsSettingsExpanded(false);
+                  setLdapPassword('');
+                  setTestPassword('');
+                }}
+              >
+                Kapat
+              </button>
+            )}
+          </div>
+        </div>
+        
+        {isSettingsExpanded && (
         <div className="ldap-settings-form">
           <div className="form-group">
             <label>LDAP URLs *</label>
@@ -299,6 +401,7 @@ const LdapImport: React.FC = () => {
             </div>
           )}
         </div>
+        )}
       </div>
 
       {/* LDAP User Search */}

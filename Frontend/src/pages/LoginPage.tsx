@@ -8,6 +8,7 @@ const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loginType, setLoginType] = useState<'ldap' | 'standard'>('standard');
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -17,7 +18,7 @@ const LoginPage: React.FC = () => {
     setLoading(true);
 
     try {
-      await login(username, password);
+      await login(username, password, loginType);
       navigate('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Giriş başarısız');
@@ -31,10 +32,26 @@ const LoginPage: React.FC = () => {
       <div className="login-box">
         <h1 className="login-title">ProjectSpring</h1>
         <p className="login-subtitle">İş Takip Sistemi</p>
+        <div className="login-tabs">
+          <button
+            type="button"
+            className={`login-tab ${loginType === 'ldap' ? 'active' : ''}`}
+            onClick={() => setLoginType('ldap')}
+          >
+            LDAP
+          </button>
+          <button
+            type="button"
+            className={`login-tab ${loginType === 'standard' ? 'active' : ''}`}
+            onClick={() => setLoginType('standard')}
+          >
+            Standard
+          </button>
+        </div>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label" htmlFor="username">
-              Kullanıcı Adı
+              Username
             </label>
             <input
               id="username"
@@ -47,7 +64,7 @@ const LoginPage: React.FC = () => {
           </div>
           <div className="form-group">
             <label className="form-label" htmlFor="password">
-              Şifre
+              Password
             </label>
             <input
               id="password"
@@ -64,7 +81,7 @@ const LoginPage: React.FC = () => {
             className="login-button"
             disabled={loading}
           >
-            {loading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
+            {loading ? 'Giriş yapılıyor...' : 'Sign in'}
           </button>
         </form>
       </div>

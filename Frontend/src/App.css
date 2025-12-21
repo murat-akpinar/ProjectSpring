@@ -463,6 +463,44 @@
   margin-bottom: 30px;
 }
 
+.login-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--ctp-surface0);
+  margin-bottom: 20px;
+}
+
+.login-tab {
+  flex: 1;
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  color: var(--ctp-subtext0);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s;
+  position: relative;
+  font-family: 'Cascadia Mono', monospace;
+}
+
+.login-tab:hover {
+  color: var(--ctp-text);
+}
+
+.login-tab.active {
+  color: var(--ctp-blue);
+}
+
+.login-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--ctp-blue);
+}
+
 .form-group {
   margin-bottom: 20px;
 }

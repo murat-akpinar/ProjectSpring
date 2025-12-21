@@ -14,5 +14,7 @@ public class LoginRequest {
     
     @NotBlank(message = "Password is required")
     private String password;
+    
+    private String loginType; // "ldap" or "standard", null means try both
 }
 

@@ -52,5 +52,16 @@ public class LdapSettingsController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
+    
+    @PostMapping("/test/auto")
+    public ResponseEntity<LdapTestResponse> testLdapConnectionAuto() {
+        try {
+            LdapTestResponse response = ldapSettingsService.testLdapConnectionWithSavedPassword();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            LdapTestResponse errorResponse = new LdapTestResponse(false, "Otomatik test başarısız", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
 }
 

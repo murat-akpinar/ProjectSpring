@@ -16,5 +16,10 @@ export const ldapSettingsService = {
     const response = await api.post<LdapTestResponse>('/admin/ldap/settings/test', request);
     return response.data;
   },
+
+  testLdapConnectionAuto: async (): Promise<LdapTestResponse> => {
+    const response = await api.post<LdapTestResponse>('/admin/ldap/settings/test/auto');
+    return response.data;
+  },
 };
 

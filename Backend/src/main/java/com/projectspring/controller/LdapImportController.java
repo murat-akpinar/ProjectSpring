@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,9 +45,30 @@ public class LdapImportController {
             ldapUser.setFullName((String) request.get("fullName"));
             ldapUser.setLdapDn((String) request.get("ldapDn"));
 
-            @SuppressWarnings("unchecked")
-            Set<Long> roleIds = request.get("roleIds") != null ?
-                    (Set<Long>) request.get("roleIds") : null;
+            // Convert roleIds from List/Array to Set
+            Set<Long> roleIds = null;
+            if (request.get("roleIds") != null) {
+                Object roleIdsObj = request.get("roleIds");
+                if (roleIdsObj instanceof List) {
+                    @SuppressWarnings("unchecked")
+                    List<Object> roleIdsList = (List<Object>) roleIdsObj;
+                    roleIds = new HashSet<>();
+                    for (Object roleId : roleIdsList) {
+                        if (roleId instanceof Number) {
+                            roleIds.add(((Number) roleId).longValue());
+                        }
+                    }
+                } else if (roleIdsObj instanceof Set) {
+                    @SuppressWarnings("unchecked")
+                    Set<Object> roleIdsSet = (Set<Object>) roleIdsObj;
+                    roleIds = new HashSet<>();
+                    for (Object roleId : roleIdsSet) {
+                        if (roleId instanceof Number) {
+                            roleIds.add(((Number) roleId).longValue());
+                        }
+                    }
+                }
+            }
 
             User user = ldapImportService.importLdapUser(ldapUser, roleIds);
             return ResponseEntity.status(HttpStatus.CREATED).body(user);
