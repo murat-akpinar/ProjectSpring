@@ -76,6 +76,7 @@ public class SystemLogController {
     }
     
     @PostMapping("/system/frontend")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> receiveFrontendLog(
             @RequestBody FrontendLogRequest request,
             jakarta.servlet.http.HttpServletRequest httpRequest
