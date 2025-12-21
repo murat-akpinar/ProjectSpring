@@ -95,6 +95,13 @@ export const logService = {
   },
 
   async sendFrontendLog(level: 'INFO' | 'WARN' | 'ERROR' | 'DEBUG', message: string, error?: Error): Promise<void> {
+    // Only send logs if user is authenticated (has token)
+    const token = localStorage.getItem('token');
+    if (!token) {
+      // Silently skip logging if user is not authenticated
+      return;
+    }
+    
     const request: FrontendLogRequest = {
       level,
       message,
@@ -103,9 +110,15 @@ export const logService = {
     
     try {
       await api.post('/admin/logs/system/frontend', request);
-    } catch (err) {
+    } catch (err: any) {
       // Don't log errors when sending logs to avoid infinite loop
-      console.error('Failed to send frontend log:', err);
+      // Also, if it's a 401/403 error, stop trying to send logs
+      const status = err?.response?.status;
+      if (status === 401 || status === 403) {
+        // Token expired or invalid, stop trying to send logs
+        return;
+      }
+      // For other errors, silently fail (don't log to avoid loop)
     }
   }
 };
