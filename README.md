@@ -76,23 +76,38 @@ git clone <repository-url>
 cd ProjectSpring
 ```
 
-2. Environment değişkenlerini ayarlayın (`.env` dosyası oluşturun):
-```env
-# LDAP ayarları (LDAP_ENABLED=false yaparsanız sadece local user kullanılır)
-LDAP_ENABLED=true
-LDAP_URLS=ldap://your-ldap-server:389
-LDAP_BASE=dc=example,dc=com
-LDAP_USER_SEARCH_BASE=ou=users
-LDAP_USER_SEARCH_FILTER=(uid={0})
-JWT_SECRET=your-secret-key-min-256-bits
+2. Docker Compose ile başlatın:
+```bash
+docker-compose up -d
 ```
 
 **Not:** Database tabloları Spring Boot başlarken otomatik olarak Liquibase migration'ları ile oluşturulur. Manuel bir şey yapmanıza gerek yok.
 
-3. Docker Compose ile başlatın:
+3. (Opsiyonel) LDAP Test Sunucusunu Başlatma
+
+LDAP test etmek için dahili test sunucusu kullanabilirsiniz:
+
 ```bash
+# Ana proje zaten çalışıyor olmalı
+cd ldap_test
 docker-compose up -d
+
+# Test kullanıcılarını ekle
+./init-ldap.sh
 ```
+
+LDAP test sunucusu otomatik olarak ana projenin Docker network'üne bağlanır. Yönetim panelinden LDAP ayarlarını yapılandırabilirsiniz:
+
+- **URLs**: `ldap://ldap-test:389` (Docker içinden) veya `ldap://localhost:389` (host'tan test için)
+- **Base**: `dc=test,dc=local`
+- **Username**: `cn=admin,dc=test,dc=local`
+- **Password**: `admin123`
+- **User Search Base**: `ou=users`
+- **User Search Filter**: `(uid={0})`
+
+**Önemli:** LDAP ayarları artık sadece yönetim panelinden (database) okunuyor. Docker-compose veya application.yml'den okunmuyor. Bu sayede LDAP sadece yetkili adminler tarafından yapılandırılabilir.
+
+**phpLDAPadmin:** Web tabanlı LDAP yönetim arayüzüne http://localhost:8082 adresinden erişebilirsiniz.
 
 4. Uygulamaya erişin:
 - Frontend: http://localhost:8000
@@ -211,15 +226,56 @@ Uygulama ilk başlatıldığında otomatik olarak bir admin kullanıcı oluştur
 
 Sistem önce LDAP'de kullanıcıyı arar, başarısız olursa database'deki local user'ları kontrol eder:
 
-1. **LDAP Authentication** (eğer `LDAP_ENABLED=true`):
+1. **LDAP Authentication** (eğer yönetim panelinden `isEnabled=true` yapılmışsa):
    - Kullanıcı LDAP sunucusunda aranır
    - Başarılı olursa kullanıcı database'e senkronize edilir
    - LDAP kullanıcılarının password'ü database'de saklanmaz
+   - **Önemli:** LDAP ayarları sadece yönetim panelinden yapılır, docker-compose veya application.yml'den okunmaz
 
 2. **Local User Authentication**:
-   - LDAP başarısız olursa veya `LDAP_ENABLED=false` ise
+   - LDAP başarısız olursa veya yönetim panelinden `isEnabled=false` ise
    - Database'deki kullanıcılar kontrol edilir
    - Password BCrypt ile hash'lenmiş olarak saklanır
+
+### LDAP Test Sunucusu
+
+Proje içinde LDAP test sunucusu bulunmaktadır (`ldap_test` dizini). Test sunucusu:
+
+- Ana projenin Docker network'üne otomatik bağlanır
+- Container adı: `ldap-test`
+- Port: 389 (LDAP), 8082 (phpLDAPadmin)
+- Base DN: `dc=test,dc=local`
+- Admin DN: `cn=admin,dc=test,dc=local`
+- Admin Password: `admin123`
+
+**Kurulum:**
+```bash
+# Ana projeyi başlatın
+docker-compose up -d
+
+# LDAP test sunucusunu başlatın
+cd ldap_test
+docker-compose up -d
+
+# Test kullanıcılarını ekleyin
+./init-ldap.sh
+```
+
+**Yönetim Panelinden Yapılandırma:**
+1. Admin panel → LDAP Ayarları
+2. Aşağıdaki bilgileri girin:
+   - **URLs**: `ldap://ldap-test:389` (Docker içinden) veya `ldap://localhost:389` (host'tan test için)
+   - **Base**: `dc=test,dc=local`
+   - **Username**: `cn=admin,dc=test,dc=local`
+   - **Password**: `admin123`
+   - **User Search Base**: `ou=users`
+   - **User Search Filter**: `(uid={0})`
+3. "LDAP'ı Aktif Et" checkbox'ını işaretleyin
+4. "Bağlantıyı Test Et" butonuna tıklayın
+
+**phpLDAPadmin:** http://localhost:8082 adresinden web tabanlı LDAP yönetim arayüzüne erişebilirsiniz.
+
+**Detaylı bilgi için:** `ldap_test/README.md` dosyasına bakın.
 
 ### Local User Oluşturma
 
@@ -330,6 +386,8 @@ Bu özellik şunları ekler:
 - Ayarların şifreli saklanması (AES-256 encryption)
 - Test butonu ile bağlantı kontrolü
 - LDAP kullanıcı arama ve import
+- **Güvenlik:** LDAP ayarları sadece yönetim panelinden (database) okunuyor, docker-compose veya application.yml'den okunmuyor
+- **Dinamik Yapılandırma:** LDAP ayarları değiştirildiğinde backend'i yeniden başlatmaya gerek yok
 
 ### Sistem Sağlığı
 - Backend durumu kontrolü
