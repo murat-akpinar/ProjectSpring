@@ -21,10 +21,11 @@ ProjectSpring — Takımlar için takvim odaklı proje ve görev yönetim platfo
   - İsim değiştirme
   - Şifre değiştirme
 - **Çoklu Görünüm Modları**: 
-  - Takvim Görünümü: Günlük takvim görünümü, hafta sonu günleri soluk
-  - Gantt Chart: Timeline bazlı Gantt chart, hafta seçimi, hiyerarşik subtask desteği
-  - Kanban Board: Status bazlı Kanban board, her takım için ayrı
-- **Aylık Görünüm**: 12 ay grid görünümü, mevsim renkleri ile
+  - Takvim Görünümü: Günlük takvim görünümü, hafta sonu günleri soluk, responsive tasarım
+  - Gantt Chart: Timeline bazlı Gantt chart, hafta seçimi, hiyerarşik subtask desteği, responsive tasarım
+  - Kanban Board: Status bazlı Kanban board, her takım için ayrı, responsive tasarım
+- **Aylık Görünüm**: 12 ay grid görünümü, mevsim renkleri ile, responsive grid düzeni
+- **Sidebar Toggle**: Sol menüyü gizleme/gösterme özelliği (localStorage ile state yönetimi)
 - **Proje Yönetimi**: Proje oluşturma, düzenleme, silme. Projelere ekip atama ve iş ekleme
 - **Proje Detay Görünümü**: Durum dağılımı grafiği, görev listesi ve Gantt chart ile detaylı proje takibi
 - **Proje Uyarı Sistemi**: Bitim tarihine 1 gün kalan projeler otomatik yanıp söner
@@ -373,6 +374,13 @@ Admin panelinde "Loglar" sekmesi altında iki tür log görüntüleme sistemi bu
 - **Görünüm Seçimi**: Dropdown yerine yan yana butonlar
 - **Hafta Sonu Görünümü**: Takvim görünümünde hafta sonu günleri soluk
 - **Proje Uyarı Sistemi**: Bitim tarihine 1 gün kalan projeler yanıp söner
+- **Sidebar Toggle**: Sol menüyü gizleme/gösterme butonu (localStorage ile state kalıcılığı)
+- **Responsive Tasarım**: 
+  - Gantt Chart: Ekran boyutuna göre otomatik ölçeklenme, sol panel responsive genişlik
+  - Kanban Board: Kolonlar ekrana eşit dağılıyor, mobil uyumlu
+  - Calendar View: Responsive grid düzeni (desktop: 4 kolon, tablet: 2-3 kolon, mobil: 1 kolon)
+  - MonthView: Ekran boyutuna göre grid kolon sayısı ayarlanıyor
+- **Content Overflow Kontrolü**: Tüm görünümlerde ekrandan taşma sorunu çözüldü
 
 ## Lisans
 
