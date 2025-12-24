@@ -23,6 +23,14 @@ public class JwtService {
     @Value("${jwt.expiration}")
     private Long expiration;
     
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(JwtService.class);
+    
+    @jakarta.annotation.PostConstruct
+    public void logJwtExpiration() {
+        logger.info("JWT expiration set to: {} ms ({} seconds, {} minutes)", 
+            expiration, expiration / 1000, expiration / 60000);
+    }
+    
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
@@ -49,7 +57,14 @@ public class JwtService {
     }
     
     private Boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+        Date expiration = extractExpiration(token);
+        Date now = new Date();
+        boolean expired = expiration.before(now);
+        if (expired) {
+            logger.debug("Token expired. Expiration: {}, Current: {}, Difference: {} ms", 
+                expiration, now, now.getTime() - expiration.getTime());
+        }
+        return expired;
     }
     
     public String generateToken(UserDetails userDetails) {
@@ -62,11 +77,15 @@ public class JwtService {
     }
     
     private String createToken(Map<String, Object> claims, String subject) {
+        Date issuedAt = new Date(System.currentTimeMillis());
+        Date expirationDate = new Date(System.currentTimeMillis() + expiration);
+        logger.debug("Creating JWT token for user: {}, issuedAt: {}, expiresAt: {}, expiration: {} ms", 
+            subject, issuedAt, expirationDate, expiration);
         return Jwts.builder()
                 .claims(claims)
                 .subject(subject)
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .issuedAt(issuedAt)
+                .expiration(expirationDate)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

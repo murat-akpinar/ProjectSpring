@@ -8,6 +8,7 @@ import ProjectsPage from './pages/ProjectsPage';
 import ProjectDetailPage from './pages/ProjectDetailPage';
 import AdminPanelPage from './pages/AdminPanelPage';
 import UserProfilePage from './pages/UserProfilePage';
+import NotFoundPage from './pages/NotFoundPage';
 import { initializeErrorLogger } from './utils/errorLogger';
 import './App.css';
 
@@ -88,6 +89,7 @@ const App: React.FC = () => {
           )
         }
       />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 };

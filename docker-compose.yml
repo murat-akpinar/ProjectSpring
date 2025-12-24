@@ -30,7 +30,8 @@ services:
       DB_USER: postgres
       DB_PASSWORD: postgres
       JWT_SECRET: ${JWT_SECRET}
-      SEED_SAMPLE_DATA: ${SEED_SAMPLE_DATA:-0}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      SEED_SAMPLE_DATA: ${SEED_SAMPLE_DATA}
       FRONTEND_URL: ${FRONTEND_URL:-http://frontend:80}
     ports:
       - "8081:8080"
