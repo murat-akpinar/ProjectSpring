@@ -75,6 +75,48 @@
   line-height: 1.6;
 }
 
+.project-summary {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: var(--ctp-surface0);
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+
+.project-summary-item {
+  flex: 1;
+  min-width: 120px;
+  text-align: center;
+}
+
+.summary-label {
+  font-size: 12px;
+  color: var(--ctp-subtext0);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ctp-text);
+}
+
+.summary-value.completed {
+  color: var(--ctp-green);
+}
+
+.summary-value.active {
+  color: var(--ctp-blue);
+}
+
+.summary-value.progress {
+  color: var(--ctp-yellow);
+}
+
 /* Status and Plan Container - Side by Side */
 .status-and-plan-container {
   display: grid;

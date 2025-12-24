@@ -22,5 +22,8 @@ public class ProjectDTO {
     private String createdByName;
     private List<Long> teamIds;
     private List<String> teamNames;
+    private Long taskCount;
+    private Long completedTaskCount;
+    private Long activeTaskCount;
 }
 

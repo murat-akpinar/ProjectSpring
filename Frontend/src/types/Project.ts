@@ -16,6 +16,9 @@ export interface Project {
   createdByName: string;
   teamIds: number[];
   teamNames: string[];
+  taskCount?: number;
+  completedTaskCount?: number;
+  activeTaskCount?: number;
 }
 
 export interface CreateProjectRequest {

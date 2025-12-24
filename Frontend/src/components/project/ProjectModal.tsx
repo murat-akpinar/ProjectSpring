@@ -86,6 +86,13 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
         return;
       }
       
+      // En az bir ekip zorunlu
+      if (!requestData.teamIds || requestData.teamIds.length === 0) {
+        alert('En az bir ekip seçilmelidir.');
+        setLoading(false);
+        return;
+      }
+      
       if (project) {
         await projectService.updateProject(project.id, requestData);
       } else {
@@ -186,7 +193,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
           </div>
           
           <div className="form-group">
-            <label>Ekipler</label>
+            <label>Ekipler *</label>
             <div className="team-checkboxes">
               {teams.map((team) => (
                 <label key={team.id} className="team-checkbox">

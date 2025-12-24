@@ -40,9 +40,12 @@ const ProjectDetailPage: React.FC = () => {
     
     try {
       setLoading(true);
+      const projectId = parseInt(id);
+      // Proje detay sayfasında sadece o projeye ait task'ları getir
+      // teamId göndermiyoruz, backend direkt projeye ait task'ları getirecek
       const [projectData, tasksData] = await Promise.all([
-        projectService.getProjectById(parseInt(id)),
-        taskService.getTasks(selectedTeamId || undefined, selectedYear, selectedMonth, parseInt(id)),
+        projectService.getProjectById(projectId),
+        taskService.getTasks(undefined, selectedYear, selectedMonth, projectId),
       ]);
       setProject(projectData);
       setTasks(tasksData);
@@ -205,6 +208,32 @@ const ProjectDetailPage: React.FC = () => {
             {project.description && (
               <div className="project-description">
                 <p>{project.description}</p>
+              </div>
+            )}
+
+            {/* Project Summary - Task Statistics */}
+            {project.taskCount !== undefined && (
+              <div className="project-summary">
+                <div className="project-summary-item">
+                  <div className="summary-label">Toplam İş</div>
+                  <div className="summary-value">{project.taskCount}</div>
+                </div>
+                <div className="project-summary-item">
+                  <div className="summary-label">Tamamlanan</div>
+                  <div className="summary-value completed">{project.completedTaskCount || 0}</div>
+                </div>
+                <div className="project-summary-item">
+                  <div className="summary-label">Aktif</div>
+                  <div className="summary-value active">{project.activeTaskCount || 0}</div>
+                </div>
+                <div className="project-summary-item">
+                  <div className="summary-label">İlerleme</div>
+                  <div className="summary-value progress">
+                    {project.taskCount > 0 
+                      ? `${Math.round(((project.completedTaskCount || 0) / project.taskCount) * 100)}%`
+                      : '0%'}
+                  </div>
+                </div>
               </div>
             )}
 
