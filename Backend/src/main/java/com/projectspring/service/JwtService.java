@@ -23,6 +23,18 @@ public class JwtService {
     @Value("${jwt.expiration}")
     private Long expiration;
     
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(JwtService.class);
+    
+    @jakarta.annotation.PostConstruct
+    public void logJwtExpiration() {
+        if (expiration != null) {
+            logger.info("JWT expiration set to: {} ms ({} seconds, {} minutes)", 
+                expiration, expiration / 1000, expiration / 60000);
+        } else {
+            logger.warn("JWT expiration is not set! Using default value from application.yml: 86400000 ms (24 hours)");
+        }
+    }
+    
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
@@ -49,7 +61,14 @@ public class JwtService {
     }
     
     private Boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+        Date expiration = extractExpiration(token);
+        Date now = new Date();
+        boolean expired = expiration.before(now);
+        if (expired) {
+            logger.debug("Token expired. Expiration: {}, Current: {}, Difference: {} ms", 
+                expiration, now, now.getTime() - expiration.getTime());
+        }
+        return expired;
     }
     
     public String generateToken(UserDetails userDetails) {
@@ -62,11 +81,17 @@ public class JwtService {
     }
     
     private String createToken(Map<String, Object> claims, String subject) {
+        // Use default expiration if not set (86400000 ms = 24 hours)
+        long expirationMs = (expiration != null) ? expiration : 86400000L;
+        Date issuedAt = new Date(System.currentTimeMillis());
+        Date expirationDate = new Date(System.currentTimeMillis() + expirationMs);
+        logger.debug("Creating JWT token for user: {}, issuedAt: {}, expiresAt: {}, expiration: {} ms", 
+            subject, issuedAt, expirationDate, expirationMs);
         return Jwts.builder()
                 .claims(claims)
                 .subject(subject)
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .issuedAt(issuedAt)
+                .expiration(expirationDate)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

@@ -1,0 +1,86 @@
+.not-found-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--ctp-base);
+  padding: 20px;
+}
+
+.not-found-content {
+  text-align: center;
+  max-width: 600px;
+  padding: 40px;
+  background: var(--ctp-mantle);
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--ctp-surface0);
+}
+
+.not-found-number {
+  font-size: 120px;
+  font-weight: bold;
+  color: var(--ctp-blue);
+  margin-bottom: 20px;
+  line-height: 1;
+  text-shadow: 0 4px 8px rgba(137, 180, 250, 0.3);
+  font-family: 'Cascadia Mono', monospace;
+}
+
+.not-found-title {
+  font-size: 32px;
+  font-weight: bold;
+  color: var(--ctp-text);
+  margin-bottom: 16px;
+  font-family: 'Cascadia Mono', monospace;
+}
+
+.not-found-message {
+  font-size: 16px;
+  color: var(--ctp-subtext1);
+  margin-bottom: 32px;
+  line-height: 1.6;
+  font-family: 'Cascadia Mono', monospace;
+}
+
+.not-found-button {
+  padding: 12px 32px;
+  background-color: var(--ctp-blue);
+  color: var(--ctp-base);
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+  font-family: 'Cascadia Mono', monospace;
+}
+
+.not-found-button:hover {
+  background-color: var(--ctp-sapphire);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(137, 180, 250, 0.4);
+}
+
+.not-found-button:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .not-found-number {
+    font-size: 80px;
+  }
+
+  .not-found-title {
+    font-size: 24px;
+  }
+
+  .not-found-message {
+    font-size: 14px;
+  }
+
+  .not-found-content {
+    padding: 30px 20px;
+  }
+}
+

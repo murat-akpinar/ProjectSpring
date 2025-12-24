@@ -4,9 +4,34 @@
   margin: 0 auto;
 }
 
-.user-profile-page h1 {
-  color: var(--ctp-text);
+.user-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.user-profile-header h1 {
+  color: var(--ctp-text);
+  margin: 0;
   font-size: 28px;
+  flex: 1;
+}
+
+.btn-back {
+  padding: 8px 16px;
+  background-color: var(--ctp-surface1);
+  color: var(--ctp-text);
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Cascadia Mono', monospace;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.btn-back:hover {
+  background-color: var(--ctp-surface2);
 }
 

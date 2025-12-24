@@ -208,66 +208,40 @@ const ProjectDetailPage: React.FC = () => {
               </div>
             )}
 
-            {/* Status Chart - Horizontal Bar Chart */}
-            {statusData.length > 0 && (
-              <div className="status-chart-section">
-                <h2>Durum</h2>
-                <div className="status-chart-horizontal">
-                  <div className="status-chart-bars">
-                    {statusData.map((item) => (
-                      <div key={item.status} className="status-bar-horizontal">
-                        <div className="status-bar-label-horizontal">{item.label}</div>
-                        <div className="status-bar-wrapper">
-                          <div
-                            className="status-bar-fill"
-                            style={{
-                              width: `${(item.count / maxCount) * 100}%`,
-                              backgroundColor: item.color,
-                            }}
-                          >
-                            <span className="status-bar-value">{item.count}</span>
+            {/* Status Chart + Project Plan - Side by Side */}
+            <div className="status-and-plan-container">
+              {/* Left: Status Chart - Vertical Bar Chart */}
+              {statusData.length > 0 && (
+                <div className="status-chart-section">
+                  <h2>Durum</h2>
+                  <div className="status-chart-vertical">
+                    <div className="status-chart-bars-vertical">
+                      {statusData.map((item) => (
+                        <div key={item.status} className="status-bar-vertical">
+                          <div className="status-bar-value-vertical">{item.count}</div>
+                          <div className="status-bar-wrapper-vertical">
+                            <div
+                              className="status-bar-fill-vertical"
+                              style={{
+                                height: `${(item.count / maxCount) * 100}%`,
+                                backgroundColor: item.color,
+                              }}
+                            />
                           </div>
+                          <div className="status-bar-label-vertical">{item.label}</div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Project Plan Section - Table + Gantt */}
-            <div className="project-plan-section">
-              <div className="project-plan-header">
-                <h2>Proje Planı</h2>
-                <div className="gantt-controls">
-                  <select
-                    value={selectedMonth}
-                    onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-                    className="month-select"
-                  >
-                    {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
-                      <option key={month} value={month}>
-                        {new Date(selectedYear, month - 1).toLocaleDateString('tr-TR', { month: 'long' })}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={selectedWeek}
-                    onChange={(e) => setSelectedWeek(parseInt(e.target.value))}
-                    className="week-select"
-                  >
-                    <option value={0}>Tüm Ay</option>
-                    {Array.from({ length: weeksInMonth }, (_, i) => i + 1).map((week) => (
-                      <option key={week} value={week}>
-                        {week}. Hafta
-                      </option>
-                    ))}
-                  </select>
+              {/* Right: Project Plan Table */}
+              <div className="project-plan-section">
+                <div className="project-plan-header">
+                  <h2>Proje Planı</h2>
                 </div>
-              </div>
-              
-              <div className="project-plan-content">
-                {/* Left: Tasks Table */}
+                
                 <div className="tasks-table-container">
                   <table className="tasks-table">
                     <thead>
@@ -335,18 +309,49 @@ const ProjectDetailPage: React.FC = () => {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            </div>
 
-                {/* Right: Gantt Chart */}
-                <div className="gantt-chart-container">
-                  <GanttChartView
-                    tasks={tasks}
-                    month={selectedMonth}
-                    year={selectedYear}
-                    selectedWeek={selectedWeek}
-                    weeksInMonth={weeksInMonth}
-                    onTaskClick={handleTaskClick}
-                  />
+            {/* Gantt Chart - Full Width Below */}
+            <div className="gantt-section">
+              <div className="gantt-header">
+                <h2>İş Planı</h2>
+                <div className="gantt-controls">
+                  <select
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+                    className="month-select"
+                  >
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
+                      <option key={month} value={month}>
+                        {new Date(selectedYear, month - 1).toLocaleDateString('tr-TR', { month: 'long' })}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={selectedWeek}
+                    onChange={(e) => setSelectedWeek(parseInt(e.target.value))}
+                    className="week-select"
+                  >
+                    <option value={0}>Tüm Ay</option>
+                    {Array.from({ length: weeksInMonth }, (_, i) => i + 1).map((week) => (
+                      <option key={week} value={week}>
+                        {week}. Hafta
+                      </option>
+                    ))}
+                  </select>
                 </div>
+              </div>
+              
+              <div className="gantt-chart-container-full">
+                <GanttChartView
+                  tasks={tasks}
+                  month={selectedMonth}
+                  year={selectedYear}
+                  selectedWeek={selectedWeek}
+                  weeksInMonth={weeksInMonth}
+                  onTaskClick={handleTaskClick}
+                />
               </div>
             </div>
           </div>
