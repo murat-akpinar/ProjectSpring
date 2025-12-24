@@ -27,8 +27,12 @@ public class JwtService {
     
     @jakarta.annotation.PostConstruct
     public void logJwtExpiration() {
-        logger.info("JWT expiration set to: {} ms ({} seconds, {} minutes)", 
-            expiration, expiration / 1000, expiration / 60000);
+        if (expiration != null) {
+            logger.info("JWT expiration set to: {} ms ({} seconds, {} minutes)", 
+                expiration, expiration / 1000, expiration / 60000);
+        } else {
+            logger.warn("JWT expiration is not set! Using default value from application.yml: 86400000 ms (24 hours)");
+        }
     }
     
     private SecretKey getSigningKey() {
@@ -77,10 +81,12 @@ public class JwtService {
     }
     
     private String createToken(Map<String, Object> claims, String subject) {
+        // Use default expiration if not set (86400000 ms = 24 hours)
+        long expirationMs = (expiration != null) ? expiration : 86400000L;
         Date issuedAt = new Date(System.currentTimeMillis());
-        Date expirationDate = new Date(System.currentTimeMillis() + expiration);
+        Date expirationDate = new Date(System.currentTimeMillis() + expirationMs);
         logger.debug("Creating JWT token for user: {}, issuedAt: {}, expiresAt: {}, expiration: {} ms", 
-            subject, issuedAt, expirationDate, expiration);
+            subject, issuedAt, expirationDate, expirationMs);
         return Jwts.builder()
                 .claims(claims)
                 .subject(subject)
