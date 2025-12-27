@@ -64,7 +64,9 @@ public class AuthController {
         logger.info("Login attempt for user: {} from IP: {}", username, ipAddress);
         
         // Check IP-based rate limiting
-        if (loginAttemptService.isIpBlocked(ipAddress)) {
+        boolean ipBlocked = loginAttemptService.isIpBlocked(ipAddress);
+        logger.debug("Rate limiting check for IP {}: blocked={}", ipAddress, ipBlocked);
+        if (ipBlocked) {
             logger.warn("IP blocked for login attempt: {} from IP: {}", username, ipAddress);
             loginAttemptService.recordLoginAttempt(username, ipAddress, false);
             Map<String, Object> error = new HashMap<>();
@@ -74,7 +76,9 @@ public class AuthController {
         }
         
         // Check account lockout
-        if (loginAttemptService.isAccountLocked(username)) {
+        boolean accountLocked = loginAttemptService.isAccountLocked(username);
+        logger.debug("Account lockout check for user {}: locked={}", username, accountLocked);
+        if (accountLocked) {
             logger.warn("Account locked for login attempt: {}", username);
             loginAttemptService.recordLoginAttempt(username, ipAddress, false);
             Map<String, Object> error = new HashMap<>();
@@ -93,7 +97,7 @@ public class AuthController {
             loginAttemptService.recordLoginAttempt(username, ipAddress, true);
             
             User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("User not found after successful authentication"));
             
             UserDTO userDTO = new UserDTO();
             userDTO.setId(user.getId());
@@ -112,19 +116,51 @@ public class AuthController {
             response.setUser(userDTO);
             
             return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            logger.error("Authentication failed for user: {} - Error: {}", username, e.getMessage(), e);
+        } catch (RuntimeException e) {
+            // Handle specific authentication errors
+            String errorMessage = e.getMessage();
+            logger.error("Authentication failed for user: {} from IP: {} - Error: {} (Type: {})", 
+                username, ipAddress, errorMessage, e.getClass().getSimpleName(), e);
+            
             // Record failed login
             loginAttemptService.recordLoginAttempt(username, ipAddress, false);
             
             int remainingAttempts = loginAttemptService.getRemainingAttempts(username);
             Map<String, Object> error = new HashMap<>();
-            error.put("error", "Invalid username or password");
-            error.put("code", "AUTHENTICATION_FAILED");
+            
+            // Provide more specific error messages based on exception type
+            if (errorMessage != null && errorMessage.contains("LDAP")) {
+                error.put("error", "LDAP authentication failed. Please check your credentials or contact administrator.");
+                error.put("code", "LDAP_AUTHENTICATION_FAILED");
+            } else if (errorMessage != null && errorMessage.contains("User not found")) {
+                error.put("error", "Invalid username or password");
+                error.put("code", "USER_NOT_FOUND");
+            } else if (errorMessage != null && errorMessage.contains("Invalid password")) {
+                error.put("error", "Invalid username or password");
+                error.put("code", "INVALID_PASSWORD");
+            } else {
+                error.put("error", "Invalid username or password");
+                error.put("code", "AUTHENTICATION_FAILED");
+            }
+            
             if (remainingAttempts < 5) {
                 error.put("remainingAttempts", remainingAttempts);
             }
+            
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        } catch (Exception e) {
+            // Handle unexpected errors
+            logger.error("Unexpected error during login for user: {} from IP: {} - Error: {}", 
+                username, ipAddress, e.getMessage(), e);
+            
+            // Record failed login
+            loginAttemptService.recordLoginAttempt(username, ipAddress, false);
+            
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", "An error occurred during authentication. Please try again later.");
+            error.put("code", "INTERNAL_SERVER_ERROR");
+            
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
     

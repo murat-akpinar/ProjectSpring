@@ -70,12 +70,27 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
             IllegalArgumentException ex, WebRequest request) {
-        logger.warn("Illegal argument: {}", ex.getMessage());
+        // Filter out HTTP parsing errors from bots/scanners (harmless but noisy)
+        String errorMessage = ex.getMessage();
+        if (errorMessage != null && errorMessage.contains("Invalid character found in method name")) {
+            // This is a harmless bot/scanner trying HTTPS on HTTP port
+            logger.debug("HTTP parsing error (likely bot/scanner): {}", errorMessage);
+            // Return a generic error without exposing details
+            ErrorResponse errorResponse = new ErrorResponse(
+                    HttpStatus.BAD_REQUEST.value(),
+                    "Bad Request",
+                    "Invalid request format",
+                    request.getDescription(false).replace("uri=", "")
+            );
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+        
+        logger.warn("Illegal argument: {}", errorMessage);
         
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 "Invalid Request",
-                ex.getMessage(),
+                errorMessage,
                 request.getDescription(false).replace("uri=", "")
         );
         

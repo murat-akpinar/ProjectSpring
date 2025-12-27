@@ -40,7 +40,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             if (request.getRequestURI().startsWith("/api/admin")) {
                 logger.warn("No Authorization header or invalid format for admin request: " + request.getRequestURI());
-            } else {
+            } else if (!request.getRequestURI().equals("/health") && !request.getRequestURI().equals("/actuator/health")) {
+                // Skip debug logging for health check endpoints to reduce log spam
                 logger.debug("No Authorization header or invalid format for request: " + request.getRequestURI());
             }
             filterChain.doFilter(request, response);
