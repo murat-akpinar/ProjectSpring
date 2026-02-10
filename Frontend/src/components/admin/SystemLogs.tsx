@@ -17,7 +17,8 @@ const SystemLogs: React.FC = () => {
 
   useEffect(() => {
     fetchLogs();
-  }, [activeSource, filter]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeSource, filter.level, filter.startDate, filter.endDate, filter.page]);
 
   const fetchLogs = async () => {
     try {
@@ -26,14 +27,14 @@ const SystemLogs: React.FC = () => {
         ...filter,
         source: activeSource
       };
-      
+
       let response: PageResponse<SystemLog>;
       if (activeSource === 'BACKEND') {
         response = await logService.getBackendLogs(updatedFilter);
       } else {
         response = await logService.getFrontendLogs(updatedFilter);
       }
-      
+
       setLogs(response.content);
       setTotalPages(response.totalPages);
       setCurrentPage(response.number);

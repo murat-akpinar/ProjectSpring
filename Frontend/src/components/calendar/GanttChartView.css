@@ -2,7 +2,7 @@
   padding: 20px;
   overflow: hidden;
   background-color: var(--ctp-base);
-  border-radius: 8px;
+  border-radius: 16px;
   width: 100%;
   max-width: 100%;
   height: 100%;
@@ -16,18 +16,19 @@
   max-width: 100%;
   background-color: var(--ctp-base);
   border: 1px solid var(--ctp-surface0);
-  border-radius: 8px;
+  border-radius: 16px;
   overflow: visible;
   flex: 1;
   min-height: 0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 /* Sol Panel - Task Listesi */
 .gantt-left-panel {
-  min-width: 420px;
-  max-width: 520px;
-  width: 420px;
-  flex: 0 0 420px;
+  min-width: 480px;
+  max-width: 600px;
+  width: 520px;
+  flex: 0 0 520px;
   border-right: 2px solid var(--ctp-surface0);
   background-color: var(--ctp-mantle);
   display: flex;
@@ -37,21 +38,21 @@
 
 .gantt-table-header {
   display: grid;
-  grid-template-columns: 2fr 1fr 1.2fr 1.2fr 2.2fr;
+  grid-template-columns: 3fr 1fr 1.2fr 1.2fr 2.2fr;
   gap: 10px;
-  padding: 12px 12px;
-  background-color: var(--ctp-crust);
-  border-bottom: 2px solid var(--ctp-surface0);
-  font-weight: 600;
+  padding: 14px 12px;
+  background: linear-gradient(180deg, var(--ctp-surface0) 0%, var(--ctp-crust) 100%);
+  border-bottom: 2px solid var(--ctp-surface1);
+  font-weight: 700;
   font-size: 12px;
   color: var(--ctp-text);
   text-transform: uppercase;
+  letter-spacing: 0.5px;
   position: sticky;
   top: 0;
   left: 0;
   z-index: 10;
   min-width: 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .gantt-col-subject,
@@ -95,7 +96,7 @@
 
 .gantt-table-row {
   display: grid;
-  grid-template-columns: 2fr 1fr 1.2fr 1.2fr 2.2fr;
+  grid-template-columns: 3fr 1fr 1.2fr 1.2fr 2.2fr;
   gap: 10px;
   padding: 10px 12px;
   border-bottom: 1px solid var(--ctp-surface0);
@@ -108,6 +109,7 @@
 
 .gantt-table-row:hover {
   background-color: var(--ctp-surface0);
+  box-shadow: inset 4px 0 0 var(--ctp-blue);
 }
 
 .gantt-table-row.subtask-row {
@@ -152,6 +154,7 @@
   white-space: nowrap;
   flex: 1;
   min-width: 0;
+  max-width: 100%;
 }
 
 .type-badge {
@@ -225,7 +228,8 @@
   overflow-y: hidden;
   display: flex;
   flex-direction: column;
-  width: 0; /* Flexbox için gerekli */
+  width: 0;
+  /* Flexbox için gerekli */
   position: relative;
 }
 
@@ -355,9 +359,10 @@
 }
 
 .gantt-bar:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
   z-index: 3;
+  opacity: 1;
 }
 
 .gantt-bar-content {
@@ -436,18 +441,18 @@
     width: 380px;
     flex: 0 0 380px;
   }
-  
+
   .gantt-table-header,
   .gantt-table-row {
-    grid-template-columns: 1.8fr 0.9fr 1.1fr 1.1fr 1.9fr;
+    grid-template-columns: 2.5fr 0.9fr 1.1fr 1.1fr 1.9fr;
     gap: 6px;
   }
-  
+
   .gantt-timeline-header,
   .timeline-bars-container {
     grid-template-columns: repeat(var(--days-count, 35), minmax(35px, 1fr));
   }
-  
+
   .timeline-day-header {
     min-width: 35px;
     padding: 6px 3px;
@@ -461,32 +466,32 @@
     width: 360px;
     flex: 0 0 360px;
   }
-  
+
   .gantt-table-header,
   .gantt-table-row {
-    grid-template-columns: 1.6fr 0.8fr 1fr 1fr 1.6fr;
+    grid-template-columns: 2.2fr 0.8fr 1fr 1fr 1.6fr;
     gap: 5px;
     padding: 8px;
   }
-  
+
   .task-title {
     font-size: 13px;
   }
-  
+
   .gantt-timeline-header,
   .timeline-bars-container {
     grid-template-columns: repeat(var(--days-count, 35), minmax(30px, 1fr));
   }
-  
+
   .timeline-day-header {
     min-width: 30px;
     padding: 5px 2px;
   }
-  
+
   .day-number {
     font-size: 12px;
   }
-  
+
   .day-name {
     font-size: 9px;
   }
@@ -496,36 +501,35 @@
   .gantt-chart-view {
     padding: 10px;
   }
-  
+
   .gantt-left-panel {
     display: none;
   }
-  
+
   .gantt-right-panel {
     width: 100%;
     flex: 1;
   }
-  
+
   .gantt-timeline-header,
   .timeline-bars-container {
     grid-template-columns: repeat(var(--days-count, 35), minmax(25px, 1fr));
   }
-  
+
   .timeline-day-header {
     min-width: 25px;
     padding: 4px 1px;
   }
-  
+
   .day-number {
     font-size: 10px;
   }
-  
+
   .day-name {
     font-size: 8px;
   }
-  
+
   .gantt-bar-title {
     font-size: 10px;
   }
 }
-

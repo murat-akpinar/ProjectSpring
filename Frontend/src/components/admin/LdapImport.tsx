@@ -281,7 +281,38 @@ const LdapImport: React.FC = () => {
               </button>
             )}
           </div>
-        </div>
+        
+        {/* Settings Summary - shown when settings exist and form is collapsed */}
+        {!isSettingsExpanded && ldapSettings.urls && (
+          <div className="ldap-settings-summary">
+            <div className="ldap-summary-item">
+              <span className="ldap-summary-label">LDAP URL</span>
+              <span className="ldap-summary-value">{ldapSettings.urls}</span>
+            </div>
+            <div className="ldap-summary-item">
+              <span className="ldap-summary-label">Base DN</span>
+              <span className="ldap-summary-value">{ldapSettings.base}</span>
+            </div>
+            <div className="ldap-summary-item">
+              <span className="ldap-summary-label">Durum</span>
+              <span className={`ldap-status-badge ${ldapSettings.isEnabled ? 'active' : 'inactive'}`}>
+                {ldapSettings.isEnabled ? '✓ Aktif' : '○ Pasif'}
+              </span>
+            </div>
+            <div className="ldap-summary-item">
+              <span className="ldap-summary-label">Bağlantı</span>
+              <span className={`ldap-status-badge ${connectionTested ? 'connected' : 'inactive'}`}>
+                {connectionTested ? '✓ Bağlı' : '○ Test Edilmedi'}
+              </span>
+            </div>
+            <div className="ldap-summary-item">
+              <span className="ldap-summary-label">Şifre</span>
+              <span className="ldap-password-indicator saved">
+                ✓ Kayıtlı (şifrelenmiş)
+              </span>
+            </div>
+          </div>
+        )}</div>
         
         {isSettingsExpanded && (
         <div className="ldap-settings-form">

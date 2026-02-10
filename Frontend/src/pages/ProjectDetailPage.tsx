@@ -25,6 +25,7 @@ const ProjectDetailPage: React.FC = () => {
   const [project, setProject] = useState<Project | null>(null);
   const { isCollapsed, toggleSidebar } = useSidebar();
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [allProjectTasks, setAllProjectTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -37,18 +38,20 @@ const ProjectDetailPage: React.FC = () => {
 
   const fetchProjectAndTasks = async () => {
     if (!id) return;
-    
+
     try {
       setLoading(true);
       const projectId = parseInt(id);
       // Proje detay sayfasında sadece o projeye ait task'ları getir
       // teamId göndermiyoruz, backend direkt projeye ait task'ları getirecek
-      const [projectData, tasksData] = await Promise.all([
+      const [projectData, tasksData, allTasksData] = await Promise.all([
         projectService.getProjectById(projectId),
         taskService.getTasks(undefined, selectedYear, selectedMonth, projectId),
+        taskService.getTasks(undefined, undefined, undefined, projectId),
       ]);
       setProject(projectData);
       setTasks(tasksData);
+      setAllProjectTasks(allTasksData);
     } catch (error) {
       console.error('Failed to fetch project data:', error);
       alert('Proje yüklenemedi.');
@@ -126,7 +129,7 @@ const ProjectDetailPage: React.FC = () => {
   };
 
   // Calculate status distribution
-  const statusCounts = tasks.reduce((acc, task) => {
+  const statusCounts = allProjectTasks.reduce((acc, task) => {
     const status = task.status;
     acc[status] = (acc[status] || 0) + 1;
     return acc;
@@ -169,8 +172,8 @@ const ProjectDetailPage: React.FC = () => {
 
   return (
     <div className="app-container">
-      <Sidebar 
-        selectedTeamId={selectedTeamId} 
+      <Sidebar
+        selectedTeamId={selectedTeamId}
         onTeamSelect={handleTeamSelect}
         isCollapsed={isCollapsed}
         onToggleCollapse={toggleSidebar}
@@ -188,10 +191,10 @@ const ProjectDetailPage: React.FC = () => {
                 <h1>{project.name}</h1>
                 <div className="project-detail-meta">
                   <span className="project-status-badge" style={{ backgroundColor: getProjectStatusColor(project.status) }}>
-                    {project.status === 'ACTIVE' ? 'Aktif' : 
-                     project.status === 'COMPLETED' ? 'Tamamlandı' :
-                     project.status === 'ON_HOLD' ? 'Beklemede' :
-                     project.status === 'CANCELLED' ? 'İptal Edildi' : project.status}
+                    {project.status === 'ACTIVE' ? 'Aktif' :
+                      project.status === 'COMPLETED' ? 'Tamamlandı' :
+                        project.status === 'ON_HOLD' ? 'Beklemede' :
+                          project.status === 'CANCELLED' ? 'İptal Edildi' : project.status}
                   </span>
                   {project.startDate && project.endDate && (
                     <span className="project-dates">
@@ -229,7 +232,7 @@ const ProjectDetailPage: React.FC = () => {
                 <div className="project-summary-item">
                   <div className="summary-label">İlerleme</div>
                   <div className="summary-value progress">
-                    {project.taskCount > 0 
+                    {project.taskCount > 0
                       ? `${Math.round(((project.completedTaskCount || 0) / project.taskCount) * 100)}%`
                       : '0%'}
                   </div>
@@ -270,7 +273,7 @@ const ProjectDetailPage: React.FC = () => {
                 <div className="project-plan-header">
                   <h2>Proje Planı</h2>
                 </div>
-                
+
                 <div className="tasks-table-container">
                   <table className="tasks-table">
                     <thead>
@@ -284,16 +287,16 @@ const ProjectDetailPage: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {tasks.length === 0 ? (
+                      {allProjectTasks.length === 0 ? (
                         <tr>
                           <td colSpan={6} className="empty-tasks">
                             Henüz iş eklenmemiş
                           </td>
                         </tr>
                       ) : (
-                        tasks.map((task) => (
-                          <tr 
-                            key={task.id} 
+                        allProjectTasks.map((task) => (
+                          <tr
+                            key={task.id}
                             className="task-row"
                             onClick={() => handleTaskClick(task)}
                           >
@@ -301,13 +304,13 @@ const ProjectDetailPage: React.FC = () => {
                             <td className="task-subject">{task.title}</td>
                             <td>
                               <span className={`task-type-badge task-type-${task.taskType?.toLowerCase() || 'task'}`}>
-                                {task.taskType === 'TASK' ? 'GÖREV' : 
-                                 task.taskType === 'FEATURE' ? 'ÖZELLİK' : 
-                                 task.taskType === 'BUG' ? 'HATA' : 'GÖREV'}
+                                {task.taskType === 'TASK' ? 'GÖREV' :
+                                  task.taskType === 'FEATURE' ? 'ÖZELLİK' :
+                                    task.taskType === 'BUG' ? 'HATA' : 'GÖREV'}
                               </span>
                             </td>
                             <td>
-                              <span 
+                              <span
                                 className="task-status-badge"
                                 style={{ backgroundColor: getStatusColor(task.status) }}
                               >
@@ -327,9 +330,9 @@ const ProjectDetailPage: React.FC = () => {
                             </td>
                             <td>
                               <span className={`priority-badge priority-${task.priority?.toLowerCase() || 'normal'}`}>
-                                {task.priority === 'NORMAL' ? 'Normal' : 
-                                 task.priority === 'HIGH' ? 'Yüksek' : 
-                                 task.priority === 'URGENT' ? 'Acil' : 'Normal'}
+                                {task.priority === 'NORMAL' ? 'Normal' :
+                                  task.priority === 'HIGH' ? 'Yüksek' :
+                                    task.priority === 'URGENT' ? 'Acil' : 'Normal'}
                               </span>
                             </td>
                           </tr>
@@ -371,7 +374,7 @@ const ProjectDetailPage: React.FC = () => {
                   </select>
                 </div>
               </div>
-              
+
               <div className="gantt-chart-container-full">
                 <GanttChartView
                   tasks={tasks}

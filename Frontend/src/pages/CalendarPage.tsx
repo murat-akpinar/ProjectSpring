@@ -6,7 +6,7 @@ import CalendarView from '../components/calendar/CalendarView';
 import GanttChartView from '../components/calendar/GanttChartView';
 import KanbanBoardView from '../components/calendar/KanbanBoardView';
 import TaskModal from '../components/task/TaskModal';
-import { Task } from '../types/Task';
+import { Task, TaskStatus } from '../types/Task';
 import { Project } from '../types/Project';
 import { taskService } from '../services/taskService';
 import { projectService } from '../services/projectService';
@@ -66,9 +66,9 @@ const CalendarPage: React.FC = () => {
     setViewMode('calendar');
     setSelectedProjectId(null);
   }, [selectedTeamId]);
-  
+
   // Calculate weeks in selected month
-  const weeksInMonth = selectedMonth 
+  const weeksInMonth = selectedMonth
     ? getWeeksInMonth(selectedMonth, selectedYear)
     : 0;
 
@@ -106,22 +106,35 @@ const CalendarPage: React.FC = () => {
     fetchTasks();
   };
 
+  // Kanban drag-drop için status değiştirme
+  const handleStatusChange = async (taskId: number, newStatus: TaskStatus) => {
+    try {
+      await taskService.updateTaskStatus(taskId, { status: newStatus });
+      // Refresh tasks
+      const data = await taskService.getTasks(selectedTeamId || undefined, selectedYear, undefined, selectedProjectId || undefined);
+      setTasks(data);
+    } catch (error) {
+      console.error('Failed to update task status:', error);
+      alert('Görev durumu güncellenemedi');
+    }
+  };
+
   // Task'ları filtrele: startDate veya endDate seçilen ay içinde olmalı
   const filteredTasks = selectedMonth
     ? tasks.filter((task) => {
-        const taskStart = new Date(task.startDate);
-        const taskEnd = new Date(task.endDate);
-        const taskStartMonth = taskStart.getMonth() + 1;
-        const taskEndMonth = taskEnd.getMonth() + 1;
-        // Task'ın startDate'i veya endDate'i seçilen ay içinde olmalı
-        return taskStartMonth === selectedMonth || taskEndMonth === selectedMonth;
-      })
+      const taskStart = new Date(task.startDate);
+      const taskEnd = new Date(task.endDate);
+      const taskStartMonth = taskStart.getMonth() + 1;
+      const taskEndMonth = taskEnd.getMonth() + 1;
+      // Task'ın startDate'i veya endDate'i seçilen ay içinde olmalı
+      return taskStartMonth === selectedMonth || taskEndMonth === selectedMonth;
+    })
     : tasks;
 
   return (
     <div className="app-container">
-      <Sidebar 
-        selectedTeamId={selectedTeamId} 
+      <Sidebar
+        selectedTeamId={selectedTeamId}
         onTeamSelect={setSelectedTeamId}
         isCollapsed={isCollapsed}
         onToggleCollapse={toggleSidebar}
@@ -212,7 +225,7 @@ const CalendarPage: React.FC = () => {
               ) : (
                 <>
                   <div style={{ marginBottom: '20px', textAlign: 'right' }}>
-                    <button 
+                    <button
                       onClick={handleCreateTask}
                       style={{
                         padding: '10px 20px',
@@ -230,11 +243,11 @@ const CalendarPage: React.FC = () => {
                     </button>
                   </div>
                   {viewMode === 'calendar' ? (
-                    <CalendarView 
-                      tasks={filteredTasks} 
-                      month={selectedMonth} 
+                    <CalendarView
+                      tasks={filteredTasks}
+                      month={selectedMonth}
                       year={selectedYear}
-                      onTaskClick={handleTaskClick} 
+                      onTaskClick={handleTaskClick}
                     />
                   ) : viewMode === 'gantt' ? (
                     <GanttChartView
@@ -251,6 +264,7 @@ const CalendarPage: React.FC = () => {
                       month={selectedMonth}
                       year={selectedYear}
                       onTaskClick={handleTaskClick}
+                      onStatusChange={handleStatusChange}
                     />
                   )}
                 </>
@@ -262,7 +276,7 @@ const CalendarPage: React.FC = () => {
                 <h1 style={{ margin: 0 }}>
                   {selectedYear} Yılı - Aylık Görünüm
                 </h1>
-                <button 
+                <button
                   onClick={handleCreateTask}
                   style={{
                     padding: '10px 20px',
@@ -291,7 +305,7 @@ const CalendarPage: React.FC = () => {
           )}
         </div>
       </div>
-      
+
       <TaskModal
         isOpen={isTaskModalOpen}
         onClose={() => {

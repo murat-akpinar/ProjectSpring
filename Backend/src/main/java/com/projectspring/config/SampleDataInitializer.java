@@ -113,9 +113,10 @@ public class SampleDataInitializer implements CommandLineRunner {
         List<Project> projects = createProjects(teamUsers);
         System.out.println("Created " + projects.size() + " projects");
 
-        // Create tasks for 2025
-        createTasksFor2025(teamUsers, projects);
-        System.out.println("Created tasks for 2025");
+        // Create tasks for current year
+        int currentYear = LocalDate.now().getYear();
+        createTasksForYear(teamUsers, projects, currentYear);
+        System.out.println("Created tasks for " + currentYear);
 
         System.out.println("Sample data initialization completed!");
     }
@@ -170,8 +171,8 @@ public class SampleDataInitializer implements CommandLineRunner {
             Project project = new Project();
             project.setName(projectNames[i]);
             project.setDescription(projectDescriptions[i]);
-            project.setStartDate(LocalDate.of(2025, 1 + i, 1));
-            project.setEndDate(LocalDate.of(2025, 6 + i, 30));
+            project.setStartDate(LocalDate.of(LocalDate.now().getYear(), 1 + i, 1));
+            project.setEndDate(LocalDate.of(LocalDate.now().getYear(), 6 + i, 30));
             project.setStatus(ProjectStatus.ACTIVE);
             project.setCreatedBy(allUsers.get(random.nextInt(allUsers.size())));
             project.setCreatedAt(LocalDateTime.now());
@@ -203,7 +204,7 @@ public class SampleDataInitializer implements CommandLineRunner {
         return projects;
     }
 
-    private void createTasksFor2025(Map<Team, List<User>> teamUsers, List<Project> projects) {
+    private void createTasksForYear(Map<Team, List<User>> teamUsers, List<Project> projects, int year) {
         String[] taskTitles = {
             "Veritabanı şema tasarımı",
             "API endpoint geliştirme",
@@ -228,7 +229,7 @@ public class SampleDataInitializer implements CommandLineRunner {
 
         List<Team> teams = new ArrayList<>(teamUsers.keySet());
 
-        // Create tasks for each month in 2025
+        // Create tasks for each month in given year
         for (int month = 1; month <= 12; month++) {
             int tasksPerMonth = 15 + random.nextInt(20); // 15-35 tasks per month
 
@@ -241,13 +242,13 @@ public class SampleDataInitializer implements CommandLineRunner {
                 User assignee = teamMembers.get(random.nextInt(teamMembers.size()));
 
                 // Random dates within the month
-                int daysInMonth = LocalDate.of(2025, month, 1).lengthOfMonth();
+                int daysInMonth = LocalDate.of(year, month, 1).lengthOfMonth();
                 int startDay = 1 + random.nextInt(daysInMonth - 5);
                 int endDay = startDay + 1 + random.nextInt(7); // 1-7 days duration
                 if (endDay > daysInMonth) endDay = daysInMonth;
 
-                LocalDate startDate = LocalDate.of(2025, month, startDay);
-                LocalDate endDate = LocalDate.of(2025, month, endDay);
+                LocalDate startDate = LocalDate.of(year, month, startDay);
+                LocalDate endDate = LocalDate.of(year, month, endDay);
 
                 // Assign to project (50% chance) - but ensure task's team is one of project's teams
                 Project selectedProject = null;
@@ -288,7 +289,7 @@ public class SampleDataInitializer implements CommandLineRunner {
                 }
                 
                 Task task = new Task();
-                task.setTitle(taskTitles[random.nextInt(taskTitles.length)] + " - " + month + "/2025");
+                task.setTitle(taskTitles[random.nextInt(taskTitles.length)] + " - " + month + "/" + year);
                 task.setContent("Bu iş " + month + ". ay için oluşturulmuş örnek bir iştir.");
                 task.setStartDate(startDate);
                 task.setEndDate(endDate);
