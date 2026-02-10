@@ -185,6 +185,41 @@ const ProjectsPage: React.FC = () => {
                         </div>
                       )}
                     </div>
+
+                    {/* Task Progress Section */}
+                    {project.taskCount !== undefined && project.taskCount > 0 && (
+                      <div className="project-card-tasks">
+                        <div className="project-task-stats">
+                          <span className="task-stat-item">
+                            <strong>{project.taskCount}</strong> İş
+                          </span>
+                          <span className="task-stat-item">
+                            <strong>{project.completedTaskCount || 0}</strong> Tamamlandı
+                          </span>
+                          <span className="task-stat-item">
+                            <strong>{project.activeTaskCount || 0}</strong> Aktif
+                          </span>
+                        </div>
+                        <div className="project-progress-bar">
+                          <div 
+                            className="project-progress-fill"
+                            style={{ 
+                              width: `${project.taskCount > 0 ? ((project.completedTaskCount || 0) / project.taskCount * 100) : 0}%` 
+                            }}
+                          />
+                        </div>
+                        <div className="project-progress-text">
+                          {project.taskCount > 0 
+                            ? `${Math.round(((project.completedTaskCount || 0) / project.taskCount) * 100)}% Tamamlandı`
+                            : '0% Tamamlandı'}
+                        </div>
+                      </div>
+                    )}
+                    {project.taskCount === 0 && (
+                      <div className="project-card-tasks">
+                        <div className="project-no-tasks">Henüz iş eklenmemiş</div>
+                      </div>
+                    )}
                     
                     <div className="project-card-footer">
                       <span className="project-card-creator">

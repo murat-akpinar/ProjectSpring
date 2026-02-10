@@ -35,7 +35,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
   const [users, setUsers] = useState<User[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(false);
-  
+
   const [formData, setFormData] = useState<CreateTaskRequest>({
     title: '',
     content: '',
@@ -118,14 +118,14 @@ const TaskModal: React.FC<TaskModalProps> = ({
       if (task) {
         // Check if arrays are equal (assigneeIds)
         const assigneeIdsEqual = JSON.stringify((task.assigneeIds || []).sort()) === JSON.stringify((formData.assigneeIds || []).sort());
-        
+
         // Check if subtasks are equal (simplified - just count and titles)
         const subtasksEqual = (task.subtasks || []).length === (formData.subtasks || []).length &&
           (task.subtasks || []).every((st, idx) => {
             const newSt = (formData.subtasks || [])[idx];
             return st.title === newSt?.title && st.content === newSt?.content;
           });
-        
+
         // If only status is changing, use updateTaskStatus
         const onlyStatusChanged = task.status !== formData.status &&
           task.title === formData.title &&
@@ -138,7 +138,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
           task.projectId === formData.projectId &&
           assigneeIdsEqual &&
           subtasksEqual;
-        
+
         if (onlyStatusChanged) {
           const statusUpdate: UpdateTaskStatusRequest = {
             status: formData.status!,
@@ -165,8 +165,8 @@ const TaskModal: React.FC<TaskModalProps> = ({
   const addSubtask = () => {
     setFormData({
       ...formData,
-      subtasks: [...(formData.subtasks || []), { 
-        title: '', 
+      subtasks: [...(formData.subtasks || []), {
+        title: '',
         content: '',
         startDate: formData.startDate,
         endDate: formData.endDate,
@@ -189,13 +189,13 @@ const TaskModal: React.FC<TaskModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+    <div className="task-modal modal-overlay" onClick={onClose}>
+      <div className="task-modal-content modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>{task ? 'İş Düzenle' : 'Yeni İş Oluştur'}</h2>
           <button className="modal-close" onClick={onClose}>×</button>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="task-form">
           <div className="form-group">
             <label>Başlık *</label>
@@ -290,9 +290,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
                 ))}
               </select>
             </div>
-          </div>
 
-          <div className="form-row">
             <div className="form-group">
               <label>İş Türü</label>
               <select
@@ -304,7 +302,9 @@ const TaskModal: React.FC<TaskModalProps> = ({
                 <option value={TaskType.BUG}>Hata</option>
               </select>
             </div>
+          </div>
 
+          <div className="form-row">
             <div className="form-group">
               <label>Önem</label>
               <select
@@ -353,60 +353,60 @@ const TaskModal: React.FC<TaskModalProps> = ({
             </div>
             <div className="subtasks-container">
               {formData.subtasks?.map((subtask, index) => (
-              <div key={index} className="subtask-item">
-                <input
-                  type="text"
-                  placeholder="Alt iş başlığı"
-                  value={subtask.title}
-                  onChange={(e) => updateSubtask(index, 'title', e.target.value)}
-                />
-                <textarea
-                  placeholder="Alt iş içeriği (opsiyonel)"
-                  value={subtask.content || ''}
-                  onChange={(e) => updateSubtask(index, 'content', e.target.value)}
-                  rows={2}
-                />
-                <div className="form-row" style={{ marginTop: '8px' }}>
-                  <div className="form-group" style={{ marginBottom: '0' }}>
-                    <label style={{ fontSize: '12px', marginBottom: '3px' }}>Başlangıç Tarihi</label>
-                    <input
-                      type="date"
-                      value={subtask.startDate || ''}
-                      onChange={(e) => updateSubtask(index, 'startDate', e.target.value)}
-                    />
+                <div key={index} className="subtask-item">
+                  <input
+                    type="text"
+                    placeholder="Alt iş başlığı"
+                    value={subtask.title}
+                    onChange={(e) => updateSubtask(index, 'title', e.target.value)}
+                  />
+                  <textarea
+                    placeholder="Alt iş içeriği (opsiyonel)"
+                    value={subtask.content || ''}
+                    onChange={(e) => updateSubtask(index, 'content', e.target.value)}
+                    rows={2}
+                  />
+                  <div className="form-row" style={{ marginTop: '8px' }}>
+                    <div className="form-group" style={{ marginBottom: '0' }}>
+                      <label style={{ fontSize: '12px', marginBottom: '3px' }}>Başlangıç Tarihi</label>
+                      <input
+                        type="date"
+                        value={subtask.startDate || ''}
+                        onChange={(e) => updateSubtask(index, 'startDate', e.target.value)}
+                      />
+                    </div>
+                    <div className="form-group" style={{ marginBottom: '0' }}>
+                      <label style={{ fontSize: '12px', marginBottom: '3px' }}>Bitiş Tarihi</label>
+                      <input
+                        type="date"
+                        value={subtask.endDate || ''}
+                        onChange={(e) => updateSubtask(index, 'endDate', e.target.value)}
+                      />
+                    </div>
                   </div>
-                  <div className="form-group" style={{ marginBottom: '0' }}>
-                    <label style={{ fontSize: '12px', marginBottom: '3px' }}>Bitiş Tarihi</label>
-                    <input
-                      type="date"
-                      value={subtask.endDate || ''}
-                      onChange={(e) => updateSubtask(index, 'endDate', e.target.value)}
-                    />
+                  <div className="form-group" style={{ marginTop: '8px', marginBottom: '0' }}>
+                    <label style={{ fontSize: '12px', marginBottom: '3px' }}>Atanan Kişi</label>
+                    <select
+                      value={subtask.assigneeId || ''}
+                      onChange={(e) => updateSubtask(index, 'assigneeId', e.target.value ? parseInt(e.target.value) : undefined)}
+                      style={{ width: '100%', padding: '6px 10px', fontSize: '14px' }}
+                    >
+                      <option value="">Atanan Kişi Seçin</option>
+                      {users.map((user) => (
+                        <option key={user.id} value={user.id}>
+                          {user.fullName}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                </div>
-                <div className="form-group" style={{ marginTop: '8px', marginBottom: '0' }}>
-                  <label style={{ fontSize: '12px', marginBottom: '3px' }}>Atanan Kişi</label>
-                  <select
-                    value={subtask.assigneeId || ''}
-                    onChange={(e) => updateSubtask(index, 'assigneeId', e.target.value ? parseInt(e.target.value) : undefined)}
-                    style={{ width: '100%', padding: '6px 10px', fontSize: '14px' }}
+                  <button
+                    type="button"
+                    onClick={() => removeSubtask(index)}
+                    className="btn-remove-subtask"
                   >
-                    <option value="">Atanan Kişi Seçin</option>
-                    {users.map((user) => (
-                      <option key={user.id} value={user.id}>
-                        {user.fullName}
-                      </option>
-                    ))}
-                  </select>
+                    Sil
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => removeSubtask(index)}
-                  className="btn-remove-subtask"
-                >
-                  Sil
-                </button>
-              </div>
               ))}
             </div>
           </div>

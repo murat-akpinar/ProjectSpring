@@ -6,6 +6,7 @@ import com.projectspring.model.enums.TaskStatus;
 import com.projectspring.repository.ProjectRepository;
 import com.projectspring.model.enums.TaskType;
 import com.projectspring.model.enums.Priority;
+import com.projectspring.model.enums.Role;
 import com.projectspring.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -56,7 +57,35 @@ public class TaskService {
         
         List<Task> tasks;
         
-        if (teamId != null) {
+        // Eğer projectId verilmişse, direkt projeye ait task'ları getir
+        if (projectId != null) {
+            // Proje erişim kontrolü
+            Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+            
+            User currentUser = getCurrentUser();
+            
+            // Yetki kontrolü - getProjectById ile aynı mantık
+            boolean hasAccess = false;
+            if (project.getTeams() != null && !project.getTeams().isEmpty()) {
+                hasAccess = project.getTeams().stream()
+                    .anyMatch(team -> accessibleTeamIds.contains(team.getId()));
+            }
+            
+            if (!hasAccess && !hasRole(currentUser, Role.ADMIN)) {
+                throw new RuntimeException("Access denied to this project");
+            }
+            
+            // Projeye ait task'ları getir
+            if (year != null && month != null) {
+                tasks = taskRepository.findByProjectIdAndYearAndMonth(projectId, year, month);
+            } else if (year != null) {
+                tasks = taskRepository.findByProjectIdAndYear(projectId, year);
+            } else {
+                tasks = taskRepository.findByProjectId(projectId);
+            }
+        } else if (teamId != null) {
+            // Ekip bazlı filtreleme
             if (year != null && month != null) {
                 tasks = taskRepository.findByTeamIdAndYearAndMonth(teamId, year, month);
             } else if (year != null) {
@@ -65,6 +94,7 @@ public class TaskService {
                 tasks = taskRepository.findByTeamId(teamId);
             }
         } else {
+            // Tüm erişilebilir ekiplerin task'ları
             if (year != null && month != null) {
                 tasks = taskRepository.findByTeamIdsAndYearAndMonth(accessibleTeamIds, year, month);
             } else if (year != null) {
@@ -74,13 +104,6 @@ public class TaskService {
                     .flatMap(id -> taskRepository.findByTeamId(id).stream())
                     .collect(Collectors.toList());
             }
-        }
-        
-        // Project filter
-        if (projectId != null) {
-            tasks = tasks.stream()
-                .filter(task -> task.getProject() != null && task.getProject().getId().equals(projectId))
-                .collect(Collectors.toList());
         }
         
         return tasks.stream()
@@ -131,6 +154,12 @@ public class TaskService {
                 .anyMatch(t -> accessibleTeamIds.contains(t.getId()));
             if (!hasAccess) {
                 throw new RuntimeException("Access denied to this project");
+            }
+            // Task'ın ekibi projenin ekiplerinden biri olmalı
+            boolean teamMatches = project.getTeams().stream()
+                .anyMatch(t -> t.getId().equals(team.getId()));
+            if (!teamMatches) {
+                throw new RuntimeException("Task's team must be one of the project's teams");
             }
             task.setProject(project);
         }
@@ -205,6 +234,13 @@ public class TaskService {
                 .anyMatch(t -> accessibleTeamIds.contains(t.getId()));
             if (!hasAccess) {
                 throw new RuntimeException("Access denied to this project");
+            }
+            // Task'ın ekibi projenin ekiplerinden biri olmalı
+            final Long taskTeamId = task.getTeam().getId();
+            boolean teamMatches = project.getTeams().stream()
+                .anyMatch(t -> t.getId().equals(taskTeamId));
+            if (!teamMatches) {
+                throw new RuntimeException("Task's team must be one of the project's teams");
             }
             task.setProject(project);
         } else {
@@ -389,6 +425,11 @@ public class TaskService {
         String username = authentication.getName();
         return userRepository.findByUsername(username)
             .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+    
+    private boolean hasRole(User user, Role role) {
+        return user.getRoles().stream()
+            .anyMatch(r -> r.getName().equals(role.name()));
     }
 }
 

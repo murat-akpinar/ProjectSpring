@@ -1,6 +1,5 @@
-import React from 'react';
-import { Task, TaskStatus } from '../../types/Task';
-import { formatDate } from '../../utils/dateUtils';
+import React, { useState, useMemo } from 'react';
+import { Task, TaskStatus, Priority } from '../../types/Task';
 import { getStatusColor } from '../../utils/statusColors';
 import './KanbanBoardView.css';
 
@@ -9,141 +8,224 @@ interface KanbanBoardViewProps {
   month: number;
   year: number;
   onTaskClick?: (task: Task) => void;
+  onStatusChange?: (taskId: number, newStatus: TaskStatus) => void;
 }
 
 const KanbanBoardView: React.FC<KanbanBoardViewProps> = ({
   tasks,
   onTaskClick,
+  onStatusChange,
 }) => {
-  // Status'lere göre kolonlar
-  const columns: { status: TaskStatus; label: string }[] = [
-    { status: TaskStatus.OPEN, label: 'Yeni' },
-    { status: TaskStatus.IN_PROGRESS, label: 'Yapılıyor' },
-    { status: TaskStatus.COMPLETED, label: 'Tamamlandı' },
-    { status: TaskStatus.CANCELLED, label: 'İptal Edildi' },
-    { status: TaskStatus.POSTPONED, label: 'Ertelendi' },
-    { status: TaskStatus.OVERDUE, label: 'Yetişmedi' },
+  const [draggedTaskId, setDraggedTaskId] = useState<number | null>(null);
+  const [dragOverColumn, setDragOverColumn] = useState<TaskStatus | null>(null);
+
+  // Dashboard.jpeg'deki gibi 4 kolon
+  const columns: { status: TaskStatus; label: string; icon: string }[] = [
+    { status: TaskStatus.OPEN, label: 'Backlog', icon: '|' },
+    { status: TaskStatus.IN_PROGRESS, label: 'Devam Eden', icon: '|' },
+    { status: TaskStatus.POSTPONED, label: 'İnceleme', icon: '|' },
+    { status: TaskStatus.COMPLETED, label: 'Tamamlanan', icon: '|' },
   ];
 
+  // Diğer durumları da hesaba kat (CANCELLED, OVERDUE -> Backlog'a ekle)
+  const getColumnForStatus = (status: TaskStatus): TaskStatus => {
+    switch (status) {
+      case TaskStatus.CANCELLED:
+      case TaskStatus.OVERDUE:
+        return TaskStatus.OPEN;
+      default:
+        return status;
+    }
+  };
+
   // Task'ları status'e göre grupla
-  const tasksByStatus = columns.reduce((acc, column) => {
-    acc[column.status] = tasks.filter((task) => task.status === column.status);
+  const tasksByColumn = columns.reduce((acc, column) => {
+    acc[column.status] = tasks.filter((task) => getColumnForStatus(task.status) === column.status);
     return acc;
   }, {} as Record<TaskStatus, Task[]>);
 
-  const getTaskTypeLabel = (taskType?: string): string => {
-    switch (taskType) {
-      case 'FEATURE':
-        return 'ÖZELLİK';
-      case 'BUG':
-        return 'HATA';
+  // Priority'ye göre önem etiketi (Türkçe)
+  const getDifficultyBadge = (priority?: Priority): { label: string; color: string } => {
+    switch (priority) {
+      case Priority.URGENT:
+        return { label: 'Acil', color: '#f38ba8' };
+      case Priority.HIGH:
+        return { label: 'Yüksek', color: '#fab387' };
+      case Priority.NORMAL:
       default:
-        return 'GÖREV';
+        return { label: 'Normal', color: '#a6e3a1' };
     }
   };
 
-  const getTaskTypeColor = (taskType?: string): string => {
-    switch (taskType) {
-      case 'FEATURE':
-        return '#94e2d5'; // Teal
-      case 'BUG':
-        return '#ff5e6c'; // Coral Pink
-      default:
-        return '#ffaaab'; // Pink Leaf
-    }
+  // getEasyBadge artık kullanılmıyor - priority değerini direkt kullanıyoruz
+  const getEasyBadge = (_task: Task): { label: string; color: string } | null => {
+    return null;
   };
 
-  const getInitials = (name: string): string => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .substring(0, 2);
+  // Gün hesaplama
+  const getDaysRemaining = (endDate: string): number => {
+    const end = new Date(endDate);
+    const today = new Date();
+    const diffTime = end.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return Math.max(0, diffDays);
+  };
+
+  // Progress hesaplama - useMemo ile sabit değer (her render'da değişmez)
+  const progressMap = useMemo(() => {
+    const map: Record<number, number> = {};
+    tasks.forEach((task) => {
+      if (task.status === TaskStatus.COMPLETED) {
+        map[task.id] = 100;
+      } else if (task.status === TaskStatus.IN_PROGRESS) {
+        if (task.subtasks && task.subtasks.length > 0) {
+          const completed = task.subtasks.filter(s => s.isCompleted).length;
+          map[task.id] = Math.round((completed / task.subtasks.length) * 100);
+        } else {
+          // Başlangıç ve bitiş tarihleri arasındaki ilerleme
+          const start = new Date(task.startDate).getTime();
+          const end = new Date(task.endDate).getTime();
+          const now = Date.now();
+          if (now >= end) map[task.id] = 95;
+          else if (now <= start) map[task.id] = 10;
+          else map[task.id] = Math.round(((now - start) / (end - start)) * 100);
+        }
+      } else if (task.status === TaskStatus.POSTPONED) {
+        // Ertelenen işlerde tarih bazlı ilerleme
+        const start = new Date(task.startDate).getTime();
+        const end = new Date(task.endDate).getTime();
+        const now = Date.now();
+        if (now >= end) map[task.id] = 60;
+        else if (now <= start) map[task.id] = 20;
+        else map[task.id] = Math.round(((now - start) / (end - start)) * 70);
+      } else {
+        // Açık görevler için 0
+        map[task.id] = 0;
+      }
+    });
+    return map;
+  }, [tasks]);
+
+  // Drag & Drop Handlers
+  const handleDragStart = (e: React.DragEvent, taskId: number) => {
+    setDraggedTaskId(taskId);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', taskId.toString());
+    (e.target as HTMLElement).classList.add('dragging');
+  };
+
+  const handleDragEnd = (e: React.DragEvent) => {
+    setDraggedTaskId(null);
+    setDragOverColumn(null);
+    (e.target as HTMLElement).classList.remove('dragging');
+  };
+
+  const handleDragOver = (e: React.DragEvent, columnStatus: TaskStatus) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverColumn(columnStatus);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverColumn(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, newStatus: TaskStatus) => {
+    e.preventDefault();
+    const taskId = parseInt(e.dataTransfer.getData('text/plain'));
+
+    if (taskId && onStatusChange) {
+      onStatusChange(taskId, newStatus);
+    }
+
+    setDraggedTaskId(null);
+    setDragOverColumn(null);
   };
 
   return (
-    <div className="kanban-board-view">
+    <div className="kanban-board-view kanban-light-theme">
       {columns.map((column) => {
-        const columnTasks = tasksByStatus[column.status] || [];
+        const columnTasks = tasksByColumn[column.status] || [];
         const statusColor = getStatusColor(column.status);
+        const isDropTarget = dragOverColumn === column.status;
 
         return (
-          <div key={column.status} className="kanban-column">
+          <div
+            key={column.status}
+            className={`kanban-column ${isDropTarget ? 'drop-target' : ''}`}
+            onDragOver={(e) => handleDragOver(e, column.status)}
+            onDragLeave={handleDragLeave}
+            onDrop={(e) => handleDrop(e, column.status)}
+          >
             <div className="kanban-column-header">
-              <div
-                className="kanban-column-indicator"
-                style={{ backgroundColor: statusColor }}
-              />
+              <span className="kanban-column-indicator" style={{ backgroundColor: statusColor }}></span>
               <h3 className="kanban-column-title">{column.label}</h3>
               <span className="kanban-column-count">{columnTasks.length}</span>
+              <span className="kanban-column-menu">⋮</span>
             </div>
             <div className="kanban-column-content">
               {columnTasks.length === 0 ? (
-                <div className="kanban-empty-state">Bu kolonda görev yok</div>
+                <div className="kanban-empty-state">
+                  {isDropTarget ? '📥 Buraya bırak' : 'Bu kolonda görev yok'}
+                </div>
               ) : (
-                columnTasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className="kanban-card"
-                    onClick={() => onTaskClick?.(task)}
-                  >
-                    <div className="kanban-card-header">
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        {task.teamIcon && (
-                          <span className="team-icon" style={{ color: task.teamColor || 'var(--ctp-text)', fontSize: '16px' }}>
-                            {task.teamIcon}
-                          </span>
-                        )}
-                        {task.teamColor && !task.teamIcon && (
-                          <span 
-                            className="team-color-indicator" 
-                            style={{ 
-                              backgroundColor: task.teamColor,
-                              width: '12px',
-                              height: '12px',
-                              borderRadius: '50%',
-                              display: 'inline-block'
-                            }}
-                          />
-                        )}
+                columnTasks.map((task) => {
+                  const difficulty = getDifficultyBadge(task.priority);
+                  const easyBadge = getEasyBadge(task);
+                  const finalBadge = easyBadge || difficulty;
+                  const daysRemaining = getDaysRemaining(task.endDate);
+                  const progress = progressMap[task.id] ?? 0;
+                  const isDragging = draggedTaskId === task.id;
+
+                  return (
+                    <div
+                      key={task.id}
+                      className={`kanban-card ${isDragging ? 'dragging' : ''}`}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, task.id)}
+                      onDragEnd={handleDragEnd}
+                      onClick={() => onTaskClick?.(task)}
+                    >
+                      {/* Drag Handle */}
+                      <div className="kanban-card-drag-handle">⋮⋮</div>
+
+                      {/* Badges Row */}
+                      <div className="kanban-card-badges">
                         <span
-                          className="kanban-card-type"
-                          style={{ color: getTaskTypeColor(task.taskType) }}
+                          className="kanban-badge difficulty"
+                          style={{
+                            backgroundColor: finalBadge.color + '20',
+                            color: finalBadge.color,
+                            borderColor: finalBadge.color
+                          }}
                         >
-                          {getTaskTypeLabel(task.taskType)}
+                          {finalBadge.label}
+                        </span>
+                        <span className="kanban-badge days">
+                          <span className="days-icon">⏱</span>
+                          {daysRemaining} Gün
                         </span>
                       </div>
-                    </div>
-                    <div className="kanban-card-title">{task.title}</div>
-                    {task.content && (
-                      <div className="kanban-card-content">
-                        {task.content.substring(0, 100)}
-                        {task.content.length > 100 ? '...' : ''}
+
+                      {/* Title */}
+                      <div className="kanban-card-title">{task.title}</div>
+
+                      {/* Progress Bar */}
+                      <div className="kanban-progress-container">
+                        <div className="kanban-progress-bar">
+                          <div
+                            className="kanban-progress-fill"
+                            style={{
+                              width: `${progress}%`,
+                              backgroundColor: progress === 100 ? '#a6e3a1' : '#89b4fa'
+                            }}
+                          ></div>
+                        </div>
+                        <span className="kanban-progress-text">{progress}%</span>
                       </div>
-                    )}
-                    <div className="kanban-card-footer">
-                      <div className="kanban-card-assignee">
-                        {task.assigneeNames && task.assigneeNames.length > 0 ? (
-                          <>
-                            <div className="kanban-card-avatar">
-                              {getInitials(task.assigneeNames[0])}
-                            </div>
-                            <span className="kanban-card-assignee-name">
-                              {task.assigneeNames[0]}
-                            </span>
-                          </>
-                        ) : (
-                          <span className="kanban-card-no-assignee">Atanan yok</span>
-                        )}
-                      </div>
-                      <div className="kanban-card-id">#{task.id}</div>
                     </div>
-                    <div className="kanban-card-dates">
-                      {formatDate(task.startDate)} - {formatDate(task.endDate)}
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>
@@ -154,4 +236,3 @@ const KanbanBoardView: React.FC<KanbanBoardViewProps> = ({
 };
 
 export default KanbanBoardView;
-

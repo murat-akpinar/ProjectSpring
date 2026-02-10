@@ -8,8 +8,10 @@ import com.projectspring.model.User;
 import com.projectspring.model.enums.ProjectStatus;
 import com.projectspring.model.enums.Role;
 import com.projectspring.repository.ProjectRepository;
+import com.projectspring.repository.TaskRepository;
 import com.projectspring.repository.TeamRepository;
 import com.projectspring.repository.UserRepository;
+import com.projectspring.model.enums.TaskStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,21 +38,29 @@ public class ProjectService {
     @Autowired
     private TeamService teamService;
     
+    @Autowired
+    private TaskRepository taskRepository;
+    
     public List<ProjectDTO> getAllProjects() {
-        User currentUser = getCurrentUser();
-        List<Long> accessibleTeamIds = teamService.getAccessibleTeamIds();
-        
-        // Yönetici tüm projeleri görebilir
-        if (hasRole(currentUser, Role.ADMIN)) {
-            return projectRepository.findAll().stream()
+        try {
+            User currentUser = getCurrentUser();
+            List<Long> accessibleTeamIds = teamService.getAccessibleTeamIds();
+            
+            // Yönetici tüm projeleri görebilir
+            if (hasRole(currentUser, Role.ADMIN)) {
+                return projectRepository.findAll().stream()
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
+            }
+            
+            // Diğer kullanıcılar sadece kendi ekiplerinin projelerini görebilir
+            return projectRepository.findByTeamIds(accessibleTeamIds).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to fetch projects: " + e.getMessage(), e);
         }
-        
-        // Diğer kullanıcılar sadece kendi ekiplerinin projelerini görebilir
-        return projectRepository.findByTeamIds(accessibleTeamIds).stream()
-            .map(this::convertToDTO)
-            .collect(Collectors.toList());
     }
     
     public ProjectDTO getProjectById(Long id) {
@@ -74,6 +84,11 @@ public class ProjectService {
     public ProjectDTO createProject(CreateProjectRequest request) {
         User currentUser = getCurrentUser();
         
+        // En az bir ekip zorunlu
+        if (request.getTeamIds() == null || request.getTeamIds().isEmpty()) {
+            throw new RuntimeException("En az bir ekip seçilmelidir");
+        }
+        
         Project project = new Project();
         project.setName(request.getName());
         project.setDescription(request.getDescription());
@@ -83,15 +98,18 @@ public class ProjectService {
         project.setCreatedBy(currentUser);
         
         // Ekipleri ata
-        if (request.getTeamIds() != null && !request.getTeamIds().isEmpty()) {
-            List<Long> accessibleTeamIds = teamService.getAccessibleTeamIds();
-            Set<Team> teams = request.getTeamIds().stream()
-                .filter(accessibleTeamIds::contains)
-                .map(teamId -> teamRepository.findById(teamId)
-                    .orElseThrow(() -> new RuntimeException("Team not found: " + teamId)))
-                .collect(Collectors.toSet());
-            project.setTeams(teams);
+        List<Long> accessibleTeamIds = teamService.getAccessibleTeamIds();
+        Set<Team> teams = request.getTeamIds().stream()
+            .filter(accessibleTeamIds::contains)
+            .map(teamId -> teamRepository.findById(teamId)
+                .orElseThrow(() -> new RuntimeException("Team not found: " + teamId)))
+            .collect(Collectors.toSet());
+        
+        if (teams.isEmpty()) {
+            throw new RuntimeException("Erişilebilir ekip bulunamadı");
         }
+        
+        project.setTeams(teams);
         
         project = projectRepository.save(project);
         return convertToDTO(project);
@@ -118,15 +136,22 @@ public class ProjectService {
         project.setEndDate(request.getEndDate());
         project.setStatus(request.getStatus() != null ? request.getStatus() : project.getStatus());
         
-        // Ekipleri güncelle
-        if (request.getTeamIds() != null) {
-            Set<Team> teams = request.getTeamIds().stream()
-                .filter(accessibleTeamIds::contains)
-                .map(teamId -> teamRepository.findById(teamId)
-                    .orElseThrow(() -> new RuntimeException("Team not found: " + teamId)))
-                .collect(Collectors.toSet());
-            project.setTeams(teams);
+        // Ekipleri güncelle - en az bir ekip zorunlu
+        if (request.getTeamIds() == null || request.getTeamIds().isEmpty()) {
+            throw new RuntimeException("En az bir ekip seçilmelidir");
         }
+        
+        Set<Team> teams = request.getTeamIds().stream()
+            .filter(accessibleTeamIds::contains)
+            .map(teamId -> teamRepository.findById(teamId)
+                .orElseThrow(() -> new RuntimeException("Team not found: " + teamId)))
+            .collect(Collectors.toSet());
+        
+        if (teams.isEmpty()) {
+            throw new RuntimeException("Erişilebilir ekip bulunamadı");
+        }
+        
+        project.setTeams(teams);
         
         project = projectRepository.save(project);
         return convertToDTO(project);
@@ -156,12 +181,31 @@ public class ProjectService {
         dto.setStatus(project.getStatus());
         dto.setCreatedById(project.getCreatedBy().getId());
         dto.setCreatedByName(project.getCreatedBy().getFullName());
-        dto.setTeamIds(project.getTeams().stream()
+        dto.setTeamIds(project.getTeams() != null ? project.getTeams().stream()
             .map(Team::getId)
-            .collect(Collectors.toList()));
-        dto.setTeamNames(project.getTeams().stream()
+            .collect(Collectors.toList()) : new java.util.ArrayList<>());
+        dto.setTeamNames(project.getTeams() != null ? project.getTeams().stream()
             .map(Team::getName)
-            .collect(Collectors.toList()));
+            .collect(Collectors.toList()) : new java.util.ArrayList<>());
+        
+        // Calculate task counts - handle potential errors gracefully
+        try {
+            Long taskCount = taskRepository.countByProjectId(project.getId());
+            Long completedTaskCount = taskRepository.countByProjectIdAndStatus(project.getId(), TaskStatus.COMPLETED);
+            Long cancelledTaskCount = taskRepository.countByProjectIdAndStatus(project.getId(), TaskStatus.CANCELLED);
+            // Active tasks = total - completed - cancelled
+            Long activeTaskCount = Math.max(0L, taskCount - completedTaskCount - cancelledTaskCount);
+            
+            dto.setTaskCount(taskCount != null ? taskCount : 0L);
+            dto.setCompletedTaskCount(completedTaskCount != null ? completedTaskCount : 0L);
+            dto.setActiveTaskCount(activeTaskCount != null ? activeTaskCount : 0L);
+        } catch (Exception e) {
+            // If task count calculation fails, set defaults
+            dto.setTaskCount(0L);
+            dto.setCompletedTaskCount(0L);
+            dto.setActiveTaskCount(0L);
+        }
+        
         return dto;
     }
     

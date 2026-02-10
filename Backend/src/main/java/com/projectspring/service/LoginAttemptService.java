@@ -2,6 +2,8 @@ package com.projectspring.service;
 
 import com.projectspring.model.LoginAttempt;
 import com.projectspring.repository.LoginAttemptRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -12,6 +14,8 @@ import java.time.LocalDateTime;
 
 @Service
 public class LoginAttemptService {
+    
+    private static final Logger logger = LoggerFactory.getLogger(LoginAttemptService.class);
     
     @Autowired
     private LoginAttemptRepository loginAttemptRepository;
@@ -35,18 +39,25 @@ public class LoginAttemptService {
         attempt.setSuccess(success);
         attempt.setAttemptTime(LocalDateTime.now());
         loginAttemptRepository.save(attempt);
+        logger.debug("Recorded login attempt: user={}, IP={}, success={}", username, ipAddress, success);
     }
     
     public boolean isIpBlocked(String ipAddress) {
         LocalDateTime since = LocalDateTime.now().minusMinutes(windowMinutes);
         Long failedCount = loginAttemptRepository.countFailedAttemptsByIpSince(ipAddress, since);
-        return failedCount != null && failedCount >= maxAttempts;
+        boolean blocked = failedCount != null && failedCount >= maxAttempts;
+        logger.debug("IP rate limiting check for IP {}: failed attempts={}, max attempts={}, window={} minutes, blocked={}", 
+            ipAddress, failedCount != null ? failedCount : 0, maxAttempts, windowMinutes, blocked);
+        return blocked;
     }
     
     public boolean isAccountLocked(String username) {
         LocalDateTime since = LocalDateTime.now().minusMinutes(lockoutDurationMinutes);
         Long failedCount = loginAttemptRepository.countFailedAttemptsByUsernameSince(username, since);
-        return failedCount != null && failedCount >= maxFailedAttempts;
+        boolean locked = failedCount != null && failedCount >= maxFailedAttempts;
+        logger.debug("Account lockout check for user {}: failed attempts={}, max attempts={}, lockout duration={} minutes, locked={}", 
+            username, failedCount != null ? failedCount : 0, maxFailedAttempts, lockoutDurationMinutes, locked);
+        return locked;
     }
     
     public int getRemainingAttempts(String username) {

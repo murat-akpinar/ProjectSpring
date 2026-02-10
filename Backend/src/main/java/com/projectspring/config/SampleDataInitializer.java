@@ -113,9 +113,10 @@ public class SampleDataInitializer implements CommandLineRunner {
         List<Project> projects = createProjects(teamUsers);
         System.out.println("Created " + projects.size() + " projects");
 
-        // Create tasks for 2025
-        createTasksFor2025(teamUsers, projects);
-        System.out.println("Created tasks for 2025");
+        // Create tasks for current year
+        int currentYear = LocalDate.now().getYear();
+        createTasksForYear(teamUsers, projects, currentYear);
+        System.out.println("Created tasks for " + currentYear);
 
         System.out.println("Sample data initialization completed!");
     }
@@ -170,20 +171,31 @@ public class SampleDataInitializer implements CommandLineRunner {
             Project project = new Project();
             project.setName(projectNames[i]);
             project.setDescription(projectDescriptions[i]);
-            project.setStartDate(LocalDate.of(2025, 1 + i, 1));
-            project.setEndDate(LocalDate.of(2025, 6 + i, 30));
+            project.setStartDate(LocalDate.of(LocalDate.now().getYear(), 1 + i, 1));
+            project.setEndDate(LocalDate.of(LocalDate.now().getYear(), 6 + i, 30));
             project.setStatus(ProjectStatus.ACTIVE);
             project.setCreatedBy(allUsers.get(random.nextInt(allUsers.size())));
             project.setCreatedAt(LocalDateTime.now());
             project.setUpdatedAt(LocalDateTime.now());
 
-            // Assign 2-3 random teams to project
+            // Assign teams to project - at least 1 team required
             Set<Team> projectTeams = new HashSet<>();
-            int teamCount = 2 + random.nextInt(2);
+            if (teams.isEmpty()) {
+                throw new RuntimeException("Cannot create projects: No teams available");
+            }
+
+            // Select 1-3 teams (at least 1, up to available teams)
+            int teamCount = 1 + random.nextInt(Math.min(2, teams.size())); // 1-3 teams, but not more than available
             Collections.shuffle(teams);
-            for (int j = 0; j < Math.min(teamCount, teams.size()); j++) {
+            for (int j = 0; j < teamCount; j++) {
                 projectTeams.add(teams.get(j));
             }
+
+            // Ensure at least one team is assigned
+            if (projectTeams.isEmpty()) {
+                projectTeams.add(teams.get(0)); // Fallback: add first team
+            }
+
             project.setTeams(projectTeams);
 
             projects.add(projectRepository.save(project));
@@ -192,7 +204,7 @@ public class SampleDataInitializer implements CommandLineRunner {
         return projects;
     }
 
-    private void createTasksFor2025(Map<Team, List<User>> teamUsers, List<Project> projects) {
+    private void createTasksForYear(Map<Team, List<User>> teamUsers, List<Project> projects, int year) {
         String[] taskTitles = {
             "Veritabanı şema tasarımı",
             "API endpoint geliştirme",
@@ -217,7 +229,7 @@ public class SampleDataInitializer implements CommandLineRunner {
 
         List<Team> teams = new ArrayList<>(teamUsers.keySet());
 
-        // Create tasks for each month in 2025
+        // Create tasks for each month in given year
         for (int month = 1; month <= 12; month++) {
             int tasksPerMonth = 15 + random.nextInt(20); // 15-35 tasks per month
 
@@ -230,34 +242,71 @@ public class SampleDataInitializer implements CommandLineRunner {
                 User assignee = teamMembers.get(random.nextInt(teamMembers.size()));
 
                 // Random dates within the month
-                int daysInMonth = LocalDate.of(2025, month, 1).lengthOfMonth();
+                int daysInMonth = LocalDate.of(year, month, 1).lengthOfMonth();
                 int startDay = 1 + random.nextInt(daysInMonth - 5);
                 int endDay = startDay + 1 + random.nextInt(7); // 1-7 days duration
                 if (endDay > daysInMonth) endDay = daysInMonth;
 
-                LocalDate startDate = LocalDate.of(2025, month, startDay);
-                LocalDate endDate = LocalDate.of(2025, month, endDay);
+                LocalDate startDate = LocalDate.of(year, month, startDay);
+                LocalDate endDate = LocalDate.of(year, month, endDay);
 
+                // Assign to project (50% chance) - but ensure task's team is one of project's teams
+                Project selectedProject = null;
+                Team taskTeam = team;
+                User taskCreator = creator;
+                User taskAssignee = assignee;
+                
+                if (random.nextBoolean() && !projects.isEmpty()) {
+                    // Find a project that has the selected team, or select a team from a random project
+                    List<Project> projectsWithTeam = projects.stream()
+                        .filter(p -> p.getTeams() != null && p.getTeams().contains(team))
+                        .collect(Collectors.toList());
+                    
+                    if (!projectsWithTeam.isEmpty()) {
+                        // Use a project that already has this team
+                        selectedProject = projectsWithTeam.get(random.nextInt(projectsWithTeam.size()));
+                        taskTeam = team; // Keep the original team
+                        taskCreator = creator;
+                        taskAssignee = assignee;
+                    } else {
+                        // No project has this team, so select a random project and use one of its teams
+                        selectedProject = projects.get(random.nextInt(projects.size()));
+                        if (selectedProject.getTeams() != null && !selectedProject.getTeams().isEmpty()) {
+                            List<Team> projectTeams = new ArrayList<>(selectedProject.getTeams());
+                            taskTeam = projectTeams.get(random.nextInt(projectTeams.size()));
+                            // Update team members for the new team
+                            List<User> newTeamMembers = teamUsers.get(taskTeam);
+                            if (newTeamMembers == null || newTeamMembers.isEmpty()) {
+                                continue; // Skip if no members in the project's team
+                            }
+                            taskCreator = newTeamMembers.get(random.nextInt(newTeamMembers.size()));
+                            taskAssignee = newTeamMembers.get(random.nextInt(newTeamMembers.size()));
+                        } else {
+                            // Project has no teams, skip project assignment
+                            selectedProject = null;
+                        }
+                    }
+                }
+                
                 Task task = new Task();
-                task.setTitle(taskTitles[random.nextInt(taskTitles.length)] + " - " + month + "/2025");
+                task.setTitle(taskTitles[random.nextInt(taskTitles.length)] + " - " + month + "/" + year);
                 task.setContent("Bu iş " + month + ". ay için oluşturulmuş örnek bir iştir.");
                 task.setStartDate(startDate);
                 task.setEndDate(endDate);
                 task.setStatus(statuses[random.nextInt(statuses.length)]);
                 task.setTaskType(taskTypes[random.nextInt(taskTypes.length)]);
                 task.setPriority(priorities[random.nextInt(priorities.length)]);
-                task.setTeam(team);
-                task.setCreatedBy(creator);
+                task.setTeam(taskTeam);
+                task.setCreatedBy(taskCreator);
                 task.setCreatedAt(LocalDateTime.now());
                 task.setUpdatedAt(LocalDateTime.now());
-
-                // Assign to project (50% chance)
-                if (random.nextBoolean() && !projects.isEmpty()) {
-                    task.setProject(projects.get(random.nextInt(projects.size())));
+                
+                if (selectedProject != null) {
+                    task.setProject(selectedProject);
                 }
 
                 // Assign user to task
-                task.setAssignees(Collections.singleton(assignee));
+                task.setAssignees(Collections.singleton(taskAssignee));
                 Task savedTask = taskRepository.save(task);
 
                 // 30% chance to create subtasks
