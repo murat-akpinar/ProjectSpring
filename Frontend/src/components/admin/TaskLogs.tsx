@@ -83,12 +83,28 @@ const TaskLogs: React.FC = () => {
   };
 
   const handleDateChange = (field: 'startDate' | 'endDate', value: string) => {
+    let isoValue: string | undefined = undefined;
+    if (value) {
+      // date input formatı: "YYYY-MM-DD"
+      // Backend ISO format bekliyor: "YYYY-MM-DDTHH:MM:SS"
+      if (field === 'startDate') {
+        isoValue = value + 'T00:00:00';
+      } else {
+        isoValue = value + 'T23:59:59';
+      }
+    }
     setFilter(prev => ({
       ...prev,
-      [field]: value || undefined,
+      [field]: isoValue,
       page: 0
     }));
     setCurrentPage(0);
+  };
+
+  // Filter'daki ISO tarihten sadece tarih kısmını al (input value için)
+  const getDateValue = (isoDate?: string): string => {
+    if (!isoDate) return '';
+    return isoDate.substring(0, 10); // "YYYY-MM-DD" kısmını al
   };
 
   const handlePageChange = (page: number) => {
@@ -129,7 +145,7 @@ const TaskLogs: React.FC = () => {
 
   const filteredUsers = users.filter(user =>
     (user.fullName?.toLowerCase().includes(searchUsername.toLowerCase()) ||
-     user.username?.toLowerCase().includes(searchUsername.toLowerCase())) &&
+      user.username?.toLowerCase().includes(searchUsername.toLowerCase())) &&
     searchUsername.length > 0
   ).slice(0, 10);
 
@@ -196,16 +212,16 @@ const TaskLogs: React.FC = () => {
         <div className="filter-group">
           <label>Başlangıç Tarihi:</label>
           <input
-            type="datetime-local"
-            value={filter.startDate || ''}
+            type="date"
+            value={getDateValue(filter.startDate)}
             onChange={(e) => handleDateChange('startDate', e.target.value)}
           />
         </div>
         <div className="filter-group">
           <label>Bitiş Tarihi:</label>
           <input
-            type="datetime-local"
-            value={filter.endDate || ''}
+            type="date"
+            value={getDateValue(filter.endDate)}
             onChange={(e) => handleDateChange('endDate', e.target.value)}
           />
         </div>
@@ -251,8 +267,8 @@ const TaskLogs: React.FC = () => {
                         </span>
                       </td>
                       <td>
-                        <span 
-                          className="task-link" 
+                        <span
+                          className="task-link"
                           title={`İş #${log.taskId}`}
                           onClick={() => handleTaskClick(log.taskId)}
                         >

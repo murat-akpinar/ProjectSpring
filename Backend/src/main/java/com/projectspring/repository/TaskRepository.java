@@ -42,6 +42,11 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
                                          @Param("startDate") LocalDate startDate, 
                                          @Param("endDate") LocalDate endDate);
     
+    @Query("SELECT t FROM Task t WHERE t.team.id = :teamId AND t.startDate >= :startDate AND t.endDate <= :endDate")
+    List<Task> findByTeamIdAndDateRange(@Param("teamId") Long teamId, 
+                                        @Param("startDate") LocalDate startDate, 
+                                        @Param("endDate") LocalDate endDate);
+    
     @Query("SELECT COUNT(t) FROM Task t WHERE t.project.id = :projectId")
     Long countByProjectId(@Param("projectId") Long projectId);
     

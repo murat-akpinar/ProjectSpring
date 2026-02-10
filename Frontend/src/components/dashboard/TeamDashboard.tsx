@@ -5,9 +5,110 @@ import './TeamDashboard.css';
 
 interface TeamDashboardProps {
   teamId?: number;
+  startDate?: string;
+  endDate?: string;
 }
 
-const TeamDashboard: React.FC<TeamDashboardProps> = ({ teamId }) => {
+// Donut Chart bileşeni
+interface DonutSegment {
+  label: string;
+  value: number;
+  color: string;
+}
+
+interface DonutChartProps {
+  title: string;
+  segments: DonutSegment[];
+  size?: number;
+}
+
+const DonutChart: React.FC<DonutChartProps> = ({ title, segments, size = 180 }) => {
+  const total = segments.reduce((sum, s) => sum + s.value, 0);
+  if (total === 0) {
+    return (
+      <div className="donut-chart-wrapper">
+        <h4 className="donut-title">{title}</h4>
+        <div className="donut-empty">Veri yok</div>
+      </div>
+    );
+  }
+
+  const radius = 70;
+  const circumference = 2 * Math.PI * radius;
+  const center = size / 2;
+  const strokeWidth = 28;
+
+  // Segment'lerin offset'lerini hesapla
+  let accumulatedOffset = 0;
+  const segmentData = segments
+    .filter(s => s.value > 0)
+    .map(s => {
+      const percent = s.value / total;
+      const dashArray = circumference * percent;
+      const dashOffset = -accumulatedOffset;
+      accumulatedOffset += dashArray;
+      return { ...s, percent, dashArray, dashOffset };
+    });
+
+  return (
+    <div className="donut-chart-wrapper">
+      <h4 className="donut-title">{title}</h4>
+      <div className="donut-chart-container">
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="donut-svg">
+          {/* Background circle */}
+          <circle
+            cx={center}
+            cy={center}
+            r={radius}
+            fill="none"
+            stroke="var(--ctp-surface0)"
+            strokeWidth={strokeWidth}
+          />
+          {/* Data segments */}
+          {segmentData.map((seg, idx) => (
+            <circle
+              key={idx}
+              cx={center}
+              cy={center}
+              r={radius}
+              fill="none"
+              stroke={seg.color}
+              strokeWidth={strokeWidth}
+              strokeDasharray={`${seg.dashArray} ${circumference - seg.dashArray}`}
+              strokeDashoffset={seg.dashOffset}
+              strokeLinecap="butt"
+              className="donut-segment"
+              style={{
+                transform: 'rotate(-90deg)',
+                transformOrigin: `${center}px ${center}px`,
+                animationDelay: `${idx * 0.15}s`
+              }}
+            />
+          ))}
+          {/* Center text */}
+          <text x={center} y={center - 8} textAnchor="middle" className="donut-center-value">
+            {total}
+          </text>
+          <text x={center} y={center + 14} textAnchor="middle" className="donut-center-label">
+            Toplam
+          </text>
+        </svg>
+      </div>
+      <div className="donut-legend">
+        {segmentData.map((seg, idx) => (
+          <div key={idx} className="donut-legend-item">
+            <span className="donut-legend-dot" style={{ backgroundColor: seg.color }} />
+            <span className="donut-legend-label">{seg.label}</span>
+            <span className="donut-legend-value">{seg.value}</span>
+            <span className="donut-legend-percent">({(seg.percent * 100).toFixed(0)}%)</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const TeamDashboard: React.FC<TeamDashboardProps> = ({ teamId, startDate, endDate }) => {
   const [details, setDetails] = useState<DashboardDetails | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -16,8 +117,8 @@ const TeamDashboard: React.FC<TeamDashboardProps> = ({ teamId }) => {
       try {
         setLoading(true);
         const data = teamId
-          ? await dashboardService.getTeamDashboardDetails(teamId)
-          : await dashboardService.getAllTeamsDashboardDetails();
+          ? await dashboardService.getTeamDashboardDetails(teamId, startDate, endDate)
+          : await dashboardService.getAllTeamsDashboardDetails(startDate, endDate);
         setDetails(data);
       } catch (error) {
         console.error('Failed to fetch dashboard details:', error);
@@ -27,10 +128,15 @@ const TeamDashboard: React.FC<TeamDashboardProps> = ({ teamId }) => {
     };
 
     fetchDetails();
-  }, [teamId]);
+  }, [teamId, startDate, endDate]);
 
   if (loading) {
-    return <div className="loading">Yükleniyor...</div>;
+    return (
+      <div className="dashboard-loading">
+        <div className="loading-spinner" />
+        <span>Yükleniyor...</span>
+      </div>
+    );
   }
 
   if (!details || !details.stats) {
@@ -42,23 +148,6 @@ const TeamDashboard: React.FC<TeamDashboardProps> = ({ teamId }) => {
   // Toplam iş sayısı
   const total = stats.totalOpen + stats.totalInProgress + stats.totalCompleted +
     stats.totalOverdue + stats.totalPostponed + stats.totalCancelled;
-
-  // Trend hesaplama (mock - gerçek uygulamada backend'den gelir)
-  const getTrend = (value: number): { percent: number; isUp: boolean } => {
-    // Simüle edilmiş trend
-    const percent = Math.floor(Math.random() * 20) + 1;
-    const isUp = value > 2;
-    return { percent, isUp };
-  };
-
-  // Mini bar grafik için mock data
-  const getMiniChart = (value: number): number[] => {
-    const bars = [];
-    for (let i = 0; i < 6; i++) {
-      bars.push(Math.floor(Math.random() * value) + 1);
-    }
-    return bars;
-  };
 
   // Stat kartları için konfigürasyon
   const statCards = [
@@ -112,63 +201,111 @@ const TeamDashboard: React.FC<TeamDashboardProps> = ({ teamId }) => {
     },
   ];
 
+  // Pasta grafik verileri
+  const overallSegments: DonutSegment[] = [
+    { label: 'Tamamlanan', value: stats.totalCompleted, color: '#a6e3a1' },
+    { label: 'Devam Eden', value: stats.totalInProgress, color: '#89b4fa' },
+    { label: 'Açık', value: stats.totalOpen, color: '#f9e2af' },
+    { label: 'Yetişmeyen', value: stats.totalOverdue, color: '#f38ba8' },
+    { label: 'Ertelenen', value: stats.totalPostponed, color: '#fab387' },
+    { label: 'İptal', value: stats.totalCancelled, color: '#6c7086' },
+  ];
+
+  const completionSegments: DonutSegment[] = [
+    { label: 'Tamamlanan', value: stats.totalCompleted, color: '#a6e3a1' },
+    { label: 'Tamamlanmayan', value: total - stats.totalCompleted, color: '#45475a' },
+  ];
+
+  const problemSegments: DonutSegment[] = [
+    { label: 'Problemli', value: stats.totalOverdue + stats.totalPostponed + stats.totalCancelled, color: '#f38ba8' },
+    { label: 'Normal', value: stats.totalCompleted + stats.totalInProgress + stats.totalOpen, color: '#a6e3a1' },
+  ];
+
+  // Tamamlanma yüzdesi
+  const completionPercent = total > 0 ? Math.round((stats.totalCompleted / total) * 100) : 0;
+
   return (
     <div className="dashboard-container-full">
 
-      {/* Overview Header */}
+      {/* Overview Header with Summary */}
       <div className="overview-header">
-        <h2 className="overview-title">Overview</h2>
-        <p className="overview-subtitle">Ekip performansı ve iş takibi</p>
+        <div className="overview-header-left">
+          <h2 className="overview-title">📊 Overview</h2>
+          <p className="overview-subtitle">
+            Birim performansı ve iş takibi
+            {startDate && endDate && (
+              <span className="date-range-badge">
+                {' • '}{startDate} – {endDate}
+              </span>
+            )}
+          </p>
+        </div>
+        <div className="overview-summary-badges">
+          <div className="summary-badge">
+            <span className="badge-value">{total}</span>
+            <span className="badge-label">Toplam İş</span>
+          </div>
+          <div className="summary-badge completion">
+            <span className="badge-value">{completionPercent}%</span>
+            <span className="badge-label">Tamamlanma</span>
+          </div>
+        </div>
       </div>
 
       {/* Modern Stats Cards */}
       <div className="stats-grid">
-        {statCards.map((card) => {
-          const trend = getTrend(card.value);
-          const miniChart = getMiniChart(card.value);
-          const maxBar = Math.max(...miniChart);
-
-          return (
-            <div
-              key={card.key}
-              className="stat-card-modern"
-              style={{ '--accent-color': card.color, '--bg-color': card.bgColor } as React.CSSProperties}
-            >
-              <div className="stat-card-header">
-                <span className="stat-icon">{card.icon}</span>
-                <span className="stat-label-modern">{card.label}</span>
-                <span className="stat-expand">↗</span>
-              </div>
-
-              <div className="stat-content">
-                <div className="stat-main">
-                  <span className="stat-value-modern">{card.value.toLocaleString()}</span>
-                  <span className="stat-unit">Görev</span>
-                </div>
-
-                <div className="stat-mini-chart">
-                  {miniChart.map((height, idx) => (
-                    <div
-                      key={idx}
-                      className="mini-bar"
-                      style={{
-                        height: `${(height / maxBar) * 100}%`,
-                        backgroundColor: card.color
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <div className="stat-footer">
-                <span className={`trend-badge ${trend.isUp ? 'up' : 'down'}`}>
-                  {trend.isUp ? '↑' : '↓'} {trend.percent}%
-                </span>
-                <span className="trend-text">vs geçen ay</span>
-              </div>
+        {statCards.map((card) => (
+          <div
+            key={card.key}
+            className="stat-card-modern"
+            style={{ '--accent-color': card.color, '--bg-color': card.bgColor } as React.CSSProperties}
+          >
+            <div className="stat-card-header">
+              <span className="stat-icon">{card.icon}</span>
+              <span className="stat-label-modern">{card.label}</span>
             </div>
-          );
-        })}
+
+            <div className="stat-content">
+              <div className="stat-main">
+                <span className="stat-value-modern">{card.value.toLocaleString()}</span>
+                <span className="stat-unit">Görev</span>
+              </div>
+              {total > 0 && (
+                <div className="stat-percent-bar">
+                  <div
+                    className="stat-percent-fill"
+                    style={{
+                      width: `${(card.value / total) * 100}%`,
+                      backgroundColor: card.color
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="stat-footer">
+              <span className="stat-share">
+                {total > 0 ? Math.round((card.value / total) * 100) : 0}% toplam içinden
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Pie Charts Section */}
+      <div className="charts-section">
+        <h3 className="section-title">📈 İş Dağılım Grafikleri</h3>
+        <div className="charts-grid">
+          <div className="chart-card">
+            <DonutChart title="Genel İş Dağılımı" segments={overallSegments} size={200} />
+          </div>
+          <div className="chart-card">
+            <DonutChart title="Tamamlanma Durumu" segments={completionSegments} size={200} />
+          </div>
+          <div className="chart-card">
+            <DonutChart title="Problem Analizi" segments={problemSegments} size={200} />
+          </div>
+        </div>
       </div>
 
       {/* Total Progress Bar */}
@@ -177,27 +314,27 @@ const TeamDashboard: React.FC<TeamDashboardProps> = ({ teamId }) => {
         <div className="total-progress-bar">
           <div
             className="progress-segment completed"
-            style={{ width: `${(stats.totalCompleted / total) * 100}%` }}
+            style={{ width: `${total > 0 ? (stats.totalCompleted / total) * 100 : 0}%` }}
             title={`Tamamlanan: ${stats.totalCompleted}`}
           />
           <div
             className="progress-segment in-progress"
-            style={{ width: `${(stats.totalInProgress / total) * 100}%` }}
+            style={{ width: `${total > 0 ? (stats.totalInProgress / total) * 100 : 0}%` }}
             title={`Devam Eden: ${stats.totalInProgress}`}
           />
           <div
             className="progress-segment open"
-            style={{ width: `${(stats.totalOpen / total) * 100}%` }}
+            style={{ width: `${total > 0 ? (stats.totalOpen / total) * 100 : 0}%` }}
             title={`Açık: ${stats.totalOpen}`}
           />
           <div
             className="progress-segment overdue"
-            style={{ width: `${(stats.totalOverdue / total) * 100}%` }}
+            style={{ width: `${total > 0 ? (stats.totalOverdue / total) * 100 : 0}%` }}
             title={`Yetişmeyen: ${stats.totalOverdue}`}
           />
           <div
             className="progress-segment postponed"
-            style={{ width: `${(stats.totalPostponed / total) * 100}%` }}
+            style={{ width: `${total > 0 ? (stats.totalPostponed / total) * 100 : 0}%` }}
             title={`Ertelenen: ${stats.totalPostponed}`}
           />
         </div>
@@ -270,7 +407,7 @@ const TeamDashboard: React.FC<TeamDashboardProps> = ({ teamId }) => {
 
         {/* Team Members */}
         <div className="team-members-card">
-          <h3 className="team-members-title">👥 Ekip Üyeleri</h3>
+          <h3 className="team-members-title">👥 Birim Üyeleri</h3>
           {details.teamMembers && details.teamMembers.length > 0 ? (
             <ul className="team-members-list">
               {details.teamMembers.map((member) => (
@@ -280,7 +417,7 @@ const TeamDashboard: React.FC<TeamDashboardProps> = ({ teamId }) => {
                   </span>
                   <span className="member-name">{member.userName}</span>
                   <span className="member-roles">
-                    {member.isLeader && <span className="role-leader">Takım Lideri</span>}
+                    {member.isLeader && <span className="role-leader">Birim Lideri</span>}
                     {member.roles && member.roles.length > 0 && (
                       <>
                         {member.isLeader && member.roles.length > 0 && ' / '}

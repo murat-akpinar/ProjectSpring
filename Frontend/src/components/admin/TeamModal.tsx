@@ -79,13 +79,13 @@ const TeamModal: React.FC<TeamModalProps> = ({ team, onClose }) => {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>{team ? 'Takım Düzenle' : 'Yeni Takım'}</h2>
+          <h2>{team ? 'Birim Düzenle' : 'Yeni Birim'}</h2>
           <button className="modal-close" onClick={onClose}>×</button>
         </div>
 
         <form onSubmit={handleSubmit} className="team-form">
           <div className="form-group">
-            <label>Takım Adı *</label>
+            <label>Birim Adı *</label>
             <input
               type="text"
               value={formData.name}
@@ -104,7 +104,7 @@ const TeamModal: React.FC<TeamModalProps> = ({ team, onClose }) => {
           </div>
 
           <div className="form-group">
-            <label>Takım Lideri</label>
+            <label>Birim Lideri</label>
             <select
               value={formData.leaderId || ''}
               onChange={(e) => setFormData({ ...formData, leaderId: e.target.value ? Number(e.target.value) : null })}

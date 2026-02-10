@@ -109,7 +109,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title || !formData.teamId) {
-      alert('Başlık ve Ekip seçimi zorunludur');
+      alert('Başlık ve Birim seçimi zorunludur');
       return;
     }
 
@@ -240,7 +240,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
 
           <div className="form-row">
             <div className="form-group">
-              <label>Ekip *</label>
+              <label>Birim *</label>
               <select
                 value={formData.teamId}
                 onChange={(e) => {
@@ -249,7 +249,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
                 }}
                 required
               >
-                <option value={0}>Ekip Seçin</option>
+                <option value={0}>Birim Seçin</option>
                 {teams.map((team) => (
                   <option key={team.id} value={team.id}>
                     {team.name}
@@ -266,7 +266,10 @@ const TaskModal: React.FC<TaskModalProps> = ({
               >
                 <option value="">Proje Seçin (Opsiyonel)</option>
                 {projects
-                  .filter(project => formData.teamId && project.teamIds.includes(formData.teamId))
+                  .filter(project =>
+                    (formData.teamId && project.teamIds.includes(formData.teamId)) ||
+                    (formData.projectId && project.id === formData.projectId)
+                  )
                   .map((project) => (
                     <option key={project.id} value={project.id}>
                       {project.name}
@@ -300,6 +303,12 @@ const TaskModal: React.FC<TaskModalProps> = ({
                 <option value={TaskType.TASK}>Görev</option>
                 <option value={TaskType.FEATURE}>Özellik</option>
                 <option value={TaskType.BUG}>Hata</option>
+                <option value={TaskType.IMPROVEMENT}>İyileştirme</option>
+                <option value={TaskType.RESEARCH}>Araştırma</option>
+                <option value={TaskType.DOCUMENTATION}>Dokümantasyon</option>
+                <option value={TaskType.TEST}>Test</option>
+                <option value={TaskType.MAINTENANCE}>Bakım</option>
+                <option value={TaskType.MEETING}>Toplantı</option>
               </select>
             </div>
           </div>
@@ -321,26 +330,28 @@ const TaskModal: React.FC<TaskModalProps> = ({
           <div className="form-group">
             <label>Atanan Kişiler</label>
             <div className="checkbox-group">
-              {users.map((user) => (
-                <label key={user.id} className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={formData.assigneeIds?.includes(user.id) || false}
-                    onChange={(e) => {
-                      const currentIds = formData.assigneeIds || [];
-                      if (e.target.checked) {
-                        setFormData({ ...formData, assigneeIds: [...currentIds, user.id] });
-                      } else {
-                        setFormData({
-                          ...formData,
-                          assigneeIds: currentIds.filter((id) => id !== user.id),
-                        });
-                      }
-                    }}
-                  />
-                  {user.fullName}
-                </label>
-              ))}
+              {users
+                .filter((user) => !formData.teamId || (user.teamIds && user.teamIds.includes(formData.teamId)))
+                .map((user) => (
+                  <label key={user.id} className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={formData.assigneeIds?.includes(user.id) || false}
+                      onChange={(e) => {
+                        const currentIds = formData.assigneeIds || [];
+                        if (e.target.checked) {
+                          setFormData({ ...formData, assigneeIds: [...currentIds, user.id] });
+                        } else {
+                          setFormData({
+                            ...formData,
+                            assigneeIds: currentIds.filter((id) => id !== user.id),
+                          });
+                        }
+                      }}
+                    />
+                    {user.fullName}
+                  </label>
+                ))}
             </div>
           </div>
 

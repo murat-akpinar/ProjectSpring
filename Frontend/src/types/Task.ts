@@ -8,9 +8,15 @@ export enum TaskStatus {
 }
 
 export enum TaskType {
-  TASK = 'TASK',      // Görev
-  FEATURE = 'FEATURE', // Özellik
-  BUG = 'BUG',        // Hata
+  TASK = 'TASK',              // Görev
+  FEATURE = 'FEATURE',       // Özellik
+  BUG = 'BUG',               // Hata
+  IMPROVEMENT = 'IMPROVEMENT', // İyileştirme
+  RESEARCH = 'RESEARCH',     // Araştırma
+  DOCUMENTATION = 'DOCUMENTATION', // Dokümantasyon
+  TEST = 'TEST',             // Test
+  MAINTENANCE = 'MAINTENANCE', // Bakım
+  MEETING = 'MEETING',       // Toplantı
 }
 
 export enum Priority {

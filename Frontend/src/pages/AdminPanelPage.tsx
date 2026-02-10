@@ -49,16 +49,16 @@ const AdminPanelPage: React.FC = () => {
     <div className="admin-panel-page">
       <div className="admin-panel-header">
         <h1>Yönetim Paneli</h1>
-        <button 
+        <button
           className="btn-back-to-home"
           onClick={() => navigate('/')}
         >
           ← Anasayfaya Dön
         </button>
       </div>
-      
+
       <SystemHealth />
-      
+
       <div className="admin-tabs">
         <button
           className={activeTab === 'users' ? 'active' : ''}
@@ -70,7 +70,7 @@ const AdminPanelPage: React.FC = () => {
           className={activeTab === 'teams' ? 'active' : ''}
           onClick={() => setActiveTab('teams')}
         >
-          Takımlar
+          Birimler
         </button>
         <button
           className={activeTab === 'roles' ? 'active' : ''}

@@ -70,7 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({ selectedTeamId, onTeamSelect, isColla
           to="/dashboard"
           className={`nav-item ${location.pathname === '/dashboard' ? 'active' : ''}`}
         >
-          Dashboard
+          Overview
         </Link>
       </div>
       <div className="team-list">
@@ -78,7 +78,7 @@ const Sidebar: React.FC<SidebarProps> = ({ selectedTeamId, onTeamSelect, isColla
           className={`team-item ${selectedTeamId === null ? 'active' : ''}`}
           onClick={() => onTeamSelect(null)}
         >
-          <div className="team-item-name">Tüm Ekipler</div>
+          <div className="team-item-name">Tüm Birimler</div>
         </div>
         {loading ? (
           <div className="loading">Yükleniyor...</div>
@@ -99,9 +99,9 @@ const Sidebar: React.FC<SidebarProps> = ({ selectedTeamId, onTeamSelect, isColla
                   </span>
                 )}
                 {team.color && !team.icon && (
-                  <span 
-                    className="team-color-indicator" 
-                    style={{ 
+                  <span
+                    className="team-color-indicator"
+                    style={{
                       backgroundColor: team.color,
                       width: '12px',
                       height: '12px',

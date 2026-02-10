@@ -9,7 +9,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Repository
 public interface SystemLogRepository extends JpaRepository<SystemLog, Long> {
@@ -22,28 +21,43 @@ public interface SystemLogRepository extends JpaRepository<SystemLog, Long> {
     
     Page<SystemLog> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
     
-    @Query("SELECT sl FROM SystemLog sl WHERE sl.createdAt BETWEEN :start AND :end ORDER BY sl.createdAt DESC")
-    Page<SystemLog> findByCreatedAtBetweenOrderByCreatedAtDesc(
-            @Param("start") LocalDateTime start, 
-            @Param("end") LocalDateTime end, 
-            Pageable pageable
-    );
-    
-    @Query(value = "SELECT * FROM system_logs sl WHERE " +
-           "(:source = '' OR sl.source = :source) AND " +
-           "(:level = '' OR sl.level = :level) AND " +
-           "(:userId IS NULL OR sl.user_id = :userId) AND " +
-           "(:startDate IS NULL OR sl.created_at >= :startDate) AND " +
-           "(:endDate IS NULL OR sl.created_at <= :endDate) " +
-           "ORDER BY sl.created_at DESC",
-           nativeQuery = true)
-    Page<SystemLog> findWithFilters(
+    // Source + date range
+    @Query("SELECT sl FROM SystemLog sl WHERE sl.source = :source AND sl.createdAt >= :startDate AND sl.createdAt <= :endDate ORDER BY sl.createdAt DESC")
+    Page<SystemLog> findBySourceAndDateRange(
             @Param("source") String source,
-            @Param("level") String level,
-            @Param("userId") Long userId,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
             Pageable pageable
     );
+    
+    // Source + level + date range
+    @Query("SELECT sl FROM SystemLog sl WHERE sl.source = :source AND sl.level = :level AND sl.createdAt >= :startDate AND sl.createdAt <= :endDate ORDER BY sl.createdAt DESC")
+    Page<SystemLog> findBySourceAndLevelAndDateRange(
+            @Param("source") String source,
+            @Param("level") String level,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable
+    );
+    
+    // Level + date range
+    @Query("SELECT sl FROM SystemLog sl WHERE sl.level = :level AND sl.createdAt >= :startDate AND sl.createdAt <= :endDate ORDER BY sl.createdAt DESC")
+    Page<SystemLog> findByLevelAndDateRange(
+            @Param("level") String level,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable
+    );
+    
+    // Date range only
+    @Query("SELECT sl FROM SystemLog sl WHERE sl.createdAt >= :startDate AND sl.createdAt <= :endDate ORDER BY sl.createdAt DESC")
+    Page<SystemLog> findByDateRange(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable
+    );
+    
+    // All logs ordered
+    Page<SystemLog> findAllByOrderByCreatedAtDesc(Pageable pageable);
 }
 
