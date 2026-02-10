@@ -48,6 +48,7 @@ public class DashboardService {
         DashboardStatsDTO stats = new DashboardStatsDTO();
         stats.setTotalOpen(0L);
         stats.setTotalInProgress(0L);
+        stats.setTotalTesting(0L);
         stats.setTotalCompleted(0L);
         stats.setTotalOverdue(0L);
         stats.setTotalPostponed(0L);
@@ -65,6 +66,8 @@ public class DashboardService {
                 tasks.stream().filter(t -> t.getStatus() == TaskStatus.OPEN).count());
             stats.setTotalInProgress(stats.getTotalInProgress() + 
                 tasks.stream().filter(t -> t.getStatus() == TaskStatus.IN_PROGRESS).count());
+            stats.setTotalTesting(stats.getTotalTesting() + 
+                tasks.stream().filter(t -> t.getStatus() == TaskStatus.TESTING).count());
             stats.setTotalCompleted(stats.getTotalCompleted() + 
                 tasks.stream().filter(t -> t.getStatus() == TaskStatus.COMPLETED).count());
             stats.setTotalOverdue(stats.getTotalOverdue() + 

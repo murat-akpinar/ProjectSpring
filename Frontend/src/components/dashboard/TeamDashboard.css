@@ -434,6 +434,10 @@
   background: #fab387;
 }
 
+.progress-segment.testing {
+  background: #cba6f7;
+}
+
 .progress-legend {
   display: flex;
   flex-wrap: wrap;
@@ -473,6 +477,10 @@
 
 .dot.postponed {
   background: #fab387;
+}
+
+.dot.testing {
+  background: #cba6f7;
 }
 
 /* ============================================

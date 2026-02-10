@@ -46,6 +46,7 @@ public class OverdueTaskService {
         for (Task task : overdueTasks) {
             if (task.getStatus() != TaskStatus.COMPLETED && 
                 task.getStatus() != TaskStatus.CANCELLED &&
+                task.getStatus() != TaskStatus.TESTING &&
                 task.getStatus() != TaskStatus.OVERDUE) {
                 
                 TaskStatus oldStatus = task.getStatus();

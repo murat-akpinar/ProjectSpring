@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 public class DashboardStatsDTO {
     private Long totalOpen;
     private Long totalInProgress;
+    private Long totalTesting;
     private Long totalCompleted;
     private Long totalOverdue;
     private Long totalPostponed;
     private Long totalCancelled;
 }
-

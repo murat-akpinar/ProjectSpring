@@ -146,7 +146,7 @@ const TeamDashboard: React.FC<TeamDashboardProps> = ({ teamId, startDate, endDat
   const stats = details.stats;
 
   // Toplam iş sayısı
-  const total = stats.totalOpen + stats.totalInProgress + stats.totalCompleted +
+  const total = stats.totalOpen + stats.totalInProgress + (stats.totalTesting || 0) + stats.totalCompleted +
     stats.totalOverdue + stats.totalPostponed + stats.totalCancelled;
 
   // Stat kartları için konfigürasyon
@@ -158,6 +158,14 @@ const TeamDashboard: React.FC<TeamDashboardProps> = ({ teamId, startDate, endDat
       icon: '🔄',
       color: '#89b4fa',
       bgColor: 'rgba(137, 180, 250, 0.1)'
+    },
+    {
+      key: 'testing',
+      label: 'Test Aşamasında',
+      value: stats.totalTesting || 0,
+      icon: '🧪',
+      color: '#cba6f7',
+      bgColor: 'rgba(203, 166, 247, 0.1)'
     },
     {
       key: 'completed',
@@ -204,6 +212,7 @@ const TeamDashboard: React.FC<TeamDashboardProps> = ({ teamId, startDate, endDat
   // Pasta grafik verileri
   const overallSegments: DonutSegment[] = [
     { label: 'Tamamlanan', value: stats.totalCompleted, color: '#a6e3a1' },
+    { label: 'Test Aşamasında', value: stats.totalTesting || 0, color: '#cba6f7' },
     { label: 'Devam Eden', value: stats.totalInProgress, color: '#89b4fa' },
     { label: 'Açık', value: stats.totalOpen, color: '#f9e2af' },
     { label: 'Yetişmeyen', value: stats.totalOverdue, color: '#f38ba8' },
@@ -218,7 +227,7 @@ const TeamDashboard: React.FC<TeamDashboardProps> = ({ teamId, startDate, endDat
 
   const problemSegments: DonutSegment[] = [
     { label: 'Problemli', value: stats.totalOverdue + stats.totalPostponed + stats.totalCancelled, color: '#f38ba8' },
-    { label: 'Normal', value: stats.totalCompleted + stats.totalInProgress + stats.totalOpen, color: '#a6e3a1' },
+    { label: 'Normal', value: stats.totalCompleted + (stats.totalTesting || 0) + stats.totalInProgress + stats.totalOpen, color: '#a6e3a1' },
   ];
 
   // Tamamlanma yüzdesi
@@ -323,6 +332,11 @@ const TeamDashboard: React.FC<TeamDashboardProps> = ({ teamId, startDate, endDat
             title={`Devam Eden: ${stats.totalInProgress}`}
           />
           <div
+            className="progress-segment testing"
+            style={{ width: `${total > 0 ? ((stats.totalTesting || 0) / total) * 100 : 0}%` }}
+            title={`Test Aşamasında: ${stats.totalTesting || 0}`}
+          />
+          <div
             className="progress-segment open"
             style={{ width: `${total > 0 ? (stats.totalOpen / total) * 100 : 0}%` }}
             title={`Açık: ${stats.totalOpen}`}
@@ -340,6 +354,7 @@ const TeamDashboard: React.FC<TeamDashboardProps> = ({ teamId, startDate, endDat
         </div>
         <div className="progress-legend">
           <span className="legend-item"><span className="dot completed"></span> Tamamlanan</span>
+          <span className="legend-item"><span className="dot testing"></span> Test Aşamasında</span>
           <span className="legend-item"><span className="dot in-progress"></span> Devam Eden</span>
           <span className="legend-item"><span className="dot open"></span> Açık</span>
           <span className="legend-item"><span className="dot overdue"></span> Yetişmeyen</span>
