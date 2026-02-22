@@ -78,6 +78,8 @@ const ProjectDetailPage: React.FC = () => {
   const handleDeleteTask = async (taskId: number) => {
     try {
       await taskService.deleteTask(taskId);
+      setIsTaskModalOpen(false);
+      setSelectedTask(null);
       fetchProjectAndTasks();
     } catch (error) {
       console.error('Failed to delete task:', error);

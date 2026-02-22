@@ -109,6 +109,8 @@ const CalendarPage: React.FC = () => {
   const handleDeleteTask = async (taskId: number) => {
     try {
       await taskService.deleteTask(taskId);
+      setIsTaskModalOpen(false);
+      setSelectedTask(null);
       handleTaskSaved();
     } catch (error) {
       console.error('Failed to delete task:', error);

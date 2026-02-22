@@ -14,7 +14,7 @@ interface TaskModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: () => void;
-  onDelete?: (taskId: number) => void;
+  onDelete?: (taskId: number) => Promise<void>;
   task?: Task | null;
   defaultTeamId?: number;
   defaultProjectId?: number;
@@ -329,7 +329,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
             </div>
           </div>
 
-          <div className="form-group">
+          <div className="form-group" style={{ marginTop: '8px' }}>
             <label>Atanan Kişiler</label>
             <div className="checkbox-group">
               {users
@@ -428,10 +428,13 @@ const TaskModal: React.FC<TaskModalProps> = ({
             {task && onDelete && (
               <button
                 type="button"
-                onClick={() => {
+                onClick={async () => {
                   if (window.confirm(`"${task.title}" işi silinecek. Emin misiniz?`)) {
-                    onDelete(task.id);
-                    onClose();
+                    try {
+                      await onDelete(task.id);
+                    } catch (error) {
+                      console.error('Failed to delete task:', error);
+                    }
                   }
                 }}
                 className="btn-delete"
