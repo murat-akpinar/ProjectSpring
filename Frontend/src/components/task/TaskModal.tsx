@@ -8,6 +8,7 @@ import { userService } from '../../services/userService';
 import { projectService } from '../../services/projectService';
 import { Project } from '../../types/Project';
 import { getStatusLabel } from '../../utils/statusColors';
+import ConfirmDialog from '../common/ConfirmDialog';
 import './TaskModal.css';
 
 interface TaskModalProps {
@@ -36,6 +37,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
   const [teams, setTeams] = useState<Team[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState<CreateTaskRequest>({
@@ -428,15 +430,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
             {task && onDelete && (
               <button
                 type="button"
-                onClick={async () => {
-                  if (window.confirm(`"${task.title}" işi silinecek. Emin misiniz?`)) {
-                    try {
-                      await onDelete(task.id);
-                    } catch (error) {
-                      console.error('Failed to delete task:', error);
-                    }
-                  }
-                }}
+                onClick={() => setShowDeleteConfirm(true)}
                 className="btn-delete"
                 style={{
                   backgroundColor: 'var(--ctp-red, #f38ba8)',
@@ -461,6 +455,26 @@ const TaskModal: React.FC<TaskModalProps> = ({
           </div>
         </form>
       </div>
+
+      {task && onDelete && (
+        <ConfirmDialog
+          isOpen={showDeleteConfirm}
+          title="İş Sil"
+          message={`"${task.title}" işi kalıcı olarak silinecek. Bu işlemi geri alamazsınız.`}
+          confirmText="Sil"
+          cancelText="Vazgeç"
+          variant="danger"
+          onConfirm={async () => {
+            setShowDeleteConfirm(false);
+            try {
+              await onDelete(task.id);
+            } catch (error) {
+              console.error('Failed to delete task:', error);
+            }
+          }}
+          onCancel={() => setShowDeleteConfirm(false)}
+        />
+      )}
     </div>
   );
 };
