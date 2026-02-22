@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+    
+    <!-- Rename team names from Ekibi to Birimi -->
+    <changeSet id="rename_teams_ekibi_to_birimi" author="projectspring">
+        <update tableName="teams">
+            <column name="name" value="Sistem Birimi"/>
+            <column name="description" value="Sistem yönetimi ve altyapı birimi"/>
+            <where>name = 'Sistem Ekibi'</where>
+        </update>
+        <update tableName="teams">
+            <column name="name" value="Yazılım Birimi"/>
+            <column name="description" value="Yazılım geliştirme birimi"/>
+            <where>name = 'Yazılım Ekibi'</where>
+        </update>
+        <update tableName="teams">
+            <column name="name" value="Test Birimi"/>
+            <column name="description" value="Test ve kalite güvence birimi"/>
+            <where>name = 'Test Ekibi'</where>
+        </update>
+        <update tableName="teams">
+            <column name="name" value="Network Birimi"/>
+            <column name="description" value="Ağ yönetimi birimi"/>
+            <where>name = 'Network Ekibi'</where>
+        </update>
+        <update tableName="teams">
+            <column name="name" value="Some Birimi"/>
+            <column name="description" value="Some birimi"/>
+            <where>name = 'Some Ekibi'</where>
+        </update>
+    </changeSet>
+
+    <!-- Update role descriptions -->
+    <changeSet id="update_role_descriptions_birim" author="projectspring">
+        <update tableName="roles">
+            <column name="description" value="Yönetici - Tüm birimleri görüntüleyebilir"/>
+            <where>name = 'ADMIN'</where>
+        </update>
+        <update tableName="roles">
+            <column name="description" value="Birim Lideri - Kendi birimini yönetebilir"/>
+            <where>name = 'TAKIM_LIDERI'</where>
+        </update>
+    </changeSet>
+
+</databaseChangeLog>

@@ -75,6 +75,18 @@ const ProjectDetailPage: React.FC = () => {
     fetchProjectAndTasks();
   };
 
+  const handleDeleteTask = async (taskId: number) => {
+    try {
+      await taskService.deleteTask(taskId);
+      setIsTaskModalOpen(false);
+      setSelectedTask(null);
+      fetchProjectAndTasks();
+    } catch (error) {
+      console.error('Failed to delete task:', error);
+      alert('İş silinemedi');
+    }
+  };
+
   const getProjectStatusColor = (status: string): string => {
     switch (status) {
       case 'ACTIVE':
@@ -397,6 +409,7 @@ const ProjectDetailPage: React.FC = () => {
           setSelectedTask(null);
         }}
         onSave={handleTaskSaved}
+        onDelete={handleDeleteTask}
         task={selectedTask}
         defaultProjectId={project.id}
       />

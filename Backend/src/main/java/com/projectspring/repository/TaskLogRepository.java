@@ -16,6 +16,8 @@ public interface TaskLogRepository extends JpaRepository<TaskLog, Long> {
     
     Page<TaskLog> findByTaskIdOrderByCreatedAtDesc(Long taskId, Pageable pageable);
     
+    List<TaskLog> findByTask(com.projectspring.model.Task task);
+    
     Page<TaskLog> findByChangedByIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
     
     Page<TaskLog> findByActionOrderByCreatedAtDesc(String action, Pageable pageable);

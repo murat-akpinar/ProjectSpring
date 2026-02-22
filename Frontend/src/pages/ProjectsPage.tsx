@@ -32,7 +32,7 @@ const ProjectsPage: React.FC = () => {
       // Filter by selected team if a team is selected
       let filteredData = data;
       if (selectedTeamId) {
-        filteredData = data.filter(project => 
+        filteredData = data.filter(project =>
           project.teamIds && project.teamIds.includes(selectedTeamId)
         );
       }
@@ -125,8 +125,8 @@ const ProjectsPage: React.FC = () => {
 
   return (
     <div className="app-container">
-      <Sidebar 
-        selectedTeamId={selectedTeamId} 
+      <Sidebar
+        selectedTeamId={selectedTeamId}
         onTeamSelect={setSelectedTeamId}
         isCollapsed={isCollapsed}
         onToggleCollapse={toggleSidebar}
@@ -137,14 +137,14 @@ const ProjectsPage: React.FC = () => {
           <div className="projects-container">
             <div className="projects-header">
               <h1>Projeler</h1>
-              <button 
+              <button
                 onClick={handleCreateProject}
                 className="btn-create-project"
               >
                 + Yeni Proje
               </button>
             </div>
-            
+
             {loading ? (
               <div className="loading">Yükleniyor...</div>
             ) : projects.length === 0 ? (
@@ -168,11 +168,11 @@ const ProjectsPage: React.FC = () => {
                         {getStatusLabel(project.status)}
                       </div>
                     </div>
-                    
+
                     {project.description && (
                       <p className="project-card-description">{project.description}</p>
                     )}
-                    
+
                     <div className="project-card-meta">
                       {project.startDate && project.endDate && (
                         <div className="project-card-dates">
@@ -181,7 +181,7 @@ const ProjectsPage: React.FC = () => {
                       )}
                       {project.teamNames && project.teamNames.length > 0 && (
                         <div className="project-card-teams">
-                          Ekipler: {project.teamNames.join(', ')}
+                          Birimler: {project.teamNames.join(', ')}
                         </div>
                       )}
                     </div>
@@ -201,15 +201,15 @@ const ProjectsPage: React.FC = () => {
                           </span>
                         </div>
                         <div className="project-progress-bar">
-                          <div 
+                          <div
                             className="project-progress-fill"
-                            style={{ 
-                              width: `${project.taskCount > 0 ? ((project.completedTaskCount || 0) / project.taskCount * 100) : 0}%` 
+                            style={{
+                              width: `${project.taskCount > 0 ? ((project.completedTaskCount || 0) / project.taskCount * 100) : 0}%`
                             }}
                           />
                         </div>
                         <div className="project-progress-text">
-                          {project.taskCount > 0 
+                          {project.taskCount > 0
                             ? `${Math.round(((project.completedTaskCount || 0) / project.taskCount) * 100)}% Tamamlandı`
                             : '0% Tamamlandı'}
                         </div>
@@ -220,7 +220,7 @@ const ProjectsPage: React.FC = () => {
                         <div className="project-no-tasks">Henüz iş eklenmemiş</div>
                       </div>
                     )}
-                    
+
                     <div className="project-card-footer">
                       <span className="project-card-creator">
                         Oluşturan: {project.createdByName}
@@ -250,7 +250,7 @@ const ProjectsPage: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       <ProjectModal
         isOpen={isProjectModalOpen}
         onClose={() => {

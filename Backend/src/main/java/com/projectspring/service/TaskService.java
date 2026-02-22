@@ -155,12 +155,6 @@ public class TaskService {
             if (!hasAccess) {
                 throw new RuntimeException("Access denied to this project");
             }
-            // Task'ın ekibi projenin ekiplerinden biri olmalı
-            boolean teamMatches = project.getTeams().stream()
-                .anyMatch(t -> t.getId().equals(team.getId()));
-            if (!teamMatches) {
-                throw new RuntimeException("Task's team must be one of the project's teams");
-            }
             task.setProject(project);
         }
         
@@ -225,6 +219,16 @@ public class TaskService {
         task.setTaskType(request.getTaskType() != null ? request.getTaskType() : TaskType.TASK);
         task.setPriority(request.getPriority() != null ? request.getPriority() : Priority.NORMAL);
         
+        // Team güncelleme
+        if (request.getTeamId() != null) {
+            Team newTeam = teamRepository.findById(request.getTeamId())
+                .orElseThrow(() -> new RuntimeException("Team not found"));
+            if (!accessibleTeamIds.contains(newTeam.getId())) {
+                throw new RuntimeException("Access denied to this team");
+            }
+            task.setTeam(newTeam);
+        }
+        
         // Project assignment
         if (request.getProjectId() != null) {
             Project project = projectRepository.findById(request.getProjectId())
@@ -234,13 +238,6 @@ public class TaskService {
                 .anyMatch(t -> accessibleTeamIds.contains(t.getId()));
             if (!hasAccess) {
                 throw new RuntimeException("Access denied to this project");
-            }
-            // Task'ın ekibi projenin ekiplerinden biri olmalı
-            final Long taskTeamId = task.getTeam().getId();
-            boolean teamMatches = project.getTeams().stream()
-                .anyMatch(t -> t.getId().equals(taskTeamId));
-            if (!teamMatches) {
-                throw new RuntimeException("Task's team must be one of the project's teams");
             }
             task.setProject(project);
         } else {
@@ -303,6 +300,9 @@ public class TaskService {
         // Log task deletion before deleting
         TaskDTO taskDTO = convertToDTO(task);
         taskLogService.logTaskAction(task, "DELETED", currentUser, "Task deleted", taskDTO, null);
+        
+        // Task'a ait tüm log'ların task referansını null yap (log'lar korunsun)
+        taskLogService.detachTaskFromLogs(task);
         
         taskRepository.delete(task);
     }

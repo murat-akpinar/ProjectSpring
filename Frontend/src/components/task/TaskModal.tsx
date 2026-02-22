@@ -8,12 +8,14 @@ import { userService } from '../../services/userService';
 import { projectService } from '../../services/projectService';
 import { Project } from '../../types/Project';
 import { getStatusLabel } from '../../utils/statusColors';
+import ConfirmDialog from '../common/ConfirmDialog';
 import './TaskModal.css';
 
 interface TaskModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: () => void;
+  onDelete?: (taskId: number) => Promise<void>;
   task?: Task | null;
   defaultTeamId?: number;
   defaultProjectId?: number;
@@ -25,6 +27,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
   isOpen,
   onClose,
   onSave,
+  onDelete,
   task,
   defaultTeamId,
   defaultProjectId,
@@ -34,6 +37,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
   const [teams, setTeams] = useState<Team[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState<CreateTaskRequest>({
@@ -109,7 +113,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title || !formData.teamId) {
-      alert('Başlık ve Ekip seçimi zorunludur');
+      alert('Başlık ve Birim seçimi zorunludur');
       return;
     }
 
@@ -240,7 +244,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
 
           <div className="form-row">
             <div className="form-group">
-              <label>Ekip *</label>
+              <label>Birim *</label>
               <select
                 value={formData.teamId}
                 onChange={(e) => {
@@ -249,7 +253,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
                 }}
                 required
               >
-                <option value={0}>Ekip Seçin</option>
+                <option value={0}>Birim Seçin</option>
                 {teams.map((team) => (
                   <option key={team.id} value={team.id}>
                     {team.name}
@@ -266,7 +270,10 @@ const TaskModal: React.FC<TaskModalProps> = ({
               >
                 <option value="">Proje Seçin (Opsiyonel)</option>
                 {projects
-                  .filter(project => formData.teamId && project.teamIds.includes(formData.teamId))
+                  .filter(project =>
+                    (formData.teamId && project.teamIds.includes(formData.teamId)) ||
+                    (formData.projectId && project.id === formData.projectId)
+                  )
                   .map((project) => (
                     <option key={project.id} value={project.id}>
                       {project.name}
@@ -300,6 +307,12 @@ const TaskModal: React.FC<TaskModalProps> = ({
                 <option value={TaskType.TASK}>Görev</option>
                 <option value={TaskType.FEATURE}>Özellik</option>
                 <option value={TaskType.BUG}>Hata</option>
+                <option value={TaskType.IMPROVEMENT}>İyileştirme</option>
+                <option value={TaskType.RESEARCH}>Araştırma</option>
+                <option value={TaskType.DOCUMENTATION}>Dokümantasyon</option>
+                <option value={TaskType.TEST}>Test</option>
+                <option value={TaskType.MAINTENANCE}>Bakım</option>
+                <option value={TaskType.MEETING}>Toplantı</option>
               </select>
             </div>
           </div>
@@ -318,29 +331,31 @@ const TaskModal: React.FC<TaskModalProps> = ({
             </div>
           </div>
 
-          <div className="form-group">
+          <div className="form-group" style={{ marginTop: '8px' }}>
             <label>Atanan Kişiler</label>
             <div className="checkbox-group">
-              {users.map((user) => (
-                <label key={user.id} className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={formData.assigneeIds?.includes(user.id) || false}
-                    onChange={(e) => {
-                      const currentIds = formData.assigneeIds || [];
-                      if (e.target.checked) {
-                        setFormData({ ...formData, assigneeIds: [...currentIds, user.id] });
-                      } else {
-                        setFormData({
-                          ...formData,
-                          assigneeIds: currentIds.filter((id) => id !== user.id),
-                        });
-                      }
-                    }}
-                  />
-                  {user.fullName}
-                </label>
-              ))}
+              {users
+                .filter((user) => !formData.teamId || (user.teamIds && user.teamIds.includes(formData.teamId)))
+                .map((user) => (
+                  <label key={user.id} className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={formData.assigneeIds?.includes(user.id) || false}
+                      onChange={(e) => {
+                        const currentIds = formData.assigneeIds || [];
+                        if (e.target.checked) {
+                          setFormData({ ...formData, assigneeIds: [...currentIds, user.id] });
+                        } else {
+                          setFormData({
+                            ...formData,
+                            assigneeIds: currentIds.filter((id) => id !== user.id),
+                          });
+                        }
+                      }}
+                    />
+                    {user.fullName}
+                  </label>
+                ))}
             </div>
           </div>
 
@@ -412,6 +427,25 @@ const TaskModal: React.FC<TaskModalProps> = ({
           </div>
 
           <div className="modal-actions">
+            {task && onDelete && (
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(true)}
+                className="btn-delete"
+                style={{
+                  backgroundColor: 'var(--ctp-red, #f38ba8)',
+                  color: 'var(--ctp-base, #1e1e2e)',
+                  border: 'none',
+                  padding: '8px 16px',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontWeight: '500',
+                  marginRight: 'auto',
+                }}
+              >
+                Sil
+              </button>
+            )}
             <button type="button" onClick={onClose} className="btn-cancel">
               İptal
             </button>
@@ -421,6 +455,26 @@ const TaskModal: React.FC<TaskModalProps> = ({
           </div>
         </form>
       </div>
+
+      {task && onDelete && (
+        <ConfirmDialog
+          isOpen={showDeleteConfirm}
+          title="İş Sil"
+          message={`"${task.title}" işi kalıcı olarak silinecek. Bu işlemi geri alamazsınız.`}
+          confirmText="Sil"
+          cancelText="Vazgeç"
+          variant="danger"
+          onConfirm={async () => {
+            setShowDeleteConfirm(false);
+            try {
+              await onDelete(task.id);
+            } catch (error) {
+              console.error('Failed to delete task:', error);
+            }
+          }}
+          onCancel={() => setShowDeleteConfirm(false)}
+        />
+      )}
     </div>
   );
 };

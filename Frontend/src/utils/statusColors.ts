@@ -6,6 +6,8 @@ export const getStatusColor = (status: TaskStatus): string => {
       return '#f5e0dc'; // Rosewater (daha açık sarı)
     case TaskStatus.IN_PROGRESS:
       return '#89dceb'; // Sky (daha açık mavi)
+    case TaskStatus.TESTING:
+      return '#cba6f7'; // Mauve (mor)
     case TaskStatus.COMPLETED:
       return '#94e2d5'; // Teal (daha açık yeşil)
     case TaskStatus.POSTPONED:
@@ -25,6 +27,8 @@ export const getStatusLabel = (status: TaskStatus): string => {
       return 'Açık';
     case TaskStatus.IN_PROGRESS:
       return 'Yapılıyor';
+    case TaskStatus.TESTING:
+      return 'Test Aşamasında';
     case TaskStatus.COMPLETED:
       return 'Tamamlandı';
     case TaskStatus.POSTPONED:
@@ -37,4 +41,3 @@ export const getStatusLabel = (status: TaskStatus): string => {
       return status;
   }
 };
-

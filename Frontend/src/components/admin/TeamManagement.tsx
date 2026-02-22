@@ -23,7 +23,7 @@ const TeamManagement: React.FC = () => {
         window.location.href = '/login';
         return;
       }
-      
+
       const data = await adminService.getAllTeams();
       console.log('Fetched teams:', data);
       setTeams(data);
@@ -44,7 +44,7 @@ const TeamManagement: React.FC = () => {
       } else if (status === 403) {
         alert('Bu işlem için yetkiniz yok. Sadece yöneticiler (ADMIN rolü) erişebilir.');
       } else {
-        alert('Takımlar yüklenemedi: ' + (error.response?.data?.error || error.message));
+        alert('Birimler yüklenemedi: ' + (error.response?.data?.error || error.message));
       }
     } finally {
       setLoading(false);
@@ -62,12 +62,12 @@ const TeamManagement: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Bu takımı silmek istediğinizden emin misiniz?')) {
+    if (window.confirm('Bu birimi silmek istediğinizden emin misiniz?')) {
       try {
         await adminService.deleteTeam(id);
         fetchTeams();
       } catch (error: any) {
-        alert(error.response?.data?.error || 'Takım silinemedi');
+        alert(error.response?.data?.error || 'Birim silinemedi');
       }
     }
   };
@@ -85,22 +85,22 @@ const TeamManagement: React.FC = () => {
   return (
     <div className="team-management">
       <div className="team-management-header">
-        <h2>Takım Yönetimi</h2>
+        <h2>Birim Yönetimi</h2>
         <button className="btn-create" onClick={handleCreate}>
-          Yeni Takım
+          Yeni Birim
         </button>
       </div>
 
       {teams.length === 0 ? (
         <div className="empty-state">
-          <p>Henüz takım bulunmamaktadır.</p>
+          <p>Henüz birim bulunmamaktadır.</p>
         </div>
       ) : (
         <table className="teams-table">
           <thead>
             <tr>
               <th>ID</th>
-              <th>Takım Adı</th>
+              <th>Birim Adı</th>
               <th>Açıklama</th>
               <th>Lider</th>
               <th>Renk</th>
@@ -110,32 +110,32 @@ const TeamManagement: React.FC = () => {
           </thead>
           <tbody>
             {teams.map((team) => (
-            <tr key={team.id}>
-              <td>{team.id}</td>
-              <td>{team.name}</td>
-              <td>{team.description || '-'}</td>
-              <td>{team.leaderName || '-'}</td>
-              <td>
-                {team.color && (
-                  <span
-                    className="color-badge"
-                    style={{ backgroundColor: team.color }}
-                  >
-                    {team.color}
-                  </span>
-                )}
-              </td>
-              <td>{team.icon || '-'}</td>
-              <td>
-                <button className="btn-edit" onClick={() => handleEdit(team)}>
-                  Düzenle
-                </button>
-                <button className="btn-delete" onClick={() => handleDelete(team.id)}>
-                  Sil
-                </button>
-              </td>
-            </tr>
-          ))}
+              <tr key={team.id}>
+                <td>{team.id}</td>
+                <td>{team.name}</td>
+                <td>{team.description || '-'}</td>
+                <td>{team.leaderName || '-'}</td>
+                <td>
+                  {team.color && (
+                    <span
+                      className="color-badge"
+                      style={{ backgroundColor: team.color }}
+                    >
+                      {team.color}
+                    </span>
+                  )}
+                </td>
+                <td>{team.icon || '-'}</td>
+                <td>
+                  <button className="btn-edit" onClick={() => handleEdit(team)}>
+                    Düzenle
+                  </button>
+                  <button className="btn-delete" onClick={() => handleDelete(team.id)}>
+                    Sil
+                  </button>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       )}

@@ -20,7 +20,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
 }) => {
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(false);
-  
+
   const [formData, setFormData] = useState<CreateProjectRequest>({
     name: '',
     description: '',
@@ -67,7 +67,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
       // Prepare request data - convert empty strings to undefined for optional fields
       const requestData: CreateProjectRequest = {
@@ -78,21 +78,21 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
         status: formData.status,
         teamIds: formData.teamIds && formData.teamIds.length > 0 ? formData.teamIds : undefined,
       };
-      
+
       // Validate required fields
       if (!requestData.name || requestData.name.length === 0) {
         alert('Proje adı zorunludur.');
         setLoading(false);
         return;
       }
-      
+
       // En az bir ekip zorunlu
       if (!requestData.teamIds || requestData.teamIds.length === 0) {
-        alert('En az bir ekip seçilmelidir.');
+        alert('En az bir birim seçilmelidir.');
         setLoading(false);
         return;
       }
-      
+
       if (project) {
         await projectService.updateProject(project.id, requestData);
       } else {
@@ -133,7 +133,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
           <h2>{project ? 'Proje Düzenle' : 'Yeni Proje'}</h2>
           <button className="modal-close" onClick={onClose}>×</button>
         </div>
-        
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Proje Adı *</label>
@@ -145,7 +145,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
               className="form-input"
             />
           </div>
-          
+
           <div className="form-group">
             <label>Açıklama</label>
             <textarea
@@ -155,7 +155,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
               className="form-input"
             />
           </div>
-          
+
           <div className="form-row">
             <div className="form-group">
               <label>Başlangıç Tarihi</label>
@@ -166,7 +166,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
                 className="form-input"
               />
             </div>
-            
+
             <div className="form-group">
               <label>Bitiş Tarihi</label>
               <input
@@ -177,7 +177,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
               />
             </div>
           </div>
-          
+
           <div className="form-group">
             <label>Durum</label>
             <select
@@ -191,9 +191,9 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
               <option value={ProjectStatus.CANCELLED}>İptal Edildi</option>
             </select>
           </div>
-          
+
           <div className="form-group">
-            <label>Ekipler *</label>
+            <label>Birimler *</label>
             <div className="team-checkboxes">
               {teams.map((team) => (
                 <label key={team.id} className="team-checkbox">
@@ -209,8 +209,8 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
                       </span>
                     )}
                     {team.color && !team.icon && (
-                      <span 
-                        style={{ 
+                      <span
+                        style={{
                           backgroundColor: team.color,
                           width: '12px',
                           height: '12px',
@@ -225,7 +225,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
               ))}
             </div>
           </div>
-          
+
           <div className="modal-actions">
             <button type="button" onClick={onClose} className="btn-secondary">
               İptal

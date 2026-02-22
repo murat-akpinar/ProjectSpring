@@ -14,23 +14,23 @@ interface GanttChartViewProps {
   onTaskClick?: (task: Task) => void;
 }
 
-const GanttChartView: React.FC<GanttChartViewProps> = ({ 
-  tasks, 
-  month, 
-  year, 
+const GanttChartView: React.FC<GanttChartViewProps> = ({
+  tasks,
+  month,
+  year,
   selectedWeek,
   weeksInMonth,
-  onTaskClick 
+  onTaskClick
 }) => {
   const [expandedTasks, setExpandedTasks] = useState<Set<number>>(new Set());
-  
+
   const monthStart = startOfMonth(new Date(year, month - 1, 1));
   const monthEnd = endOfMonth(monthStart);
-  
+
   // Hafta seçimi varsa sadece o haftayı göster
   let calendarStart: Date;
   let calendarEnd: Date;
-  
+
   if (selectedWeek && selectedWeek > 0 && weeksInMonth) {
     const firstWeekStart = startOfWeek(monthStart, { locale: tr, weekStartsOn: 1 });
     const weekStart = addWeeks(firstWeekStart, selectedWeek - 1);
@@ -40,16 +40,16 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
     calendarStart = startOfWeek(monthStart, { locale: tr, weekStartsOn: 1 });
     calendarEnd = endOfWeek(monthEnd, { locale: tr, weekStartsOn: 1 });
   }
-  
+
   const days = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
-  
+
   // Task'ları hiyerarşik olarak düzenle (subtask'lar parent'ın altında)
   const organizedTasks = useMemo(() => {
     const parentTasks = tasks.filter(t => !t.subtasks || t.subtasks.length === 0);
     const tasksWithSubtasks = tasks.filter(t => t.subtasks && t.subtasks.length > 0);
-    
+
     const result: Array<{ task: Task; level: number; isSubtask: boolean }> = [];
-    
+
     tasksWithSubtasks.forEach(parent => {
       result.push({ task: parent, level: 0, isSubtask: false });
       if (expandedTasks.has(parent.id)) {
@@ -81,16 +81,16 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
         });
       }
     });
-    
+
     parentTasks.forEach(task => {
       if (!tasksWithSubtasks.find(t => t.id === task.id)) {
         result.push({ task, level: 0, isSubtask: false });
       }
     });
-    
+
     return result;
   }, [tasks, expandedTasks]);
-  
+
   const toggleExpand = (taskId: number) => {
     const newExpanded = new Set(expandedTasks);
     if (newExpanded.has(taskId)) {
@@ -100,18 +100,30 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
     }
     setExpandedTasks(newExpanded);
   };
-  
+
   const getTaskTypeLabel = (type?: TaskType): string => {
     switch (type) {
       case TaskType.FEATURE:
         return 'ÖZELLİK';
       case TaskType.BUG:
         return 'HATA';
+      case TaskType.IMPROVEMENT:
+        return 'İYİLEŞTİRME';
+      case TaskType.RESEARCH:
+        return 'ARAŞTIRMA';
+      case TaskType.DOCUMENTATION:
+        return 'DOKÜMANTASYON';
+      case TaskType.TEST:
+        return 'TEST';
+      case TaskType.MAINTENANCE:
+        return 'BAKIM';
+      case TaskType.MEETING:
+        return 'TOPLANTI';
       default:
         return 'GÖREV';
     }
   };
-  
+
   const getTaskTypeColor = (type?: TaskType): string => {
     switch (type) {
       case TaskType.FEATURE:
@@ -122,7 +134,7 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
         return '#89dceb'; // Sky (daha açık mavi)
     }
   };
-  
+
   const getPriorityLabel = (priority?: string): string => {
     switch (priority) {
       case 'HIGH':
@@ -133,7 +145,7 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
         return 'Normal';
     }
   };
-  
+
   const getPriorityColor = (priority?: string): string => {
     switch (priority) {
       case 'URGENT':
@@ -144,7 +156,7 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
         return '#7f849c'; // Overlay1 (daha açık gri)
     }
   };
-  
+
   const getInitials = (name: string): string => {
     return name
       .split(' ')
@@ -153,35 +165,35 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
       .toUpperCase()
       .substring(0, 2);
   };
-  
+
   // Task'ın timeline'da nerede başlayıp nerede bittiğini hesapla
   const getTaskBarPosition = (task: Task) => {
     const taskStart = parseISO(task.startDate);
     taskStart.setHours(0, 0, 0, 0);
     const taskEnd = parseISO(task.endDate);
     taskEnd.setHours(23, 59, 59, 999);
-    
+
     // Timeline'ın başlangıç ve bitiş tarihleri
     const timelineStart = new Date(days[0]);
     timelineStart.setHours(0, 0, 0, 0);
     const timelineEnd = new Date(days[days.length - 1]);
     timelineEnd.setHours(23, 59, 59, 999);
-    
+
     // Task timeline ile kesişiyor mu kontrol et
     if (taskEnd < timelineStart || taskStart > timelineEnd) {
       // Task timeline ile kesişmiyor, görünmez
       return { left: 0, width: 0, startIndex: -1, endIndex: -1, isVisible: false };
     }
-    
+
     let startIndex = -1;
     let endIndex = -1;
-    
+
     days.forEach((day, index) => {
       const dayStart = new Date(day);
       dayStart.setHours(0, 0, 0, 0);
       const dayEnd = new Date(day);
       dayEnd.setHours(23, 59, 59, 999);
-      
+
       // Task bu günde başlıyor mu?
       if (startIndex === -1 && taskStart <= dayEnd && taskStart >= dayStart) {
         startIndex = index;
@@ -191,7 +203,7 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
         endIndex = index;
       }
     });
-    
+
     // Eğer task timeline'dan önce başlıyorsa, timeline'ın başından başlat
     if (startIndex === -1 && taskStart < timelineStart) {
       startIndex = 0;
@@ -200,30 +212,30 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
     if (endIndex === -1 && taskEnd > timelineEnd) {
       endIndex = days.length - 1;
     }
-    
+
     // Eğer hala bulunamadıysa, task timeline ile kesişmiyor demektir
     if (startIndex === -1 || endIndex === -1) {
       return { left: 0, width: 0, startIndex: -1, endIndex: -1, isVisible: false };
     }
-    
+
     // Her günün genişliği eşit olduğu için, index bazlı hesaplama
     const cellWidth = 100 / days.length;
     const left = startIndex * cellWidth;
     const width = (endIndex - startIndex + 1) * cellWidth;
-    
+
     return { left, width, startIndex, endIndex, isVisible: true };
   };
-  
+
   const isToday = (day: Date): boolean => {
     const today = new Date();
     return format(day, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd');
   };
-  
+
   const isWeekend = (day: Date): boolean => {
     const dayOfWeek = getDay(day);
     return dayOfWeek === 0 || dayOfWeek === 6; // 0 = Pazar, 6 = Cumartesi
   };
-  
+
   const getPriorityIcon = (priority?: string): string => {
     switch (priority) {
       case 'URGENT':
@@ -234,9 +246,9 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
         return '⚪'; // Beyaz daire (Normal)
     }
   };
-  
+
   const daysCount = days.length;
-  
+
   return (
     <div className="gantt-chart-view" style={{ '--days-count': daysCount } as React.CSSProperties}>
       <div className="gantt-container">
@@ -253,7 +265,7 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
             {organizedTasks.map(({ task, level, isSubtask }) => {
               const hasSubtasks = task.subtasks && task.subtasks.length > 0;
               const isExpanded = expandedTasks.has(task.id);
-              
+
               return (
                 <div
                   key={task.id}
@@ -279,9 +291,9 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
                       </span>
                     )}
                     {task.teamColor && !task.teamIcon && (
-                      <span 
-                        className="team-color-indicator" 
-                        style={{ 
+                      <span
+                        className="team-color-indicator"
+                        style={{
                           backgroundColor: task.teamColor,
                           width: '12px',
                           height: '12px',
@@ -332,7 +344,7 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
             })}
           </div>
         </div>
-        
+
         {/* Sağ Panel - Timeline/Gantt Chart */}
         <div className="gantt-right-panel">
           <div className="gantt-timeline-header">
@@ -340,7 +352,7 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
               const isCurrentMonth = isSameMonth(day, monthStart);
               const isTodayDay = isToday(day);
               const isWeekendDay = isWeekend(day);
-              
+
               return (
                 <div
                   key={index}
@@ -352,18 +364,18 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
               );
             })}
           </div>
-          
+
           <div className="gantt-timeline-body">
             {organizedTasks.map(({ task, level, isSubtask }) => {
               const { left, width, isVisible } = getTaskBarPosition(task);
               const typeColor = getTaskTypeColor(task.taskType);
               const isMilestone = width < 2; // Çok kısa task'lar milestone olarak göster
-              
+
               // Task görünür değilse render etme
               if (!isVisible) {
                 return null;
               }
-              
+
               return (
                 <div
                   key={task.id}
@@ -375,7 +387,7 @@ const GanttChartView: React.FC<GanttChartViewProps> = ({
                       const isCurrentMonth = isSameMonth(day, monthStart);
                       const isTodayDay = isToday(day);
                       const isWeekendDay = isWeekend(day);
-                      
+
                       return (
                         <div
                           key={index}

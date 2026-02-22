@@ -55,36 +55,28 @@ public class SystemLogService {
         Pageable pageable = PageRequest.of(page, size);
         Page<SystemLog> logs;
         
-        // If date filters are present, always use native query
-        // Otherwise use simpler queries when possible to avoid PostgreSQL parameter type issues
-        if (startDate != null || endDate != null) {
-            // Use native query for complex filters including date filters
-            logs = systemLogRepository.findWithFilters(
-                    source != null ? source : "",
-                    level != null ? level : "",
-                    userId,
-                    startDate,
-                    endDate,
-                    pageable
-            );
-        } else if (source != null && level != null && userId == null) {
+        boolean hasSource = source != null && !source.isEmpty();
+        boolean hasLevel = level != null && !level.isEmpty();
+        boolean hasDate = startDate != null && endDate != null;
+        
+        if (hasSource && hasLevel && hasDate) {
+            logs = systemLogRepository.findBySourceAndLevelAndDateRange(source, level, startDate, endDate, pageable);
+        } else if (hasSource && hasDate) {
+            logs = systemLogRepository.findBySourceAndDateRange(source, startDate, endDate, pageable);
+        } else if (hasLevel && hasDate) {
+            logs = systemLogRepository.findByLevelAndDateRange(level, startDate, endDate, pageable);
+        } else if (hasDate) {
+            logs = systemLogRepository.findByDateRange(startDate, endDate, pageable);
+        } else if (hasSource && hasLevel) {
             logs = systemLogRepository.findBySourceAndLevelOrderByCreatedAtDesc(source, level, pageable);
-        } else if (source != null && level == null && userId == null) {
+        } else if (hasSource) {
             logs = systemLogRepository.findBySourceOrderByCreatedAtDesc(source, pageable);
-        } else if (source == null && level != null && userId == null) {
+        } else if (hasLevel) {
             logs = systemLogRepository.findByLevelOrderByCreatedAtDesc(level, pageable);
-        } else if (source == null && level == null && userId != null) {
+        } else if (userId != null) {
             logs = systemLogRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
         } else {
-            // Use native query for complex filters
-            logs = systemLogRepository.findWithFilters(
-                    source != null ? source : "",
-                    level != null ? level : "",
-                    userId,
-                    startDate,
-                    endDate,
-                    pageable
-            );
+            logs = systemLogRepository.findAllByOrderByCreatedAtDesc(pageable);
         }
         
         return logs.map(this::convertToDTO);

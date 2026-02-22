@@ -33,6 +33,10 @@ public class DashboardService {
     private UserRepository userRepository;
     
     public DashboardStatsDTO getTeamDashboardStats(Long teamId) {
+        return getTeamDashboardStats(teamId, null, null);
+    }
+    
+    public DashboardStatsDTO getTeamDashboardStats(Long teamId, LocalDate startDate, LocalDate endDate) {
         List<Long> accessibleTeamIds = teamService.getAccessibleTeamIds();
         
         if (teamId != null && !accessibleTeamIds.contains(teamId)) {
@@ -44,18 +48,26 @@ public class DashboardService {
         DashboardStatsDTO stats = new DashboardStatsDTO();
         stats.setTotalOpen(0L);
         stats.setTotalInProgress(0L);
+        stats.setTotalTesting(0L);
         stats.setTotalCompleted(0L);
         stats.setTotalOverdue(0L);
         stats.setTotalPostponed(0L);
         stats.setTotalCancelled(0L);
         
         for (Long tid : teamIds) {
-            List<Task> tasks = taskRepository.findByTeamId(tid);
+            List<Task> tasks;
+            if (startDate != null && endDate != null) {
+                tasks = taskRepository.findByTeamIdAndDateRange(tid, startDate, endDate);
+            } else {
+                tasks = taskRepository.findByTeamId(tid);
+            }
             
             stats.setTotalOpen(stats.getTotalOpen() + 
                 tasks.stream().filter(t -> t.getStatus() == TaskStatus.OPEN).count());
             stats.setTotalInProgress(stats.getTotalInProgress() + 
                 tasks.stream().filter(t -> t.getStatus() == TaskStatus.IN_PROGRESS).count());
+            stats.setTotalTesting(stats.getTotalTesting() + 
+                tasks.stream().filter(t -> t.getStatus() == TaskStatus.TESTING).count());
             stats.setTotalCompleted(stats.getTotalCompleted() + 
                 tasks.stream().filter(t -> t.getStatus() == TaskStatus.COMPLETED).count());
             stats.setTotalOverdue(stats.getTotalOverdue() + 
@@ -70,30 +82,41 @@ public class DashboardService {
     }
     
     public DashboardDetailsDTO getTeamDashboardDetails(Long teamId) {
+        return getTeamDashboardDetails(teamId, null, null);
+    }
+    
+    public DashboardDetailsDTO getTeamDashboardDetails(Long teamId, LocalDate startDate, LocalDate endDate) {
         List<Long> accessibleTeamIds = teamService.getAccessibleTeamIds();
         
         if (teamId != null && !accessibleTeamIds.contains(teamId)) {
             throw new RuntimeException("Access denied");
         }
         
-        DashboardStatsDTO stats = getTeamDashboardStats(teamId);
+        DashboardStatsDTO stats = getTeamDashboardStats(teamId, startDate, endDate);
         
-        List<UserLeaderboardDTO> topCompleters = getTopCompleters(teamId);
-        List<UserLeaderboardDTO> topPostponers = getTopPostponers(teamId);
-        List<UserLeaderboardDTO> topCancellers = getTopCancellers(teamId);
+        List<UserLeaderboardDTO> topCompleters = getTopCompleters(teamId, startDate, endDate);
+        List<UserLeaderboardDTO> topPostponers = getTopPostponers(teamId, startDate, endDate);
+        List<UserLeaderboardDTO> topCancellers = getTopCancellers(teamId, startDate, endDate);
         List<TeamMemberDTO> teamMembers = getTeamMembers(teamId);
         
         return new DashboardDetailsDTO(stats, topCompleters, topPostponers, topCancellers, teamMembers);
     }
     
-    private List<UserLeaderboardDTO> getTopCompleters(Long teamId) {
+    private List<Task> getFilteredTasks(Long teamId, LocalDate startDate, LocalDate endDate) {
+        if (startDate != null && endDate != null) {
+            return taskRepository.findByTeamIdAndDateRange(teamId, startDate, endDate);
+        }
+        return taskRepository.findByTeamId(teamId);
+    }
+    
+    private List<UserLeaderboardDTO> getTopCompleters(Long teamId, LocalDate startDate, LocalDate endDate) {
         List<Long> accessibleTeamIds = teamService.getAccessibleTeamIds();
         List<Long> teamIds = teamId != null ? List.of(teamId) : accessibleTeamIds;
         
         Map<Long, Long> userCounts = new HashMap<>();
         
         for (Long tid : teamIds) {
-            List<Task> tasks = taskRepository.findByTeamId(tid);
+            List<Task> tasks = getFilteredTasks(tid, startDate, endDate);
             tasks.stream()
                 .filter(t -> t.getStatus() == TaskStatus.COMPLETED)
                 .flatMap(t -> t.getAssignees().stream())
@@ -114,14 +137,14 @@ public class DashboardService {
             .collect(Collectors.toList());
     }
     
-    private List<UserLeaderboardDTO> getTopPostponers(Long teamId) {
+    private List<UserLeaderboardDTO> getTopPostponers(Long teamId, LocalDate startDate, LocalDate endDate) {
         List<Long> accessibleTeamIds = teamService.getAccessibleTeamIds();
         List<Long> teamIds = teamId != null ? List.of(teamId) : accessibleTeamIds;
         
         Map<Long, Long> userCounts = new HashMap<>();
         
         for (Long tid : teamIds) {
-            List<Task> tasks = taskRepository.findByTeamId(tid);
+            List<Task> tasks = getFilteredTasks(tid, startDate, endDate);
             tasks.stream()
                 .filter(t -> t.getStatus() == TaskStatus.POSTPONED)
                 .flatMap(t -> t.getAssignees().stream())
@@ -142,14 +165,14 @@ public class DashboardService {
             .collect(Collectors.toList());
     }
     
-    private List<UserLeaderboardDTO> getTopCancellers(Long teamId) {
+    private List<UserLeaderboardDTO> getTopCancellers(Long teamId, LocalDate startDate, LocalDate endDate) {
         List<Long> accessibleTeamIds = teamService.getAccessibleTeamIds();
         List<Long> teamIds = teamId != null ? List.of(teamId) : accessibleTeamIds;
         
         Map<Long, Long> userCounts = new HashMap<>();
         
         for (Long tid : teamIds) {
-            List<Task> tasks = taskRepository.findByTeamId(tid);
+            List<Task> tasks = getFilteredTasks(tid, startDate, endDate);
             tasks.stream()
                 .filter(t -> t.getStatus() == TaskStatus.CANCELLED)
                 .flatMap(t -> t.getAssignees().stream())
@@ -221,4 +244,3 @@ public class DashboardService {
         return members;
     }
 }
-

@@ -184,7 +184,7 @@ const UserModal: React.FC<UserModalProps> = ({ user, onClose }) => {
           </div>
 
           <div className="form-group">
-            <label>Takımlar</label>
+            <label>Birimler</label>
             <div className="checkbox-group">
               {teams.map((team) => (
                 <label key={team.id} className="checkbox-label">

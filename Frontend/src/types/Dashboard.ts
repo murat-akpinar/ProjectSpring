@@ -1,6 +1,7 @@
 export interface DashboardStats {
   totalOpen: number;
   totalInProgress: number;
+  totalTesting: number;
   totalCompleted: number;
   totalOverdue: number;
   totalPostponed: number;

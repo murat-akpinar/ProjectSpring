@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Task, TaskStatus, Priority } from '../../types/Task';
-import { getStatusColor } from '../../utils/statusColors';
+import { getStatusColor, getStatusLabel } from '../../utils/statusColors';
 import './KanbanBoardView.css';
 
 interface KanbanBoardViewProps {
@@ -19,28 +19,20 @@ const KanbanBoardView: React.FC<KanbanBoardViewProps> = ({
   const [draggedTaskId, setDraggedTaskId] = useState<number | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<TaskStatus | null>(null);
 
-  // Dashboard.jpeg'deki gibi 4 kolon
+  // Tüm iş durumlarını Kanban sütunu olarak göster
   const columns: { status: TaskStatus; label: string; icon: string }[] = [
-    { status: TaskStatus.OPEN, label: 'Backlog', icon: '|' },
-    { status: TaskStatus.IN_PROGRESS, label: 'Devam Eden', icon: '|' },
-    { status: TaskStatus.POSTPONED, label: 'İnceleme', icon: '|' },
-    { status: TaskStatus.COMPLETED, label: 'Tamamlanan', icon: '|' },
+    { status: TaskStatus.OPEN, label: getStatusLabel(TaskStatus.OPEN), icon: '📋' },
+    { status: TaskStatus.IN_PROGRESS, label: getStatusLabel(TaskStatus.IN_PROGRESS), icon: '🔄' },
+    { status: TaskStatus.TESTING, label: getStatusLabel(TaskStatus.TESTING), icon: '🧪' },
+    { status: TaskStatus.COMPLETED, label: getStatusLabel(TaskStatus.COMPLETED), icon: '✅' },
+    { status: TaskStatus.POSTPONED, label: getStatusLabel(TaskStatus.POSTPONED), icon: '⏸️' },
+    { status: TaskStatus.CANCELLED, label: getStatusLabel(TaskStatus.CANCELLED), icon: '❌' },
+    { status: TaskStatus.OVERDUE, label: getStatusLabel(TaskStatus.OVERDUE), icon: '⚠️' },
   ];
 
-  // Diğer durumları da hesaba kat (CANCELLED, OVERDUE -> Backlog'a ekle)
-  const getColumnForStatus = (status: TaskStatus): TaskStatus => {
-    switch (status) {
-      case TaskStatus.CANCELLED:
-      case TaskStatus.OVERDUE:
-        return TaskStatus.OPEN;
-      default:
-        return status;
-    }
-  };
-
-  // Task'ları status'e göre grupla
+  // Task'ları status'e göre direkt grupla (artık mapping yok)
   const tasksByColumn = columns.reduce((acc, column) => {
-    acc[column.status] = tasks.filter((task) => getColumnForStatus(task.status) === column.status);
+    acc[column.status] = tasks.filter((task) => task.status === column.status);
     return acc;
   }, {} as Record<TaskStatus, Task[]>);
 
@@ -57,11 +49,6 @@ const KanbanBoardView: React.FC<KanbanBoardViewProps> = ({
     }
   };
 
-  // getEasyBadge artık kullanılmıyor - priority değerini direkt kullanıyoruz
-  const getEasyBadge = (_task: Task): { label: string; color: string } | null => {
-    return null;
-  };
-
   // Gün hesaplama
   const getDaysRemaining = (endDate: string): number => {
     const end = new Date(endDate);
@@ -71,18 +58,25 @@ const KanbanBoardView: React.FC<KanbanBoardViewProps> = ({
     return Math.max(0, diffDays);
   };
 
-  // Progress hesaplama - useMemo ile sabit değer (her render'da değişmez)
+  // Progress hesaplama
   const progressMap = useMemo(() => {
     const map: Record<number, number> = {};
     tasks.forEach((task) => {
       if (task.status === TaskStatus.COMPLETED) {
         map[task.id] = 100;
+      } else if (task.status === TaskStatus.TESTING) {
+        // Test aşamasında olan işler %80-95 arası
+        if (task.subtasks && task.subtasks.length > 0) {
+          const completed = task.subtasks.filter(s => s.isCompleted).length;
+          map[task.id] = Math.max(80, Math.round((completed / task.subtasks.length) * 100));
+        } else {
+          map[task.id] = 85;
+        }
       } else if (task.status === TaskStatus.IN_PROGRESS) {
         if (task.subtasks && task.subtasks.length > 0) {
           const completed = task.subtasks.filter(s => s.isCompleted).length;
           map[task.id] = Math.round((completed / task.subtasks.length) * 100);
         } else {
-          // Başlangıç ve bitiş tarihleri arasındaki ilerleme
           const start = new Date(task.startDate).getTime();
           const end = new Date(task.endDate).getTime();
           const now = Date.now();
@@ -91,7 +85,6 @@ const KanbanBoardView: React.FC<KanbanBoardViewProps> = ({
           else map[task.id] = Math.round(((now - start) / (end - start)) * 100);
         }
       } else if (task.status === TaskStatus.POSTPONED) {
-        // Ertelenen işlerde tarih bazlı ilerleme
         const start = new Date(task.startDate).getTime();
         const end = new Date(task.endDate).getTime();
         const now = Date.now();
@@ -99,7 +92,6 @@ const KanbanBoardView: React.FC<KanbanBoardViewProps> = ({
         else if (now <= start) map[task.id] = 20;
         else map[task.id] = Math.round(((now - start) / (end - start)) * 70);
       } else {
-        // Açık görevler için 0
         map[task.id] = 0;
       }
     });
@@ -159,9 +151,9 @@ const KanbanBoardView: React.FC<KanbanBoardViewProps> = ({
           >
             <div className="kanban-column-header">
               <span className="kanban-column-indicator" style={{ backgroundColor: statusColor }}></span>
+              <span className="kanban-column-icon">{column.icon}</span>
               <h3 className="kanban-column-title">{column.label}</h3>
               <span className="kanban-column-count">{columnTasks.length}</span>
-              <span className="kanban-column-menu">⋮</span>
             </div>
             <div className="kanban-column-content">
               {columnTasks.length === 0 ? (
@@ -171,8 +163,6 @@ const KanbanBoardView: React.FC<KanbanBoardViewProps> = ({
               ) : (
                 columnTasks.map((task) => {
                   const difficulty = getDifficultyBadge(task.priority);
-                  const easyBadge = getEasyBadge(task);
-                  const finalBadge = easyBadge || difficulty;
                   const daysRemaining = getDaysRemaining(task.endDate);
                   const progress = progressMap[task.id] ?? 0;
                   const isDragging = draggedTaskId === task.id;
@@ -194,12 +184,12 @@ const KanbanBoardView: React.FC<KanbanBoardViewProps> = ({
                         <span
                           className="kanban-badge difficulty"
                           style={{
-                            backgroundColor: finalBadge.color + '20',
-                            color: finalBadge.color,
-                            borderColor: finalBadge.color
+                            backgroundColor: difficulty.color + '20',
+                            color: difficulty.color,
+                            borderColor: difficulty.color
                           }}
                         >
-                          {finalBadge.label}
+                          {difficulty.label}
                         </span>
                         <span className="kanban-badge days">
                           <span className="days-icon">⏱</span>
