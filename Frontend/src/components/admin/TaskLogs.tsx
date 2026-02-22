@@ -124,18 +124,23 @@ const TaskLogs: React.FC = () => {
     }
   };
 
-  const handleTaskClick = async (taskId: number) => {
+  const handleTaskClick = async (log: TaskLog) => {
+    // Silinen iş kontrolü - taskId null olabilir
+    if (!log.taskId) {
+      alert(`Bu iş silinmiş.\n\nİş Adı: ${log.taskTitle}\nİşlem: ${log.action}\nTarih: ${formatDate(log.createdAt)}`);
+      return;
+    }
+
     try {
-      const task = await taskService.getTaskById(taskId);
+      const task = await taskService.getTaskById(log.taskId);
       if (task.projectId) {
         navigate(`/projects/${task.projectId}`);
       } else {
-        // Task modal aç veya alert göster
-        alert(`İş: ${task.title}\nProje bilgisi bulunamadı.`);
+        alert(`İş: ${task.title}\nDurum: ${task.status}\nBaşlangıç: ${task.startDate}\nBitiş: ${task.endDate}`);
       }
     } catch (error) {
-      console.error('Failed to fetch task:', error);
-      alert('İş yüklenemedi.');
+      // Task silinmiş olabilir (404)
+      alert(`Bu iş silinmiş.\n\nİş Adı: ${log.taskTitle}\nİşlem: ${log.action}\nTarih: ${formatDate(log.createdAt)}`);
     }
   };
 
@@ -270,7 +275,7 @@ const TaskLogs: React.FC = () => {
                         <span
                           className="task-link"
                           title={`İş #${log.taskId}`}
-                          onClick={() => handleTaskClick(log.taskId)}
+                          onClick={() => handleTaskClick(log)}
                         >
                           {log.taskTitle}
                         </span>

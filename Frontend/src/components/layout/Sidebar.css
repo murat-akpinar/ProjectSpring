@@ -9,17 +9,12 @@
   overflow-y: auto;
   z-index: 1000;
   border-right: 1px solid var(--ctp-surface0);
-  transition: transform 0.3s ease, width 0.3s ease;
+  transition: width 0.3s ease;
 }
 
 .sidebar.collapsed {
-  width: 50px;
-  overflow: hidden;
-}
-
-.sidebar.collapsed .sidebar-navigation,
-.sidebar.collapsed .team-list {
-  display: none;
+  width: 56px;
+  overflow-x: hidden;
 }
 
 .sidebar-header {
@@ -76,19 +71,24 @@
   color: var(--ctp-subtext0);
 }
 
+/* Navigation */
 .sidebar-navigation {
   padding: 10px 0;
   border-bottom: 1px solid var(--ctp-surface0);
 }
 
 .nav-item {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   padding: 12px 20px;
   color: var(--ctp-text);
   text-decoration: none;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, padding 0.3s;
   border-left: 3px solid transparent;
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .nav-item:hover {
@@ -101,6 +101,42 @@
   color: var(--ctp-blue);
 }
 
+/* Icon & Label */
+.nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.nav-label {
+  transition: opacity 0.2s ease;
+  overflow: hidden;
+}
+
+/* Collapsed state */
+.sidebar.collapsed .nav-item {
+  padding: 12px 0;
+  justify-content: center;
+  border-left: 3px solid transparent;
+}
+
+.sidebar.collapsed .nav-item.active {
+  border-left-color: var(--ctp-blue);
+}
+
+.sidebar.collapsed .nav-label {
+  display: none;
+}
+
+.sidebar.collapsed .nav-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Team List */
 .team-list {
   padding: 10px 0;
 }
@@ -108,7 +144,7 @@
 .team-item {
   padding: 12px 20px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, padding 0.3s;
   border-left: 3px solid transparent;
 }
 
@@ -118,6 +154,12 @@
 
 .team-item.active {
   background-color: var(--ctp-surface0);
+}
+
+.team-item-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .team-icon {
@@ -140,8 +182,38 @@
   color: var(--ctp-subtext0);
 }
 
+/* Collapsed team items */
+.sidebar.collapsed .team-item {
+  padding: 12px 0;
+  display: flex;
+  justify-content: center;
+  border-left: 3px solid transparent;
+}
+
+.sidebar.collapsed .team-item.active {
+  border-left-color: var(--ctp-blue);
+}
+
+.sidebar.collapsed .team-item-content {
+  justify-content: center;
+  gap: 0;
+}
+
+.sidebar.collapsed .team-item .nav-label {
+  display: none;
+}
+
+.sidebar.collapsed .team-item-description {
+  display: none;
+}
+
 .loading {
   padding: 20px;
   text-align: center;
   color: var(--ctp-subtext0);
+}
+
+.sidebar.collapsed .loading {
+  padding: 10px 5px;
+  font-size: 12px;
 }

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { LuCalendar, LuFolderKanban, LuLayoutDashboard, LuUsers, LuChevronLeft, LuChevronRight } from 'react-icons/lu';
 import { Team } from '../../types/Team';
 import { teamService } from '../../services/teamService';
 import './Sidebar.css';
@@ -48,7 +49,7 @@ const Sidebar: React.FC<SidebarProps> = ({ selectedTeamId, onTeamSelect, isColla
               title={isCollapsed ? 'Menüyü Göster' : 'Menüyü Gizle'}
               style={isCollapsed ? { width: '100%', justifyContent: 'center' } : {}}
             >
-              {isCollapsed ? '→' : '←'}
+              {isCollapsed ? <LuChevronRight size={18} /> : <LuChevronLeft size={18} />}
             </button>
           )}
         </div>
@@ -57,64 +58,86 @@ const Sidebar: React.FC<SidebarProps> = ({ selectedTeamId, onTeamSelect, isColla
         <Link
           to="/"
           className={`nav-item ${location.pathname === '/' ? 'active' : ''}`}
+          title={isCollapsed ? 'Takvim' : undefined}
         >
-          Takvim
+          <span className="nav-icon"><LuCalendar size={18} /></span>
+          <span className="nav-label">Takvim</span>
         </Link>
         <Link
           to="/projects"
           className={`nav-item ${location.pathname === '/projects' ? 'active' : ''}`}
+          title={isCollapsed ? 'Projeler' : undefined}
         >
-          Projeler
+          <span className="nav-icon"><LuFolderKanban size={18} /></span>
+          <span className="nav-label">Projeler</span>
         </Link>
         <Link
           to="/dashboard"
           className={`nav-item ${location.pathname === '/dashboard' ? 'active' : ''}`}
+          title={isCollapsed ? 'Overview' : undefined}
         >
-          Overview
+          <span className="nav-icon"><LuLayoutDashboard size={18} /></span>
+          <span className="nav-label">Overview</span>
         </Link>
       </div>
       <div className="team-list">
         <div
           className={`team-item ${selectedTeamId === null ? 'active' : ''}`}
           onClick={() => onTeamSelect(null)}
+          title={isCollapsed ? 'Tüm Birimler' : undefined}
         >
-          <div className="team-item-name">Tüm Birimler</div>
+          <div className="team-item-content">
+            <span className="nav-icon"><LuUsers size={18} /></span>
+            <span className="nav-label team-item-name">Tüm Birimler</span>
+          </div>
         </div>
         {loading ? (
-          <div className="loading">Yükleniyor...</div>
+          <div className="loading">{isCollapsed ? '...' : 'Yükleniyor...'}</div>
         ) : (
           teams.map((team) => (
             <div
               key={team.id}
               className={`team-item ${selectedTeamId === team.id ? 'active' : ''}`}
               onClick={() => onTeamSelect(team.id)}
+              title={isCollapsed ? team.name : undefined}
               style={{
                 borderLeftColor: team.color || (selectedTeamId === team.id ? 'var(--ctp-blue)' : 'transparent')
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                {team.icon && (
-                  <span className="team-icon" style={{ color: team.color || 'var(--ctp-text)' }}>
-                    {team.icon}
-                  </span>
-                )}
-                {team.color && !team.icon && (
-                  <span
-                    className="team-color-indicator"
-                    style={{
-                      backgroundColor: team.color,
+              <div className="team-item-content">
+                <span className="nav-icon">
+                  {team.icon ? (
+                    <span className="team-icon" style={{ color: team.color || 'var(--ctp-text)' }}>
+                      {team.icon}
+                    </span>
+                  ) : team.color ? (
+                    <span
+                      className="team-color-indicator"
+                      style={{
+                        backgroundColor: team.color,
+                        width: '12px',
+                        height: '12px',
+                        borderRadius: '50%',
+                        display: 'inline-block'
+                      }}
+                    />
+                  ) : (
+                    <span className="team-color-indicator" style={{
+                      backgroundColor: 'var(--ctp-overlay0)',
                       width: '12px',
                       height: '12px',
                       borderRadius: '50%',
                       display: 'inline-block'
-                    }}
-                  />
-                )}
-                <div className="team-item-name">{team.name}</div>
+                    }} />
+                  )}
+                </span>
+                <span className="nav-label">
+                  <div className="team-item-name">{team.name}</div>
+                  {team.description && (
+                    <div className="team-item-description">{team.description}</div>
+                  )}
+                </span>
               </div>
-              {team.description && (
-                <div className="team-item-description">{team.description}</div>
-              )}
             </div>
           ))
         )}

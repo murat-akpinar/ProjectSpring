@@ -24,8 +24,11 @@ public class TaskLog {
     private Long id;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "task_id", nullable = false)
+    @JoinColumn(name = "task_id", nullable = true)
     private Task task;
+    
+    @Column(name = "task_title", length = 255)
+    private String taskTitle;
     
     @Column(nullable = false, length = 50)
     private String action; // CREATED, UPDATED, DELETED, STATUS_CHANGED, ASSIGNEE_ADDED, ASSIGNEE_REMOVED

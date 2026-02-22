@@ -301,6 +301,9 @@ public class TaskService {
         TaskDTO taskDTO = convertToDTO(task);
         taskLogService.logTaskAction(task, "DELETED", currentUser, "Task deleted", taskDTO, null);
         
+        // Task'a ait tüm log'ların task referansını null yap (log'lar korunsun)
+        taskLogService.detachTaskFromLogs(task);
+        
         taskRepository.delete(task);
     }
     

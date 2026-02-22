@@ -106,6 +106,16 @@ const CalendarPage: React.FC = () => {
     fetchTasks();
   };
 
+  const handleDeleteTask = async (taskId: number) => {
+    try {
+      await taskService.deleteTask(taskId);
+      handleTaskSaved();
+    } catch (error) {
+      console.error('Failed to delete task:', error);
+      alert('İş silinemedi');
+    }
+  };
+
   // Kanban drag-drop için status değiştirme
   const handleStatusChange = async (taskId: number, newStatus: TaskStatus) => {
     try {
@@ -313,6 +323,7 @@ const CalendarPage: React.FC = () => {
           setSelectedTask(null);
         }}
         onSave={handleTaskSaved}
+        onDelete={handleDeleteTask}
         task={selectedTask}
         defaultTeamId={selectedTeamId || undefined}
       />

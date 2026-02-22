@@ -36,6 +36,7 @@ public class TaskLogService {
     public void logTaskAction(Task task, String action, User changedBy, String changeReason, Object oldValue, Object newValue) {
         TaskLog log = new TaskLog();
         log.setTask(task);
+        log.setTaskTitle(task.getTitle());
         log.setAction(action);
         log.setChangedBy(changedBy);
         log.setChangeReason(changeReason);
@@ -54,6 +55,17 @@ public class TaskLogService {
         }
         
         taskLogRepository.save(log);
+    }
+    
+    public void detachTaskFromLogs(Task task) {
+        List<TaskLog> logs = taskLogRepository.findByTask(task);
+        for (TaskLog log : logs) {
+            if (log.getTaskTitle() == null) {
+                log.setTaskTitle(task.getTitle());
+            }
+            log.setTask(null);
+        }
+        taskLogRepository.saveAll(logs);
     }
     
     public Page<TaskLogDTO> getTaskLogs(Long taskId, Long userId, String action, 
@@ -159,8 +171,16 @@ public class TaskLogService {
     private TaskLogDTO convertToDTO(TaskLog log) {
         TaskLogDTO dto = new TaskLogDTO();
         dto.setId(log.getId());
-        dto.setTaskId(log.getTask().getId());
-        dto.setTaskTitle(log.getTask().getTitle());
+        
+        // Task silinmiş olabilir, null kontrolü yap
+        if (log.getTask() != null) {
+            dto.setTaskId(log.getTask().getId());
+            dto.setTaskTitle(log.getTask().getTitle());
+        } else {
+            dto.setTaskId(null);
+            dto.setTaskTitle(log.getTaskTitle() != null ? log.getTaskTitle() + " (silinmiş)" : "Silinmiş İş");
+        }
+        
         dto.setAction(log.getAction());
         dto.setOldValue(log.getOldValue());
         dto.setNewValue(log.getNewValue());

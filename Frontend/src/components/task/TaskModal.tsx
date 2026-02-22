@@ -14,6 +14,7 @@ interface TaskModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: () => void;
+  onDelete?: (taskId: number) => void;
   task?: Task | null;
   defaultTeamId?: number;
   defaultProjectId?: number;
@@ -25,6 +26,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
   isOpen,
   onClose,
   onSave,
+  onDelete,
   task,
   defaultTeamId,
   defaultProjectId,
@@ -423,6 +425,30 @@ const TaskModal: React.FC<TaskModalProps> = ({
           </div>
 
           <div className="modal-actions">
+            {task && onDelete && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (window.confirm(`"${task.title}" işi silinecek. Emin misiniz?`)) {
+                    onDelete(task.id);
+                    onClose();
+                  }
+                }}
+                className="btn-delete"
+                style={{
+                  backgroundColor: 'var(--ctp-red, #f38ba8)',
+                  color: 'var(--ctp-base, #1e1e2e)',
+                  border: 'none',
+                  padding: '8px 16px',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontWeight: '500',
+                  marginRight: 'auto',
+                }}
+              >
+                Sil
+              </button>
+            )}
             <button type="button" onClick={onClose} className="btn-cancel">
               İptal
             </button>
