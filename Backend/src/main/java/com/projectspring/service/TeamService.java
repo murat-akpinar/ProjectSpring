@@ -28,21 +28,21 @@ public class TeamService {
     public List<TeamDTO> getAllTeams() {
         User currentUser = getCurrentUser();
         
-        // Yönetici tüm ekipleri görebilir
+        // Yönetici tüm birimleri görebilir
         if (hasRole(currentUser, Role.ADMIN)) {
             return teamRepository.findByIsActiveTrue().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
         }
         
-        // Takım Lideri sadece kendi ekibini görebilir
-        if (hasRole(currentUser, Role.TAKIM_LIDERI)) {
+        // Birim Amiri kendi birimlerini görebilir (leader olduğu birimler)
+        if (hasRole(currentUser, Role.BIRIM_AMIRI)) {
             return teamRepository.findTeamsByLeaderId(currentUser.getId()).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
         }
         
-        // Personel sadece üyesi olduğu ekipleri görebilir
+        // Personel sadece üyesi olduğu birimleri görebilir
         return teamRepository.findTeamsByUserId(currentUser.getId()).stream()
             .map(this::convertToDTO)
             .collect(Collectors.toList());
@@ -56,8 +56,8 @@ public class TeamService {
         
         // Yetki kontrolü
         if (!hasRole(currentUser, Role.ADMIN)) {
-            if (hasRole(currentUser, Role.TAKIM_LIDERI)) {
-                if (!team.getLeader().getId().equals(currentUser.getId())) {
+            if (hasRole(currentUser, Role.BIRIM_AMIRI)) {
+                if (team.getLeader() == null || !team.getLeader().getId().equals(currentUser.getId())) {
                     throw new RuntimeException("Access denied");
                 }
             } else {
@@ -81,7 +81,8 @@ public class TeamService {
                 .collect(Collectors.toList());
         }
         
-        if (hasRole(currentUser, Role.TAKIM_LIDERI)) {
+        // Birim Amiri: leader olduğu birimlerin task'larını görebilir
+        if (hasRole(currentUser, Role.BIRIM_AMIRI)) {
             return teamRepository.findTeamsByLeaderId(currentUser.getId()).stream()
                 .map(Team::getId)
                 .collect(Collectors.toList());
@@ -118,4 +119,3 @@ public class TeamService {
             .anyMatch(r -> r.getName().equals(role.name()));
     }
 }
-

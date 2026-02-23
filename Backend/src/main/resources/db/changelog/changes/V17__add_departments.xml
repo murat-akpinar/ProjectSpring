@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- Add BIRIM_AMIRI role -->
+    <changeSet id="add_birim_amiri_role" author="projectspring">
+        <insert tableName="roles">
+            <column name="name" value="BIRIM_AMIRI"/>
+            <column name="description" value="Birim Amiri - Kendi birimini yönetebilir"/>
+        </insert>
+    </changeSet>
+
+    <!-- Add icons and colors to existing birimler -->
+    <changeSet id="add_birim_icons" author="projectspring">
+        <update tableName="teams">
+            <column name="icon" value="🖥️"/>
+            <column name="color" value="#89b4fa"/>
+            <where>name = 'Sistem Birimi'</where>
+        </update>
+        <update tableName="teams">
+            <column name="icon" value="🌐"/>
+            <column name="color" value="#a6e3a1"/>
+            <where>name = 'Network Birimi'</where>
+        </update>
+        <update tableName="teams">
+            <column name="icon" value="📡"/>
+            <column name="color" value="#f9e2af"/>
+            <where>name = 'Some Birimi'</where>
+        </update>
+        <update tableName="teams">
+            <column name="icon" value="💻"/>
+            <column name="color" value="#cba6f7"/>
+            <where>name = 'Yazılım Birimi'</where>
+        </update>
+        <update tableName="teams">
+            <column name="icon" value="🧪"/>
+            <column name="color" value="#f38ba8"/>
+            <where>name = 'Test Birimi'</where>
+        </update>
+    </changeSet>
+
+</databaseChangeLog>

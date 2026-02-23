@@ -205,7 +205,8 @@ public class DashboardService {
         if (teamId != null) {
             Team team = teamRepository.findById(teamId).orElse(null);
             if (team != null) {
-                for (User user : team.getMembers()) {
+                List<User> teamUsers = userRepository.findByTeamId(teamId);
+                for (User user : teamUsers) {
                     List<String> roleNames = user.getRoles().stream()
                         .map(role -> role.getName())
                         .collect(Collectors.toList());
@@ -218,7 +219,8 @@ public class DashboardService {
             for (Long tid : accessibleTeamIds) {
                 Team team = teamRepository.findById(tid).orElse(null);
                 if (team != null) {
-                    for (User user : team.getMembers()) {
+                    List<User> teamUsers = userRepository.findByTeamId(tid);
+                    for (User user : teamUsers) {
                         // Check if user already added
                         boolean exists = members.stream()
                             .anyMatch(m -> m.getUserId().equals(user.getId()));

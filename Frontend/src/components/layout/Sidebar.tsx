@@ -147,4 +147,3 @@ const Sidebar: React.FC<SidebarProps> = ({ selectedTeamId, onTeamSelect, isColla
 };
 
 export default Sidebar;
-
