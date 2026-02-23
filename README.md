@@ -1,16 +1,16 @@
 # ProjectSpring
 
-ProjectSpring — Takımlar için takvim odaklı proje ve görev yönetim platformu.
+ProjectSpring — Birimler için takvim odaklı proje ve görev yönetim platformu.
 
 ## Özellikler
 
-- **Çok Seviyeli Yetkilendirme**: Yönetici, Takım Lideri ve Personel rolleri
+- **Çok Seviyeli Yetkilendirme**: Yönetici (ADMIN), Birim Amiri (BIRIM_AMIRI) ve Personel rolleri
 - **Hibrit Authentication**: Hem LDAP hem de Local User desteği (LDAP önce denenir, başarısız olursa local user kontrol edilir)
 - **JWT Authentication**: Stateless authentication (session problemi yok, yatay ölçeklendirme için uygun)
 - **Otomatik Database Migration**: Liquibase ile veritabanı şeması otomatik oluşturulur
 - **Yönetim Paneli**: 
   - Kullanıcı yönetimi (oluşturma, düzenleme, silme, admin rolü atama)
-  - Takım yönetimi (oluşturma, düzenleme, silme, renk/ikon ayarlama)
+  - Birim yönetimi (oluşturma, düzenleme, silme, renk/ikon ayarlama)
   - Rol yönetimi (genel rol havuzu)
   - LDAP ayarları yönetimi (UI'dan bağlantı ayarları, şifreli saklama, test butonu)
   - LDAP kullanıcı import (arama ve import)
@@ -29,13 +29,14 @@ ProjectSpring — Takımlar için takvim odaklı proje ve görev yönetim platfo
 - **Proje Yönetimi**: Proje oluşturma, düzenleme, silme. Projelere ekip atama ve iş ekleme
 - **Proje Detay Görünümü**: Durum dağılımı grafiği, görev listesi ve Gantt chart ile detaylı proje takibi
 - **Proje Uyarı Sistemi**: Bitim tarihine 1 gün kalan projeler otomatik yanıp söner
-- **Ekip Renkleri ve İkonları**: Her ekibin kendine özel belirleyici rengi ve ikonu var, toplu görünümde ekipleri ayırmak kolay
-- **Ekip Dashboard**: Gerçek zamanlı istatistikler
+- **Birim Renkleri ve İkonları**: Her birimin kendine özel emoji ikonu ve rengi var (🖥️ Sistem, 🌐 Network, 📡 Some, 💻 Yazılım, 🧪 Test), sidebar'da ve toplu görünümlerde ayırt etmeyi kolaylaştırır
+- **Birim Dashboard**: Gerçek zamanlı istatistikler, donut grafikler, ilerleme çubukları
+- **Birim Üyeleri**: Overview sayfasında birim seçildiğinde o birimin üyeleri, rolleri ve lideri gösterilir
 - **İş Kartları**: Detaylı iş takibi, alt işler, durum yönetimi, önem seviyesi icon'ları
 - **İş Türleri ve Öncelikler**: Görev (TASK), Özellik (FEATURE), Hata (BUG) / Normal, Yüksek, Acil
 - **Ertelendi Takibi**: Ertelenen işlerin yeni tarih bilgisi ile takibi
 - **Yetişmedi Hesaplama**: Otomatik yetişmedi iş tespiti
-- **Örnek Veri Ekleme**: `.env` dosyasında `SEED_SAMPLE_DATA=1` yaparak otomatik örnek veri ekleme (her ekibe 5 kullanıcı, 2025 yılı için işler ve projeler)
+- **Örnek Veri Ekleme**: `.env` dosyasında `SEED_SAMPLE_DATA=1` yaparak otomatik örnek veri ekleme (her birime 1 Birim Amiri + 4 personel, güncel yıl için işler ve projeler)
 - **Docker Desteği**: Tam containerized yapı, yatay ölçeklendirme için hazır
 
 ## Teknoloji Stack
@@ -140,8 +141,8 @@ npm run dev
 ## Veritabanı Yapısı
 
 - `users` - Kullanıcılar (soft delete desteği ile isActive alanı)
-- `roles` - Roller (ADMIN, TAKIM_LIDERI, YAZILIMCI, DEVOPS, IS_ANALISTI, TESTCI)
-- `teams` - Ekipler (her ekibin kendine özel rengi ve ikonu var, soft delete desteği ile isActive alanı)
+- `roles` - Roller (ADMIN, BIRIM_AMIRI, YAZILIMCI, DEVOPS, IS_ANALISTI, TESTCI)
+- `teams` - Birimler (her birimin kendine özel emoji ikonu ve rengi var, soft delete desteği ile isActive alanı)
 - `ldap_settings` - LDAP bağlantı ayarları (şifreli saklama)
 - `projects` - Projeler (başlangıç/bitiş tarihi, durum, ekip atamaları)
 - `project_teams` - Proje-Ekip ilişkisi (many-to-many)
@@ -161,10 +162,12 @@ npm run dev
 - `POST /api/auth/register` - Local user oluştur
 - `GET /api/auth/me` - Mevcut kullanıcı bilgisi
 
-### Teams
-- `GET /api/teams` - Ekipler listesi
-- `GET /api/teams/{id}` - Ekip detayı
-- `GET /api/teams/{id}/dashboard` - Ekip dashboard istatistikleri
+### Teams (Birimler)
+- `GET /api/teams` - Birimler listesi
+- `GET /api/teams/{id}` - Birim detayı
+- `GET /api/teams/{id}/dashboard` - Birim dashboard istatistikleri
+- `GET /api/teams/{id}/dashboard/details` - Birim dashboard detayları (üyeler, leaderboard)
+- `GET /api/teams/dashboard/details` - Tüm birimlerin dashboard detayları
 
 ### Tasks
 - `GET /api/tasks` - İşler listesi (filtreleme: teamId, year, month)
@@ -195,18 +198,24 @@ npm run dev
 
 ## Yetkilendirme
 
-### Yönetici
-- Tüm ekipleri görüntüleyebilir
+### Hiyerarşi
+**Yönetici (ADMIN) > Birim Amiri (BIRIM_AMIRI) > Personel**
+
+### Yönetici (ADMIN)
+- Tüm birimleri görüntüleyebilir
 - Tüm işleri görebilir/düzenleyebilir
 - Tüm dashboard'ları görebilir
+- Yönetim paneline erişebilir
+- Sistem sağlığı kontrolü yapabilir
 
-### Takım Lideri
-- Sadece kendi ekibini görüntüleyebilir
-- Kendi ekibinin işlerini yönetebilir
-- Kendi ekibinin dashboard'unu görebilir
+### Birim Amiri (BIRIM_AMIRI)
+- Liderliğini yaptığı birimleri görüntüleyebilir
+- Kendi birimlerinin işlerini yönetebilir
+- Kendi birimlerinin dashboard ve üye listesini görebilir
+- Sistem sağlığı kontrolü yapabilir
 
 ### Personel
-- Sadece kendi ekibini görüntüleyebilir
+- Sadece üyesi olduğu birimleri görüntüleyebilir
 - Kendisine atanan işleri görebilir
 - Sadece kendi işlerini düzenleyebilir
 
@@ -328,6 +337,9 @@ POST /api/auth/register
 - `V12__create_login_attempts.xml` - Giriş denemeleri tablosu oluşturulur (rate limiting için)
 - `V13__create_system_logs.xml` - Sistem logları tablosu oluşturulur (backend ve frontend logları)
 - `V14__create_task_logs.xml` - İş logları tablosu oluşturulur (tüm task işlemleri için)
+- `V15__update_team_names_turkish.xml` - Ekip isimleri Türkçe birim isimlerine güncellenir
+- `V16__add_task_assignees.xml` - Görev atama tablosu (task_assignees) oluşturulur
+- `V17__add_departments.xml` - BIRIM_AMIRI rolü ve birim ikonları/renkleri eklenir
 
 Manuel bir şey yapmanıza gerek yok, uygulama ilk çalıştığında tüm tablolar otomatik oluşturulur.
 
@@ -361,14 +373,23 @@ Uygulama, Catppuccin Mocha renk paletini kullanmaktadır.
 - **Metin**: `--ctp-text`, `--ctp-subtext0`, `--ctp-subtext1` (açık beyaz tonları)
 - **Vurgu Renkleri**: `--ctp-blue`, `--ctp-green`, `--ctp-yellow`, `--ctp-peach`, `--ctp-red` vb.
 
-## Ekip Renkleri ve İkonları
+## Birim Renkleri ve İkonları
 
-Her ekibin kendine özel belirleyici rengi ve ikonu vardır. Bu özellik sayesinde:
-- Toplu görünümlerde (Gantt Chart, Kanban Board, Takvim) ekipleri hızlıca ayırt edebilirsiniz
-- Ekip seçim menüsünde görsel olarak ekipleri tanımlayabilirsiniz
-- İş kartlarında hangi ekibe ait olduğunu renk ve ikon ile görebilirsiniz
+Her birimin kendine özel emoji ikonu ve rengi vardır. Bu özellik sayesinde:
+- Sidebar'da birimleri emoji ikonları ile hızlıca ayırt edebilirsiniz
+- Toplu görünümlerde (Gantt Chart, Kanban Board, Takvim) birimleri renkleriyle ayırt edebilirsiniz
+- İş kartlarında hangi birime ait olduğunu renk ve ikon ile görebilirsiniz
 
-`teams` tablosunda `color` (VARCHAR(7)) ve `icon` (VARCHAR(50)) kolonları bulunur. Her ekip için özel renk kodu (hex, örn: #89b4fa) ve ikon (emoji veya icon identifier) tanımlanabilir.
+**Varsayılan Birim İkonları:**
+| Birim | İkon | Renk |
+|-------|------|------|
+| Sistem Birimi | 🖥️ | #89b4fa |
+| Network Birimi | 🌐 | #a6e3a1 |
+| Some Birimi | 📡 | #f9e2af |
+| Yazılım Birimi | 💻 | #cba6f7 |
+| Test Birimi | 🧪 | #f38ba8 |
+
+`teams` tablosunda `color` (VARCHAR(7)) ve `icon` (VARCHAR(50)) kolonları bulunur.
 
 ## Örnek Veri Ekleme
 
@@ -378,8 +399,9 @@ Uygulamayı test etmek için otomatik örnek veri ekleme özelliği bulunmaktad�
 2. Backend'i yeniden başlatın: `docker-compose restart backend`
 
 Bu özellik şunları ekler:
-- Her ekibe 5 kullanıcı (1 takım lideri + 4 üye)
-- 2025 yılı için her ay 15-35 arası iş
+- Her birime 5 kullanıcı (1 Birim Amiri + 4 personel)
+- Birim amirleri otomatik olarak lider olarak atanır
+- Güncel yıl için her ay 15-35 arası iş
 - 5 örnek proje
 - İşlerin %30'unda alt görevler
 
@@ -393,10 +415,10 @@ Bu özellik şunları ekler:
 - Kullanıcı silme/deaktive etme (soft delete)
 - Admin rolü atama/revoke (checkbox ile)
 
-### Takım Yönetimi
-- Takım oluşturma (isim, açıklama, renk, ikon, lider)
-- Takım düzenleme
-- Takım silme/deaktive etme (soft delete)
+### Birim Yönetimi
+- Birim oluşturma (isim, açıklama, renk, ikon, lider)
+- Birim düzenleme
+- Birim silme/deaktive etme (soft delete)
 
 ### Rol Yönetimi
 - Genel rol havuzu (takıma özel değil)
