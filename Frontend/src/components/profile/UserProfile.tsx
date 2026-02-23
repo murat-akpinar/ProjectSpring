@@ -88,7 +88,7 @@ const UserProfile: React.FC = () => {
 
   const getRoleLabel = (roles: string[]): string => {
     if (roles.includes('ADMIN')) return 'Yönetici';
-    if (roles.includes('TAKIM_LIDERI')) return 'Birim Lideri';
+    if (roles.includes('BIRIM_AMIRI')) return 'Birim Amiri';
     if (roles.includes('YAZILIMCI')) return 'Yazılımcı';
     if (roles.includes('DEVOPS')) return 'DevOps';
     if (roles.includes('IS_ANALISTI')) return 'İş Analisti';

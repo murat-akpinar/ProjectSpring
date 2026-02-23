@@ -2,7 +2,7 @@ package com.projectspring.model.enums;
 
 public enum Role {
     ADMIN,
-    TAKIM_LIDERI,
+    BIRIM_AMIRI,
     YAZILIMCI,
     DEVOPS,
     IS_ANALISTI,

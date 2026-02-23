@@ -20,6 +20,7 @@
     <include file="db/changelog/changes/V14__create_task_logs.xml"/>
     <include file="db/changelog/changes/V15__rename_teams_to_birim.xml"/>
     <include file="db/changelog/changes/V16__task_logs_preserve_deleted_task.xml"/>
+    <include file="db/changelog/changes/V17__add_departments.xml"/>
     
 </databaseChangeLog>
 

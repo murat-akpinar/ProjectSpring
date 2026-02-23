@@ -7,4 +7,3 @@ export interface Team {
   color?: string;
   icon?: string;
 }
-

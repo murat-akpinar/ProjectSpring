@@ -70,8 +70,8 @@ public class SampleDataInitializer implements CommandLineRunner {
             .orElseThrow(() -> new RuntimeException("IS_ANALISTI role not found"));
         RoleEntity testciRole = roleRepository.findByName("TESTCI")
             .orElseThrow(() -> new RuntimeException("TESTCI role not found"));
-        RoleEntity takimLideriRole = roleRepository.findByName("TAKIM_LIDERI")
-            .orElseThrow(() -> new RuntimeException("TAKIM_LIDERI role not found"));
+        RoleEntity birimAmiriRole = roleRepository.findByName("BIRIM_AMIRI")
+            .orElseThrow(() -> new RuntimeException("BIRIM_AMIRI role not found"));
 
         // Create users for each team (5 users per team)
         Map<Team, List<User>> teamUsers = new HashMap<>();
@@ -87,10 +87,13 @@ public class SampleDataInitializer implements CommandLineRunner {
                 "user" + userCounter++,
                 "user" + (userCounter - 1) + "@projectspring.local",
                 firstNames[random.nextInt(firstNames.length)] + " " + lastNames[random.nextInt(lastNames.length)],
-                Collections.singleton(takimLideriRole),
+                Collections.singleton(birimAmiriRole),
                 Collections.singleton(team)
             );
             users.add(leader);
+
+            // Set team leader via direct SQL to avoid circular reference
+            teamRepository.updateLeaderId(team.getId(), leader.getId());
 
             // Create 4 more users for the team
             RoleEntity[] teamRoles = {yazilimciRole, devopsRole, isAnalistiRole, testciRole};
