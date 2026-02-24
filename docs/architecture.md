@@ -11,6 +11,7 @@
 | Spring Data JPA | 3.x | ORM / Data access |
 | Hibernate | 6.x | JPA implementation |
 | PostgreSQL | 15 | Relational database |
+| HikariCP | 5.x | JDBC connection pool (with keepalive & leak detection) |
 | Liquibase | Latest | Database migrations |
 | jjwt | 0.12.3 | JWT token generation & validation |
 | Bucket4j | 8.7.0 | Rate limiting |
@@ -149,9 +150,11 @@ Controller (REST API) → Service (Business Logic) → Repository (Data Access) 
 
 6. **Liquibase Migrations**: All schema changes are version-controlled through Liquibase XML changelogs, ensuring repeatable deployments.
 
-7. **AOP Logging**: All controller method invocations are automatically logged via `LoggingAspect`, with sensitive data (passwords, tokens) masked.
+7. **AOP Logging**: All controller method invocations are automatically logged via `LoggingAspect`, with sensitive data (passwords, tokens) masked. Health check endpoints (`HealthController`, `SystemHealthController`) are excluded from AOP logging to prevent unnecessary database load. Logging failures are handled gracefully — if the database is unavailable, log writes fail silently to the console logger without affecting the actual API response.
 
 8. **Rate Limiting**: IP-based rate limiting using Bucket4j to prevent brute-force attacks, combined with account lockout after repeated failures.
+
+9. **Connection Pool (HikariCP)**: The database connection pool is configured with keepalive probes, connection validation, and leak detection to ensure resilient database connectivity. Dead connections are automatically evicted and replaced.
 
 ---
 

@@ -249,9 +249,33 @@ npm test
 - **Lombok**: Used for `@Data`, `@NoArgsConstructor`, `@AllArgsConstructor` to reduce boilerplate
 - **Validation**: Use `@Valid` and Jakarta Validation annotations on DTOs
 - **Null Safety**: Use `Optional<>` for nullable return types in repositories
-- **Logging**: Automatic via `LoggingAspect` — no manual logging needed in controllers
+- **Logging**: Automatic via `LoggingAspect` — no manual logging needed in controllers. Health check endpoints are excluded from AOP logging. Logging failures are handled gracefully (fall back to console, never break API responses).
+- **Connection Pool**: HikariCP is configured with keepalive probes (60s), connection validation (`SELECT 1`), and leak detection (30s threshold). See [Deployment Guide](./deployment.md#connection-pool-hikaricp) for tuning options.
 
 ### Frontend
 - **TypeScript**: Strict mode for type safety
 - **ESLint**: Configured with React hooks and refresh plugins
 - **CSS**: Component-scoped CSS files, global theme variables
+
+---
+
+## Important Implementation Notes
+
+### Adding New Controllers
+
+When you create a new controller, it is **automatically** logged by `LoggingAspect`. If your controller is called frequently (e.g., health checks, polling, WebSocket handshakes), you should exclude it from AOP logging:
+
+```java
+// In LoggingAspect.java, add to the pointcut exclusion:
+@Around("execution(* com.projectspring.controller..*(..)) && " +
+        "!execution(* com.projectspring.controller.YourNewController.*(..))")
+```
+
+### Database Resilience
+
+The application is designed to handle temporary database outages gracefully:
+- **HikariCP** automatically detects and replaces dead connections via keepalive probes
+- **LoggingAspect** catches database write failures and falls back to console logging
+- **Docker** auto-restarts crashed containers via `restart: unless-stopped`
+
+If you add new services that write to the database during request processing (similar to `SystemLogService`), ensure they handle `DataAccessException` gracefully to prevent cascading failures.

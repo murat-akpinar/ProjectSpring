@@ -68,6 +68,9 @@ CORS_ALLOWED_ORIGINS=https://your-domain.com
 | `RATE_LIMIT_WINDOW_MINUTES` | `15` | Rate limit time window |
 | `ACCOUNT_LOCKOUT_MAX_ATTEMPTS` | `10` | Max failed attempts before lockout |
 | `ACCOUNT_LOCKOUT_DURATION_MINUTES` | `30` | Lockout duration |
+| **Connection Pool (HikariCP)** | | |
+| `HIKARI_MAX_POOL_SIZE` | `20` | Maximum database connections in the pool |
+| `HIKARI_MIN_IDLE` | `5` | Minimum idle connections maintained |
 | **Application** | | |
 | `SERVER_PORT` | `8080` | Backend server port |
 | `FRONTEND_URL` | `http://frontend:80` | Frontend URL (for health checks) |
@@ -92,21 +95,31 @@ postgres:
     - "5432:5432"
   volumes:
     - postgres_data:/var/lib/postgresql/data
+  shm_size: '256mb'
+  restart: unless-stopped
   healthcheck:
     test: ["CMD-SHELL", "pg_isready -U postgres"]
     interval: 10s
 ```
 
+> **Important**: `POSTGRES_PASSWORD` is only used during the **first initialization** of the data volume. If the volume already exists with data from a previous run, changing `POSTGRES_PASSWORD` has no effect. See [Troubleshooting](#troubleshooting) for how to handle password mismatch issues.
+
+Key settings:
+- `shm_size: '256mb'` — Prevents shared memory errors under heavy queries (PostgreSQL uses `/dev/shm` for temporary data)
+- `restart: unless-stopped` — Auto-restarts the container on crash or host reboot
+
 ### Backend
 - Builds from `./Backend/Dockerfile`
 - Depends on PostgreSQL being healthy
-- Health check: `GET /health` every 10 seconds, 60s startup grace period
+- Health check: `GET /health` every 30 seconds, 90s startup grace period
 - Internal port: 8080, mapped to host port 8081
+- `restart: unless-stopped` — Auto-restarts on crash
 
 ### Frontend
 - Builds from `./Frontend/Dockerfile`
 - Depends on both PostgreSQL and Backend being healthy
 - Nginx serves the React build on port 80
+- `restart: unless-stopped` — Auto-restarts on crash
 
 ---
 
@@ -192,6 +205,96 @@ This creates:
 
 ---
 
+## Connection Pool (HikariCP)
+
+The backend uses HikariCP for database connection pooling with the following defaults:
+
+| Setting | Value | Description |
+|---------|-------|-------------|
+| `maximum-pool-size` | 20 | Max simultaneous database connections |
+| `minimum-idle` | 5 | Connections kept ready even when idle |
+| `connection-timeout` | 20s | How long to wait for a connection from the pool |
+| `idle-timeout` | 5 min | Idle connections are closed after this period |
+| `max-lifetime` | 10 min | Connections are recycled after this period |
+| `keepalive-time` | 60s | Probe interval to detect dead connections |
+| `connection-test-query` | `SELECT 1` | Validates connections before use |
+| `leak-detection-threshold` | 30s | Logs a warning if a connection is held longer than this |
+
+These settings ensure:
+- Dead or stale connections are detected and replaced automatically
+- Connection leaks are logged for debugging
+- The pool recovers gracefully after temporary database outages
+
+---
+
+## Troubleshooting
+
+### PostgreSQL Password Authentication Failed
+
+**Symptom**: Backend logs show `FATAL: password authentication failed for user "postgres"` even though the password in `docker-compose.yml` is correct.
+
+**Root Cause**: PostgreSQL's `POSTGRES_PASSWORD` environment variable is **only applied during the initial database setup** (when the data volume is first created). If the volume already contains data from a previous run, the password stored in the volume takes precedence over the environment variable.
+
+**Solution A — Reset the volume (loses all data)**:
+```bash
+docker compose down
+docker volume rm projectspring_postgres_data
+docker compose up -d
+```
+
+**Solution B — Change the password inside PostgreSQL (preserves data)**:
+```bash
+docker exec -it projectspring-db psql -U postgres -c "ALTER USER postgres PASSWORD 'postgres';"
+docker compose restart backend
+```
+
+### Backend Freezing / All Requests Timeout
+
+**Symptom**: The application works initially but then all requests start timing out or "freezing."
+
+**Possible Causes**:
+1. **Connection pool exhaustion**: All HikariCP connections are in use or dead. Check backend logs for `HikariPool-1 - Connection is not available` errors.
+2. **Database connectivity lost**: PostgreSQL container crashed or became unresponsive. Check with `docker compose ps` and `docker logs projectspring-db`.
+3. **Cascading failure from AOP logging**: If the `LoggingAspect` fails to write logs, it could block API responses. (Fixed: logging now fails gracefully to console.)
+
+**Diagnosis**:
+```bash
+# Check container health status
+docker compose ps
+
+# Check backend logs for connection pool errors
+docker logs projectspring-backend 2>&1 | grep -i "hikari\|connection\|pool\|timeout"
+
+# Check PostgreSQL logs
+docker logs projectspring-db 2>&1 | grep -i "fatal\|error\|connection"
+
+# Check if PostgreSQL is accepting connections
+docker exec -it projectspring-db pg_isready -U postgres
+```
+
+### Health Check Causing Excessive Database Load
+
+**Symptom**: `system_logs` table grows rapidly with health check entries; database load is unexpectedly high.
+
+**Root Cause (Fixed)**: The `LoggingAspect` was intercepting `HealthController` and `SystemHealthController` endpoints, writing a database record for every Docker health check probe (every 10-30 seconds).
+
+**Fix**: `HealthController` and `SystemHealthController` are now excluded from AOP logging. If you are running an older version, update the `LoggingAspect.java` pointcut expression to exclude these controllers.
+
+### Container Keeps Restarting
+
+**Symptom**: `docker compose ps` shows a container with status `Restarting`.
+
+**Diagnosis**:
+```bash
+# Check the exit code and logs
+docker logs --tail 50 projectspring-backend
+
+# If the container is restarting due to health check failures,
+# increase the start_period in docker-compose.yml
+```
+
+---
+
 ## Production Checklist
 
 - [ ] Change `JWT_SECRET` to a strong, unique secret (min 256 bits)
@@ -206,3 +309,5 @@ This creates:
 - [ ] Configure HTTPS (TLS termination at reverse proxy)
 - [ ] Set up database backups
 - [ ] Monitor application health via `/api/admin/health`
+- [ ] Tune `HIKARI_MAX_POOL_SIZE` based on expected concurrent users
+- [ ] Verify `restart: unless-stopped` is set for all services

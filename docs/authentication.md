@@ -231,3 +231,23 @@ The `LoggingAspect` automatically logs all controller method invocations:
 - Response status and timing
 - **Sensitive data masking**: Passwords, tokens, and secrets are automatically masked in logs
 - Logs are stored in the `system_logs` table with source `BACKEND`
+
+### Excluded Endpoints
+
+The following controllers are **excluded** from AOP logging to prevent unnecessary database writes and cascading failures:
+
+| Controller | Reason |
+|------------|--------|
+| `HealthController` | Called every 30s by Docker health check — would flood `system_logs` |
+| `SystemHealthController` | Same as above, detailed health endpoint |
+| `SystemLogController` | Logging the log viewer would create infinite loops |
+| `TaskLogController` | Logging the audit viewer would create noise |
+
+### Fault Tolerance
+
+Logging is wrapped in a `safeLog()` method that catches all exceptions. If the database is temporarily unavailable:
+- The log write silently falls back to the console logger (`slf4j`)
+- The original API response is **not affected** — users will not see errors caused by logging failures
+- Once the database recovers, subsequent log writes resume automatically
+
+This prevents a common cascading failure pattern where a database outage causes all API endpoints to fail because the AOP logging aspect cannot write to the database.

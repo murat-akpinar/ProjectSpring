@@ -9,9 +9,9 @@
 | [Architecture](./architecture.md) | System architecture, tech stack, project structure, and design patterns |
 | [Database Schema](./database-schema.md) | Complete database tables, columns, relationships, indexes, and migrations |
 | [API Reference](./api-reference.md) | All REST API endpoints with request/response examples |
-| [Authentication & Security](./authentication.md) | JWT, LDAP, hybrid auth flow, role-based access, rate limiting |
-| [Deployment](./deployment.md) | Docker setup, environment variables, scaling, and production config |
-| [Development Guide](./development-guide.md) | Local setup, coding conventions, adding features, and project structure |
+| [Authentication & Security](./authentication.md) | JWT, LDAP, hybrid auth flow, role-based access, rate limiting, AOP logging |
+| [Deployment](./deployment.md) | Docker setup, environment variables, HikariCP, troubleshooting, and production config |
+| [Development Guide](./development-guide.md) | Local setup, coding conventions, adding features, resilience patterns |
 | [Frontend](./frontend.md) | React frontend architecture, components, state management, and views |
 | [Roadmap](./roadmap.md) | Planned features, improvements, and known issues for future development |
 
