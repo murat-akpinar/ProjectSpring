@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.Arrays;
 
 @Aspect
 @Component
@@ -26,15 +25,17 @@ public class LoggingAspect {
     @Autowired
     private UserRepository userRepository;
     
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(LoggingAspect.class);
+
     @Around("execution(* com.projectspring.controller..*(..)) && " +
             "!execution(* com.projectspring.controller.SystemLogController.*(..)) && " +
-            "!execution(* com.projectspring.controller.TaskLogController.*(..))")
+            "!execution(* com.projectspring.controller.TaskLogController.*(..)) && " +
+            "!execution(* com.projectspring.controller.HealthController.*(..)) && " +
+            "!execution(* com.projectspring.controller.SystemHealthController.*(..))")
     public Object logControllerMethods(ProceedingJoinPoint joinPoint) throws Throwable {
         String methodName = joinPoint.getSignature().getName();
         String className = joinPoint.getTarget().getClass().getSimpleName();
-        String endpoint = className + "." + methodName;
         
-        // Get request information
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         String ipAddress = null;
         String requestEndpoint = null;
@@ -44,7 +45,6 @@ public class LoggingAspect {
             requestEndpoint = request.getMethod() + " " + request.getRequestURI();
         }
         
-        // Get current user
         User currentUser = null;
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -53,45 +53,37 @@ public class LoggingAspect {
                 currentUser = userRepository.findByUsername(authentication.getName()).orElse(null);
             }
         } catch (Exception e) {
-            // Ignore
+            // Ignore - DB might be unavailable
         }
         
         long startTime = System.currentTimeMillis();
-        Exception exception = null;
         Object result = null;
         
         try {
             result = joinPoint.proceed();
             long duration = System.currentTimeMillis() - startTime;
             
-            // Log successful request
-            systemLogService.log(
-                "INFO",
+            safeLog("INFO",
                 "Request successful: " + requestEndpoint + " (duration: " + duration + "ms)",
-                "BACKEND",
-                currentUser,
-                ipAddress,
-                requestEndpoint,
-                null
-            );
+                currentUser, ipAddress, requestEndpoint, null);
             
             return result;
         } catch (Exception e) {
-            exception = e;
             long duration = System.currentTimeMillis() - startTime;
             
-            // Log failed request
-            systemLogService.log(
-                "ERROR",
+            safeLog("ERROR",
                 "Request failed: " + requestEndpoint + " - " + e.getClass().getSimpleName() + ": " + e.getMessage() + " (duration: " + duration + "ms)",
-                "BACKEND",
-                currentUser,
-                ipAddress,
-                requestEndpoint,
-                e
-            );
+                currentUser, ipAddress, requestEndpoint, e);
             
             throw e;
+        }
+    }
+
+    private void safeLog(String level, String message, User user, String ipAddress, String endpoint, Exception exception) {
+        try {
+            systemLogService.log(level, message, "BACKEND", user, ipAddress, endpoint, exception);
+        } catch (Exception logException) {
+            logger.warn("Failed to persist audit log to database: {}", logException.getMessage());
         }
     }
     
