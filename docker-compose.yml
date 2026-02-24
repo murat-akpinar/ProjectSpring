@@ -56,7 +56,7 @@ services:
       dockerfile: Dockerfile
     container_name: projectspring-frontend
     ports:
-      - "80:80"
+      - "81:80"
     depends_on:
       postgres:
         condition: service_healthy
