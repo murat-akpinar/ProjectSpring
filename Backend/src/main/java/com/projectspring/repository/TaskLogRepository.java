@@ -57,5 +57,9 @@ public interface TaskLogRepository extends JpaRepository<TaskLog, Long> {
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate
     );
+
+    long countByCreatedAtBefore(LocalDateTime cutoff);
+
+    void deleteByCreatedAtBefore(LocalDateTime cutoff);
 }
 

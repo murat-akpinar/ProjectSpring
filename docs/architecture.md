@@ -150,7 +150,7 @@ Controller (REST API) → Service (Business Logic) → Repository (Data Access) 
 
 6. **Liquibase Migrations**: All schema changes are version-controlled through Liquibase XML changelogs, ensuring repeatable deployments.
 
-7. **AOP Logging**: All controller method invocations are automatically logged via `LoggingAspect`, with sensitive data (passwords, tokens) masked. Health check endpoints (`HealthController`, `SystemHealthController`) are excluded from AOP logging to prevent unnecessary database load. Logging failures are handled gracefully — if the database is unavailable, log writes fail silently to the console logger without affecting the actual API response.
+7. **Smart AOP Logging**: The `LoggingAspect` uses a selective logging strategy — only **write operations** (POST/PUT/DELETE) and **errors** are persisted to the database. Read-only requests (GET) are logged to console only at DEBUG level. Health check endpoints are excluded entirely. Logging failures are handled gracefully — if the database is unavailable, log writes fail silently to the console logger without affecting the actual API response. A `LogCleanupService` automatically purges old entries (system logs: 30 days, task logs: 90 days).
 
 8. **Rate Limiting**: IP-based rate limiting using Bucket4j to prevent brute-force attacks, combined with account lockout after repeated failures.
 
@@ -202,4 +202,5 @@ SystemLog ──M:1── User (optional)
 | `LoginAttemptService` | Rate limiting, account lockout tracking |
 | `SystemHealthService` | Health checks for backend, database, and frontend |
 | `EncryptionService` | AES-256 encrypt/decrypt for sensitive data |
+| `LogCleanupService` | Scheduled job to purge old system_logs (30d) and task_logs (90d) |
 | `OverdueTaskService` | Scheduled job to detect and mark overdue tasks |

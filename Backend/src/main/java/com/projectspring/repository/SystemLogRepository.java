@@ -59,5 +59,9 @@ public interface SystemLogRepository extends JpaRepository<SystemLog, Long> {
     
     // All logs ordered
     Page<SystemLog> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
+    long countByCreatedAtBefore(LocalDateTime cutoff);
+
+    void deleteByCreatedAtBefore(LocalDateTime cutoff);
 }
 

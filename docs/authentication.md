@@ -226,19 +226,32 @@ The `EncryptionService` provides AES-256 encryption for sensitive data:
 
 ## Automatic Logging (AOP)
 
-The `LoggingAspect` automatically logs all controller method invocations:
-- Method name and parameters
-- Response status and timing
+The `LoggingAspect` uses a **smart logging strategy** that balances audit trail completeness with database performance:
+
+### What Gets Logged to Database
+
+| HTTP Method | Logged to DB? | Reason |
+|-------------|---------------|--------|
+| `POST` | Yes | Creates new resources — important for audit |
+| `PUT` | Yes | Modifies existing resources — important for audit |
+| `DELETE` | Yes | Removes resources — critical for audit |
+| `GET` | No (console only) | Read-only, high volume, no audit value |
+| `HEAD` / `OPTIONS` | No (console only) | Utility requests, no audit value |
+| Any method that **fails** | Yes | All errors are logged regardless of HTTP method |
+
+Additional features:
 - **Sensitive data masking**: Passwords, tokens, and secrets are automatically masked in logs
-- Logs are stored in the `system_logs` table with source `BACKEND`
+- Successful write operations are stored in the `system_logs` table with source `BACKEND` and level `INFO`
+- Failed requests (any method) are stored with level `ERROR`
+- Read-only requests are logged at `DEBUG` level to the console/file logger only
 
 ### Excluded Endpoints
 
-The following controllers are **excluded** from AOP logging to prevent unnecessary database writes and cascading failures:
+The following controllers are **completely excluded** from AOP logging (both DB and console):
 
 | Controller | Reason |
 |------------|--------|
-| `HealthController` | Called every 30s by Docker health check — would flood `system_logs` |
+| `HealthController` | Called every 30s by Docker health check |
 | `SystemHealthController` | Same as above, detailed health endpoint |
 | `SystemLogController` | Logging the log viewer would create infinite loops |
 | `TaskLogController` | Logging the audit viewer would create noise |
@@ -251,3 +264,15 @@ Logging is wrapped in a `safeLog()` method that catches all exceptions. If the d
 - Once the database recovers, subsequent log writes resume automatically
 
 This prevents a common cascading failure pattern where a database outage causes all API endpoints to fail because the AOP logging aspect cannot write to the database.
+
+### Log Retention & Cleanup
+
+The `LogCleanupService` runs automatically every day at 02:30 AM and removes old log entries:
+
+| Table | Retention Period | Configurable Via |
+|-------|-----------------|------------------|
+| `system_logs` | 30 days (default) | `LOG_RETENTION_SYSTEM_DAYS` |
+| `task_logs` | 90 days (default) | `LOG_RETENTION_TASK_DAYS` |
+| `login_attempts` | 24 hours | Hardcoded in `LoginAttemptService` |
+
+This ensures the database does not grow indefinitely while keeping recent logs available for troubleshooting and auditing.

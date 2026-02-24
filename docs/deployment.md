@@ -71,6 +71,9 @@ CORS_ALLOWED_ORIGINS=https://your-domain.com
 | **Connection Pool (HikariCP)** | | |
 | `HIKARI_MAX_POOL_SIZE` | `20` | Maximum database connections in the pool |
 | `HIKARI_MIN_IDLE` | `5` | Minimum idle connections maintained |
+| **Log Retention** | | |
+| `LOG_RETENTION_SYSTEM_DAYS` | `30` | Days to keep system logs before auto-cleanup |
+| `LOG_RETENTION_TASK_DAYS` | `90` | Days to keep task audit logs before auto-cleanup |
 | **Application** | | |
 | `SERVER_PORT` | `8080` | Backend server port |
 | `FRONTEND_URL` | `http://frontend:80` | Frontend URL (for health checks) |

@@ -7,6 +7,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,18 +16,21 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.util.Set;
 
 @Aspect
 @Component
 public class LoggingAspect {
-    
+
+    private static final Logger logger = LoggerFactory.getLogger(LoggingAspect.class);
+
+    private static final Set<String> READ_ONLY_METHODS = Set.of("GET", "HEAD", "OPTIONS");
+
     @Autowired
     private SystemLogService systemLogService;
-    
+
     @Autowired
     private UserRepository userRepository;
-    
-    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(LoggingAspect.class);
 
     @Around("execution(* com.projectspring.controller..*(..)) && " +
             "!execution(* com.projectspring.controller.SystemLogController.*(..)) && " +
@@ -33,50 +38,58 @@ public class LoggingAspect {
             "!execution(* com.projectspring.controller.HealthController.*(..)) && " +
             "!execution(* com.projectspring.controller.SystemHealthController.*(..))")
     public Object logControllerMethods(ProceedingJoinPoint joinPoint) throws Throwable {
-        String methodName = joinPoint.getSignature().getName();
-        String className = joinPoint.getTarget().getClass().getSimpleName();
-        
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         String ipAddress = null;
         String requestEndpoint = null;
+        String httpMethod = null;
         if (attributes != null) {
             HttpServletRequest request = attributes.getRequest();
             ipAddress = getClientIpAddress(request);
-            requestEndpoint = request.getMethod() + " " + request.getRequestURI();
+            httpMethod = request.getMethod();
+            requestEndpoint = httpMethod + " " + request.getRequestURI();
         }
-        
-        User currentUser = null;
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication != null && authentication.isAuthenticated() && 
-                !authentication.getName().equals("anonymousUser")) {
-                currentUser = userRepository.findByUsername(authentication.getName()).orElse(null);
-            }
-        } catch (Exception e) {
-            // Ignore - DB might be unavailable
-        }
-        
+
+        boolean isReadOnly = httpMethod != null && READ_ONLY_METHODS.contains(httpMethod);
+
         long startTime = System.currentTimeMillis();
-        Object result = null;
-        
+
         try {
-            result = joinPoint.proceed();
+            Object result = joinPoint.proceed();
             long duration = System.currentTimeMillis() - startTime;
-            
-            safeLog("INFO",
-                "Request successful: " + requestEndpoint + " (duration: " + duration + "ms)",
-                currentUser, ipAddress, requestEndpoint, null);
-            
+
+            if (isReadOnly) {
+                logger.debug("Request successful: {} ({}ms)", requestEndpoint, duration);
+            } else {
+                User currentUser = resolveCurrentUser();
+                safeLog("INFO",
+                    "Request successful: " + requestEndpoint + " (duration: " + duration + "ms)",
+                    currentUser, ipAddress, requestEndpoint, null);
+            }
+
             return result;
         } catch (Exception e) {
             long duration = System.currentTimeMillis() - startTime;
-            
+
+            User currentUser = resolveCurrentUser();
             safeLog("ERROR",
                 "Request failed: " + requestEndpoint + " - " + e.getClass().getSimpleName() + ": " + e.getMessage() + " (duration: " + duration + "ms)",
                 currentUser, ipAddress, requestEndpoint, e);
-            
+
             throw e;
         }
+    }
+
+    private User resolveCurrentUser() {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication != null && authentication.isAuthenticated()
+                    && !authentication.getName().equals("anonymousUser")) {
+                return userRepository.findByUsername(authentication.getName()).orElse(null);
+            }
+        } catch (Exception e) {
+            logger.debug("Could not resolve current user: {}", e.getMessage());
+        }
+        return null;
     }
 
     private void safeLog(String level, String message, User user, String ipAddress, String endpoint, Exception exception) {
@@ -86,7 +99,7 @@ public class LoggingAspect {
             logger.warn("Failed to persist audit log to database: {}", logException.getMessage());
         }
     }
-    
+
     private String getClientIpAddress(HttpServletRequest request) {
         String xForwardedFor = request.getHeader("X-Forwarded-For");
         if (xForwardedFor != null && !xForwardedFor.isEmpty() && !"unknown".equalsIgnoreCase(xForwardedFor)) {

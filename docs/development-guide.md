@@ -249,7 +249,7 @@ npm test
 - **Lombok**: Used for `@Data`, `@NoArgsConstructor`, `@AllArgsConstructor` to reduce boilerplate
 - **Validation**: Use `@Valid` and Jakarta Validation annotations on DTOs
 - **Null Safety**: Use `Optional<>` for nullable return types in repositories
-- **Logging**: Automatic via `LoggingAspect` — no manual logging needed in controllers. Health check endpoints are excluded from AOP logging. Logging failures are handled gracefully (fall back to console, never break API responses).
+- **Logging**: Automatic via `LoggingAspect` — no manual logging needed in controllers. Only write operations (POST/PUT/DELETE) and errors are persisted to the database; GET requests are logged at DEBUG level to console only. Health check endpoints are excluded entirely. Logging failures are handled gracefully (fall back to console, never break API responses). Old logs are auto-cleaned by `LogCleanupService` (system logs: 30 days, task logs: 90 days).
 - **Connection Pool**: HikariCP is configured with keepalive probes (60s), connection validation (`SELECT 1`), and leak detection (30s threshold). See [Deployment Guide](./deployment.md#connection-pool-hikaricp) for tuning options.
 
 ### Frontend
