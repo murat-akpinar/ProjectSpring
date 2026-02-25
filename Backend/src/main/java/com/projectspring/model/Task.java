@@ -4,10 +4,7 @@ import com.projectspring.model.enums.TaskStatus;
 import com.projectspring.model.enums.TaskType;
 import com.projectspring.model.enums.Priority;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,10 +13,12 @@ import java.util.Set;
 
 @Entity
 @Table(name = "tasks")
-@Data
-@EqualsAndHashCode(exclude = {"subtasks", "assignees", "statusHistory", "team", "createdBy"})
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(of = "id")
+@ToString(exclude = {"subtasks", "assignees", "statusHistory", "team", "createdBy", "project"})
 public class Task {
     
     @Id

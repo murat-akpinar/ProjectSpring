@@ -96,7 +96,7 @@ public class AuthController {
             // Record successful login
             loginAttemptService.recordLoginAttempt(username, ipAddress, true);
             
-            User user = userRepository.findByUsername(username)
+            User user = userRepository.findByUsernameWithRolesAndTeams(username)
                 .orElseThrow(() -> new RuntimeException("User not found after successful authentication"));
             
             UserDTO userDTO = new UserDTO();
@@ -169,7 +169,7 @@ public class AuthController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         
-        User user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsernameWithRolesAndTeams(username)
             .orElseThrow(() -> new RuntimeException("User not found"));
         
         UserDTO userDTO = new UserDTO();

@@ -19,5 +19,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u JOIN u.teams t WHERE t.id = :teamId AND u.isActive = true")
     List<User> findByTeamId(@Param("teamId") Long teamId);
+
+    @Query("SELECT DISTINCT u FROM User u LEFT JOIN FETCH u.roles LEFT JOIN FETCH u.teams WHERE u.username = :username")
+    Optional<User> findByUsernameWithRolesAndTeams(@Param("username") String username);
 }
 

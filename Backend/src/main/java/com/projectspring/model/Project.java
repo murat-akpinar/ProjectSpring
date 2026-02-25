@@ -2,9 +2,7 @@ package com.projectspring.model;
 
 import com.projectspring.model.enums.ProjectStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -13,9 +11,12 @@ import java.util.Set;
 
 @Entity
 @Table(name = "projects")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(of = "id")
+@ToString(exclude = {"teams", "tasks", "createdBy"})
 public class Project {
     
     @Id

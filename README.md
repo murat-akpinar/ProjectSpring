@@ -155,6 +155,14 @@ npm run dev
 - `user_roles` - Kullanıcı-Rol ilişkisi
 - `login_attempts` - Giriş denemeleri (rate limiting ve account lockout için)
 
+### Entity Konvansiyonları
+
+Tüm JPA entity'lerde Lombok kullanımı aşağıdaki kurallara uyar:
+- **`@Data` kullanılmaz** — Circular referans oluşturan `hashCode()`/`toString()` ile StackOverflow ve connection leak riski taşır
+- **`@Getter` + `@Setter`** kullanılır
+- **`@EqualsAndHashCode(of = "id")`** — Sadece primary key üzerinden eşitlik kontrolü
+- **`@ToString(exclude = {...})`** — Lazy collection'lar exclude edilir (örn: `members`, `tasks`, `teams`)
+
 ## API Endpoints
 
 ### Authentication
@@ -437,6 +445,38 @@ Bu özellik şunları ekler:
 - Database bağlantı kontrolü
 - Frontend API erişilebilirlik kontrolü
 - Otomatik yenileme (30 saniye)
+
+## Performans ve Stabilite
+
+### HikariCP Connection Pool
+
+Veritabanı bağlantı havuzu (HikariCP) aşağıdaki ayarlarla optimize edilmiştir:
+
+| Ayar | Değer | Açıklama |
+|------|-------|----------|
+| `maximum-pool-size` | 20 | Maksimum eşzamanlı bağlantı |
+| `minimum-idle` | 5 | Minimum boşta bağlantı |
+| `connection-timeout` | 30s | Bağlantı bekleme süresi |
+| `max-lifetime` | 30dk | Bağlantının maksimum ömrü |
+| `idle-timeout` | 5dk | Boşta bağlantı kapanma süresi |
+| `leak-detection-threshold` | 60s | Bağlantı sızıntı tespiti |
+
+Bu değerler `.env` dosyasında `HIKARI_MAX_POOL_SIZE` ve `HIKARI_MIN_IDLE` ile override edilebilir.
+
+### OSIV (Open Session In View)
+
+OSIV **kapalıdır** (`spring.jpa.open-in-view: false`). Bu sayede:
+- DB bağlantısı sadece `@Transactional` scope içinde tutulur
+- Connection pool daha verimli kullanılır
+- Lazy collection'lar service/repository katmanında yüklenir, controller'da değil
+
+> **Not:** OSIV kapalı olduğu için controller katmanında lazy collection'lara erişmek `LazyInitializationException` fırlatır. Lazy ilişkilere ihtiyaç duyulduğunda `@Query` ile fetch join kullanılmalıdır. Örnek: `UserRepository.findByUsernameWithRolesAndTeams()`
+
+### Transaction Stratejisi
+
+- Salt okunur servisler `@Transactional(readOnly = true)` kullanır (örn: `DashboardService`)
+- Yazma işlemi yapan servisler `@Transactional` kullanır
+- `readOnly = true` PostgreSQL'de daha hafif kilit mekanizması kullanır ve connection pool'u verimli kullanır
 
 ### Log Sistemi
 Admin panelinde "Loglar" sekmesi altında iki tür log görüntüleme sistemi bulunur:
