@@ -2,18 +2,21 @@ services:
   postgres:
     image: postgres:15-alpine
     container_name: projectspring-db
+    entrypoint: ["/bin/bash", "/entrypoint-wrapper.sh"]
     environment:
       POSTGRES_DB: projectspring
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./db/entrypoint-wrapper.sh:/entrypoint-wrapper.sh:ro
+      - ./db/init:/docker-entrypoint-initdb.d:ro
     shm_size: '256mb'
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres && PGPASSWORD=postgres psql -U postgres -d projectspring -c 'SELECT 1' > /dev/null 2>&1"]
       interval: 10s
       timeout: 5s
       retries: 5

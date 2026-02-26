@@ -12,6 +12,7 @@ show_help() {
     echo "  --app       Quick deploy: rebuild backend & frontend only, keep database intact"
     echo "  --pull      Pull latest base images only (no rebuild)"
     echo "  --down      Stop and remove all containers and volumes"
+    echo "  --fix-db    Fix PostgreSQL password mismatch without losing data"
     echo "  --logs      Follow all container logs"
     echo "  --status    Show container status"
     echo "  -h, --help  Show this help"
@@ -19,6 +20,7 @@ show_help() {
     echo "Examples:"
     echo "  ./build.sh --full    # First time setup or clean slate"
     echo "  ./build.sh --app     # After code changes (most common)"
+    echo "  ./build.sh --fix-db  # If you get 'password authentication failed'"
     echo "  ./build.sh --down    # Stop everything"
 }
 
@@ -104,11 +106,34 @@ show_status() {
     echo "Logs: ./build.sh --logs"
 }
 
+fix_db() {
+    echo "============================================"
+    echo "  FIX DATABASE PASSWORD"
+    echo "============================================"
+    echo ""
+
+    # Make sure postgres is running
+    $COMPOSE up -d postgres
+    echo "Waiting for PostgreSQL..."
+    sleep 5
+
+    echo "Fixing password..."
+    docker exec -it ${PROJECT}-db psql -U postgres -c "ALTER USER postgres PASSWORD 'postgres';" && \
+        echo "Password fixed!" || echo "Failed — try: ./build.sh --full"
+
+    echo ""
+    echo "Restarting backend..."
+    $COMPOSE restart backend
+    sleep 3
+    $COMPOSE ps
+}
+
 case "${1}" in
     --full)     full_rebuild ;;
     --app)      app_deploy ;;
     --pull)     pull_images ;;
     --down)     stop_all ;;
+    --fix-db)   fix_db ;;
     --logs)     $COMPOSE logs -f ;;
     --status)   $COMPOSE ps ;;
     -h|--help)  show_help ;;

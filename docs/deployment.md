@@ -11,13 +11,28 @@
 ```bash
 git clone <repository-url>
 cd ProjectSpring
-docker-compose up -d
+chmod +x build.sh
+./build.sh --full
 ```
+
+### Build Script (`build.sh`)
+
+| Command | Description |
+|---------|-------------|
+| `./build.sh --full` | Full rebuild: wipe everything (DB included), pull base images, build from scratch |
+| `./build.sh --app` | Quick deploy: rebuild backend & frontend only, **keep database intact** |
+| `./build.sh --fix-db` | Fix PostgreSQL password mismatch without losing data |
+| `./build.sh --pull` | Pull latest base images only |
+| `./build.sh --down` | Stop and remove all containers and volumes |
+| `./build.sh --logs` | Follow all container logs |
+| `./build.sh --status` | Show container status |
+
+> Most common usage after code changes: `./build.sh --app`
 
 This starts three containers:
 | Container | Port | Description |
 |-----------|------|-------------|
-| `projectspring-db` | 5432 | PostgreSQL 15 database |
+| `projectspring-db` | 127.0.0.1:5432 | PostgreSQL 15 database (localhost only) |
 | `projectspring-backend` | 8081 → 8080 | Spring Boot API |
 | `projectspring-frontend` | 80 | React app (Nginx) |
 
@@ -90,26 +105,31 @@ CORS_ALLOWED_ORIGINS=https://your-domain.com
 ```yaml
 postgres:
   image: postgres:15-alpine
+  entrypoint: ["/bin/bash", "/entrypoint-wrapper.sh"]
   environment:
     POSTGRES_DB: projectspring
     POSTGRES_USER: postgres
     POSTGRES_PASSWORD: postgres
   ports:
-    - "5432:5432"
+    - "127.0.0.1:5432:5432"
   volumes:
     - postgres_data:/var/lib/postgresql/data
+    - ./db/entrypoint-wrapper.sh:/entrypoint-wrapper.sh:ro
+    - ./db/init:/docker-entrypoint-initdb.d:ro
   shm_size: '256mb'
   restart: unless-stopped
   healthcheck:
-    test: ["CMD-SHELL", "pg_isready -U postgres"]
+    test: ["CMD-SHELL", "pg_isready -U postgres && PGPASSWORD=postgres psql -U postgres -d projectspring -c 'SELECT 1' > /dev/null 2>&1"]
     interval: 10s
 ```
 
-> **Important**: `POSTGRES_PASSWORD` is only used during the **first initialization** of the data volume. If the volume already exists with data from a previous run, changing `POSTGRES_PASSWORD` has no effect. See [Troubleshooting](#troubleshooting) for how to handle password mismatch issues.
-
 Key settings:
-- `shm_size: '256mb'` — Prevents shared memory errors under heavy queries (PostgreSQL uses `/dev/shm` for temporary data)
-- `restart: unless-stopped` — Auto-restarts the container on crash or host reboot
+- **Custom entrypoint wrapper** (`db/entrypoint-wrapper.sh`) — Runs `ALTER USER ... PASSWORD` on every container start, ensuring the password always matches the `POSTGRES_PASSWORD` environment variable. This permanently solves the Docker volume password desync issue.
+- **Auth-aware healthcheck** — Validates not just that PostgreSQL is ready (`pg_isready`), but also that password authentication actually works. If the password is wrong, the healthcheck fails and Docker restarts the container.
+- **Init scripts** (`db/init/01-setup.sql`) — Runs on first volume creation to set up extensions and ensure correct initial password.
+- `127.0.0.1:5432:5432` — Database port only accessible from localhost, not from the network.
+- `shm_size: '256mb'` — Prevents shared memory errors under heavy queries.
+- `restart: unless-stopped` — Auto-restarts the container on crash or host reboot.
 
 ### Backend
 - Builds from `./Backend/Dockerfile`
@@ -223,10 +243,15 @@ The backend uses HikariCP for database connection pooling with the following def
 | `connection-test-query` | `SELECT 1` | Validates connections before use |
 | `leak-detection-threshold` | 30s | Logs a warning if a connection is held longer than this |
 
+Additional resilience settings:
+- `initialization-fail-timeout: -1` — The application starts even if the database is initially unavailable. HikariCP will keep retrying in the background until a connection succeeds.
+- `register-mbeans: true` — Exposes pool metrics via JMX for monitoring.
+
 These settings ensure:
 - Dead or stale connections are detected and replaced automatically
 - Connection leaks are logged for debugging
 - The pool recovers gracefully after temporary database outages
+- The application survives PostgreSQL restarts without manual intervention
 
 ---
 
@@ -238,17 +263,19 @@ These settings ensure:
 
 **Root Cause**: PostgreSQL's `POSTGRES_PASSWORD` environment variable is **only applied during the initial database setup** (when the data volume is first created). If the volume already contains data from a previous run, the password stored in the volume takes precedence over the environment variable.
 
-**Solution A — Reset the volume (loses all data)**:
-```bash
-docker compose down
-docker volume rm projectspring_postgres_data
-docker compose up -d
-```
+**Permanent Fix (Already Applied)**: The custom entrypoint wrapper (`db/entrypoint-wrapper.sh`) runs `ALTER USER ... PASSWORD` on every container start, syncing the password with the environment variable. This should prevent this issue from recurring.
 
-**Solution B — Change the password inside PostgreSQL (preserves data)**:
+**If it still happens** (e.g., running an old image without the wrapper):
 ```bash
+# Quick fix (preserves data)
+./build.sh --fix-db
+
+# Or manually:
 docker exec -it projectspring-db psql -U postgres -c "ALTER USER postgres PASSWORD 'postgres';"
 docker compose restart backend
+
+# Nuclear option (loses all data)
+./build.sh --full
 ```
 
 ### Backend Freezing / All Requests Timeout
