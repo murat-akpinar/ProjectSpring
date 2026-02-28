@@ -92,27 +92,12 @@ stop_all() {
     echo "Done."
 }
 
-show_status() {
-    echo ""
-    sleep 3
-    echo "============================================"
-    $COMPOSE ps
-    echo "============================================"
-    echo ""
-    echo "Frontend : http://localhost"
-    echo "Backend  : http://localhost:8081"
-    echo "Database : localhost:5432"
-    echo ""
-    echo "Logs: ./build.sh --logs"
-}
-
 fix_db() {
     echo "============================================"
     echo "  FIX DATABASE PASSWORD"
     echo "============================================"
     echo ""
 
-    # Make sure postgres is running
     $COMPOSE up -d postgres
     echo "Waiting for PostgreSQL..."
     sleep 5
@@ -126,6 +111,20 @@ fix_db() {
     $COMPOSE restart backend
     sleep 3
     $COMPOSE ps
+}
+
+show_status() {
+    echo ""
+    sleep 3
+    echo "============================================"
+    $COMPOSE ps
+    echo "============================================"
+    echo ""
+    echo "Frontend : http://localhost"
+    echo "Backend  : http://localhost:8081"
+    echo "Database : localhost:5432"
+    echo ""
+    echo "Logs: ./build.sh --logs"
 }
 
 case "${1}" in

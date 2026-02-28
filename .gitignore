@@ -39,4 +39,5 @@ ldap_test/ldif/
 
 # AI
 .agent/
-
+AGENTS.md
+optimization.md
